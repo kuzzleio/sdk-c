@@ -26,7 +26,7 @@ The C SDK implement the websocket protocol.
 
 ## Installation
 
-### Clone the depot
+### Clone the depot
 
 ```sh
 git clone --recursive git@github.com:kuzzleio/sdk-c.git
