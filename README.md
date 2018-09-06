@@ -20,7 +20,7 @@ You can access the Kuzzle repository on [Github](https://github.com/kuzzleio/kuz
 
 The complete SDK documentation is available [here](http://docs.kuzzle.io/sdk-reference/)
 
-## Protocol used
+## Protocol used
 
 The C SDK implement the websocket protocol.
 
