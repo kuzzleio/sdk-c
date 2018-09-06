@@ -31,6 +31,7 @@ CGOPATH = cgo$(PATHSEP)kuzzle
 PATHSEP = $(strip $(SEP))
 ROOTOUTDIR = $(ROOT_DIR)build
 GOFLAGS = -buildmode=c-archive
+GOFLAGSSHARED = -buildmode=c-shared
 GOSRC = .$(PATHSEP)cgo$(PATHSEP)kuzzle$(PATHSEP)
 GOTARGET = $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB)
 GOTARGETSO = $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB)
@@ -45,7 +46,7 @@ endif
 endif
 	cd $(SDKGOPATH) && go get .$(PATHSEP)...
 	$(GOCC) build -o $(GOTARGET) $(GOFLAGS) $(GOSRC)
-	$(GOCC) build -o $(GOTARGETSO) $(GOFLAGS) $(GOSRC)
+	$(GOCC) build -o $(GOTARGETSO) $(GOFLAGSSHARED) $(GOSRC)
 ifeq ($(OS),Windows_NT)
 	$(MV) $(subst /,\,$(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h) kuzzle.h
 else
