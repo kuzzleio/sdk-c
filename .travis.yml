@@ -1,5 +1,11 @@
 os: linux
+<<<<<<< HEAD
 language: c
+=======
+dist: trusty
+
+language: minimal
+>>>>>>> [KZL-489] Add ARM64 and ARMHF stage
 sudo: required
 
 services:
