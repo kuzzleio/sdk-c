@@ -1,0 +1,6 @@
+/go/pkg
+/go/bin
+/go/src/github.com/gorilla
+/go/src/github.com/satori
+/go/src/github.com/stretchr
+/build

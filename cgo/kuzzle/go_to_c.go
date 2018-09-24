@@ -752,7 +752,7 @@ func goToCErrorResult(err error) *C.error_result {
 }
 
 // Allocates memory
-func goToCDateResult(goRes int, err error) *C.date_result {
+func goToCDateResult(goRes int64, err error) *C.date_result {
 	result := (*C.date_result)(C.calloc(1, C.sizeof_date_result))
 
 	if err != nil {
