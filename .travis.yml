@@ -1,7 +1,5 @@
 os: linux
-dist: trusty
-
-language: minimal
+language: c
 sudo: required
 
 services:
@@ -16,19 +14,27 @@ env:
   # AWS SECRET ACCESS KEY
   - secure: "elX7qqlJaJ8fHr8bTSkLlhsf5GAd73HjCvb4FbgbwxVCQF3ghiHTZF06GSOSFgKtTvN2KP5KKd9jq9xGlGcolTi5BcEB0L62Cn7JYuMx1N7V3vsPfBiMkSkbEXZ1Fc3NiYazsnaanxjNZTeXjYRSJ7oKfPDEgbGRESkGEPLLxtuF+OWl32v7aPIkLxIM6KFwh0kTJNP9oWr/t26peSAORpO9nU8ots2JzuHdWFUIGZP2McOQM4uLhj3bDrl0Nch/ZFX9XVrvvhurg41e4DYHFBusUgm6RM664JehqyMhsZly+Hch7gx8H1EKqlVVOhbkyD+5PclQVdQKGbZKb9PioUSzI7tW0nZNs5YmSgcB9jwpC3CB4aQobpoZmMZVXNLAltWmPe1HEWOAJK1hHi35yhXMzO6B1OA1OKIJQnPgwKWEUpXUoTLGkfwQuiTr+1ue1GR8j6J41B+Hyb2em5ylCF6tWcR4hxfG+2Ag7IUVtRdwaEpTmqqxV/F7zhr+Kn+j0bJUE7318CH+3ax+T/FkApeyTIAuPhdJ9QWWHDxPGor1yXcuZTFZM3OF/pQH00FxvazNhlSI4gYkFXmmWIfqr4gYtQO15nD7mmR0J/RMUzU+4p6ZZyAfI0BYKYe4sW3HPjgybkEseyDG9zJxrg2508Fi1yZsyl4G81Pb4DrtmgI="
 
+addons:
+  apt:
+    packages:
+    - python
+    - python-pip
+
+install:
+  - pip install awscli --upgrade --user
+
 before_deploy:
-  - ./.ci/package_build.sh
+  - sudo ./.ci/package_build.sh
 
 deploy:
   provider: s3
   access_key_id: $AWS_ACCESS_KEY_ID
   secret_access_key: $AWS_SECRET_ACCESS_KEY
   bucket: $AWS_S3_BUCKET
+  region: us-west-2
   skip_cleanup: true
-  upload-dir: sdk/c/$TRAVIS_BRANCH/
+  upload-dir: sdk/c/$TRAVIS_BRANCH
   local-dir: deploy
-  on:
-    branch: master
 
 after_deploy:
   - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
