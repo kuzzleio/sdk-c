@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 os: linux
 <<<<<<< HEAD
 language: c
@@ -6,6 +7,9 @@ dist: trusty
 
 language: minimal
 >>>>>>> [KZL-489] Add ARM64 and ARMHF stage
+=======
+language: c
+>>>>>>> [KZL-489] Fix S3 deploy
 sudo: required
 
 services:
@@ -42,8 +46,8 @@ deploy:
   upload-dir: sdk/c/$TRAVIS_BRANCH
   local-dir: deploy
 
-after_deploy:
-  - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+install:
+  - sudo pip install awscli --upgrade
 
 matrix:
   include:
@@ -56,6 +60,12 @@ matrix:
       script:
         # Build
         - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make
+
+      after_success:
+        - if [ $TRAVIS_EVENT_TYPE != "pull_request" ] && [ $TRAVIS_EVENT_TYPE != "push" ]; then sudo ./.ci/package_build.sh; fi;
+          #        - aws s3 cp deploy/kuzzlesdk-c-$ARCH.tar.gz s3://$AWS_S3_BUCKET/sdk/c/$TRAVIS_BRANCH/kuzzlesdk-c-$ARCH.tar.gz
+          #        - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+
 
 # ---------------------------------------------
 # I386: Build and deploy (only on master)
@@ -70,7 +80,6 @@ matrix:
 # ---------------------------------------------
 # ARMV7: Build and deploy (only on master)
 # ---------------------------------------------
-
     - env:
         - ARCH="armhf"
 
@@ -81,7 +90,6 @@ matrix:
 # ---------------------------------------------
 # ARMV8: Build and deploy (only on master)
 # ---------------------------------------------
-
     - env:
          - ARCH="aarch64"
 
