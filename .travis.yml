@@ -1,3 +1,12 @@
+os: linux
+dist: trusty
+
+language: minimal
+sudo: required
+
+services:
+  - docker
+
 env:
   global:
   - AWS_S3_BUCKET=dl.kuzzle.io
@@ -7,103 +16,64 @@ env:
   # AWS SECRET ACCESS KEY
   - secure: "elX7qqlJaJ8fHr8bTSkLlhsf5GAd73HjCvb4FbgbwxVCQF3ghiHTZF06GSOSFgKtTvN2KP5KKd9jq9xGlGcolTi5BcEB0L62Cn7JYuMx1N7V3vsPfBiMkSkbEXZ1Fc3NiYazsnaanxjNZTeXjYRSJ7oKfPDEgbGRESkGEPLLxtuF+OWl32v7aPIkLxIM6KFwh0kTJNP9oWr/t26peSAORpO9nU8ots2JzuHdWFUIGZP2McOQM4uLhj3bDrl0Nch/ZFX9XVrvvhurg41e4DYHFBusUgm6RM664JehqyMhsZly+Hch7gx8H1EKqlVVOhbkyD+5PclQVdQKGbZKb9PioUSzI7tW0nZNs5YmSgcB9jwpC3CB4aQobpoZmMZVXNLAltWmPe1HEWOAJK1hHi35yhXMzO6B1OA1OKIJQnPgwKWEUpXUoTLGkfwQuiTr+1ue1GR8j6J41B+Hyb2em5ylCF6tWcR4hxfG+2Ag7IUVtRdwaEpTmqqxV/F7zhr+Kn+j0bJUE7318CH+3ax+T/FkApeyTIAuPhdJ9QWWHDxPGor1yXcuZTFZM3OF/pQH00FxvazNhlSI4gYkFXmmWIfqr4gYtQO15nD7mmR0J/RMUzU+4p6ZZyAfI0BYKYe4sW3HPjgybkEseyDG9zJxrg2508Fi1yZsyl4G81Pb4DrtmgI="
 
+before_deploy:
+  - ./.ci/package_build.sh
+
+deploy:
+  provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: $AWS_S3_BUCKET
+  skip_cleanup: true
+  upload-dir: sdk/c/$TRAVIS_BRANCH/
+  local-dir: deploy
+  on:
+    branch: master
+
+after_deploy:
+  - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+
 matrix:
   include:
 # ---------------------------------------------
 # AMD64: Build and deploy (only on master)
 # ---------------------------------------------
-    - os: linux
-      language: go
-      dist: trusty
-      sudo: required
-      services:
-        - docker
-      go:
-        - '1.11'
-      env:
-         - GOARCH="amd64"
+    - env:
+        - ARCH="amd64"
+
       script:
         # Build
-        - make
-      before_deploy:
-        - mkdir kuzzlesdk-c
-        - tar cfz kuzzlesdk-c/kuzzlesdk-amd64.tar.gz build/*
-      deploy:
-        provider: s3
-        access_key_id: $AWS_ACCESS_KEY_ID
-        secret_access_key: $AWS_SECRET_ACCESS_KEY
-        bucket: $AWS_S3_BUCKET
-        skip_cleanup: true
-        upload-dir: sdk/c/$TRAVIS_BRANCH/
-        local-dir: kuzzlesdk-c
-        on:
-          branch: master
-      after_deploy:
-        - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+        - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make
 
 # ---------------------------------------------
 # I386: Build and deploy (only on master)
 # ---------------------------------------------
-    - os: linux
-      language: go
-      dist: trusty
-      sudo: required
-      services:
-        - docker
-      go:
-        - '1.11'
-      env:
-         - GOARCH="386"
+    - env:
+        - ARCH="i386"
+
       script:
         # Build
-        - make
-      before_deploy:
-        - mkdir kuzzlesdk-c
-        - tar cfz kuzzlesdk-c/kuzzlesdk-i386.tar.gz build/*
-      deploy:
-        provider: s3
-        access_key_id: $AWS_ACCESS_KEY_ID
-        secret_access_key: $AWS_SECRET_ACCESS_KEY
-        bucket: $AWS_S3_BUCKET
-        skip_cleanup: true
-        upload-dir: sdk/c/$TRAVIS_BRANCH/
-        local-dir: kuzzlesdk-c
-        on:
-          branch: master
-      after_deploy:
-        - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+        - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-i386 make
 
 # ---------------------------------------------
 # ARMV7: Build and deploy (only on master)
 # ---------------------------------------------
-    - os: linux
-      language: go
-      dist: trusty
-      sudo: required
-      services:
-        - docker
-      go:
-        - '1.11'
-      env:
-         - GOARCH="arm"
-         - GOARM="7"
+
+    - env:
+        - ARCH="armhf"
+
       script:
         # Build
-        - make
-      before_deploy:
-        - mkdir kuzzlesdk-c
-        - tar cfz kuzzlesdk-c/kuzzlesdk-armv7.tar.gz build/*
-      deploy:
-        provider: s3
-        access_key_id: $AWS_ACCESS_KEY_ID
-        secret_access_key: $AWS_SECRET_ACCESS_KEY
-        bucket: $AWS_S3_BUCKET
-        skip_cleanup: true
-        upload-dir: sdk/c/$TRAVIS_BRANCH/
-        local-dir: kuzzlesdk-c
-        on:
-          branch: master
-      after_deploy:
-        - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+        - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-armhf make
 
+# ---------------------------------------------
+# ARMV8: Build and deploy (only on master)
+# ---------------------------------------------
+
+    - env:
+         - ARCH="aarch64"
+
+      script:
+        # Build
+        - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-aarch64 make
 
