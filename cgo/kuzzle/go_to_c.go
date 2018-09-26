@@ -775,6 +775,7 @@ func goToCValidationResponse(validationResponse *types.ValidationResponse, err e
 	cvalidation_response.description = C.CString(validationResponse.Description)
 
 	if validationResponse.Details != nil && len(validationResponse.Details) > 0 {
+		cvalidation_response.details_length = C.size_t(len(validationResponse.Details))
 		cvalidation_response.details = (**C.char)(C.calloc(C.size_t(len(validationResponse.Details)), C.sizeof_char_ptr))
 		details := (*[1<<28 - 1]*C.char)(unsafe.Pointer(cvalidation_response.details))[:len(validationResponse.Details)]
 

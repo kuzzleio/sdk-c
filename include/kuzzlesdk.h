@@ -661,6 +661,7 @@ typedef struct collection_entry_result {
 typedef struct validation_response {
   bool valid;
   char **details;
+  size_t details_length;
   const char *description;
 } validation_response;
 

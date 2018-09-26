@@ -760,3 +760,18 @@ func kuzzle_free_search_users_result(st *C.search_users_result) {
 		C.free(unsafe.Pointer(st))
 	}
 }
+
+// do not export => used to free the content of a structure
+// and not the structure itself
+func _free_validation_response(st *C.validation_response) {
+	if st != nil {
+		C.free(unsafe.Pointer(st.description))
+		C.free_char_array(st.details, st.details_length)
+	}
+}
+
+//export kuzzle_free_validation_response
+func kuzzle_free_validation_response(st *C.validation_response) {
+	_free_validation_response(st)
+	C.free(unsafe.Pointer(st))
+}
