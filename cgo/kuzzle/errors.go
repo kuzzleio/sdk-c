@@ -15,9 +15,9 @@
 package main
 
 /*
-  #cgo CFLAGS: -I../../include
+#cgo CFLAGS: -I../../include
 
-  #include "kuzzlesdk.h"
+#include "kuzzlesdk.h"
 */
 import "C"
 
@@ -165,6 +165,11 @@ func Set_error_result_error(s *C.error_result, err error) {
 }
 
 func Set_room_result_error(s *C.room_result, err error) {
+	setErr(&s.status, &s.error, &s.stack, err)
+}
+
+// apply a types.KuzzleError on a validation_response* C struct
+func Set_validation_response_error(s *C.validation_response, err error) {
 	setErr(&s.status, &s.error, &s.stack, err)
 }
 

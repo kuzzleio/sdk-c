@@ -663,6 +663,9 @@ typedef struct validation_response {
   char **details;
   size_t details_length;
   const char *description;
+  int status;
+  const char *error;
+  const char *stack;
 } validation_response;
 
 typedef void (*kuzzle_notification_listener)(notification_result*, void*);
