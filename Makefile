@@ -30,7 +30,7 @@ SDKGOPATH = go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)kuzzleio$(PATHSEP)sdk-g
 CGOPATH = cgo$(PATHSEP)kuzzle
 PATHSEP = $(strip $(SEP))
 ROOTOUTDIR = $(ROOT_DIR)build
-GOFLAGS = -buildmode=c-archive
+GOFLAGS ?= -buildmode=c-archive
 GOFLAGSSHARED = -buildmode=c-shared
 GOSRC = .$(PATHSEP)cgo$(PATHSEP)kuzzle$(PATHSEP)
 GOTARGET = $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB)
@@ -63,8 +63,8 @@ endif
 c: export GOPATH = $(ROOT_DIR)go
 c: makedir core
 	 cd $(ROOTOUTDIR) && mv $(GOTARGET) $(GOTARGET).$(VERSION) && mv $(GOTARGETSO) $(GOTARGETSO).$(VERSION)
-	 cd $(ROOTOUTDIR) && ln -s $(GOTARGET).$(VERSION) $(GOTARGET)
-	 cd $(ROOTOUTDIR) && ln -s $(GOTARGETSO).$(VERSION) $(GOTARGETSO)
+	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
+	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
 
 clean:
 ifeq ($(OS),Windows_NT)
@@ -72,7 +72,7 @@ ifeq ($(OS),Windows_NT)
 else
 	$(RRM) build
 endif
-.PHONY: all c core clean 
+.PHONY: all c core clean
 
 
 .DEFAULT_GOAL := all
