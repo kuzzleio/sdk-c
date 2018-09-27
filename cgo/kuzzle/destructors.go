@@ -761,11 +761,6 @@ func kuzzle_free_search_users_result(st *C.search_users_result) {
 	}
 }
 
-// do not export => used to free the content of a structure
-// and not the structure itself
-func _free_validation_response(st *C.validation_response) {
-}
-
 //export kuzzle_free_validation_response
 func kuzzle_free_validation_response(st *C.validation_response) {
 	if st != nil {
