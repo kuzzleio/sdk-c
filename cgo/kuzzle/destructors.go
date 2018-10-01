@@ -760,3 +760,15 @@ func kuzzle_free_search_users_result(st *C.search_users_result) {
 		C.free(unsafe.Pointer(st))
 	}
 }
+
+//export kuzzle_free_validation_response
+func kuzzle_free_validation_response(st *C.validation_response) {
+	if st != nil {
+		C.free(unsafe.Pointer(st.description))
+		C.free_char_array(st.details, st.details_length)
+
+		C.free(unsafe.Pointer(st.error))
+		C.free(unsafe.Pointer(st.stack))
+		C.free(unsafe.Pointer(st))
+	}
+}

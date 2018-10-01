@@ -13,7 +13,7 @@ The complete SDK documentation is available [here](http://docs.kuzzle.io/sdk-ref
 
 ## Protocol used
 
-The C SDK implement the websocket protocol.
+The C SDK implements the websocket protocol.
 
 ## Installation
 
@@ -29,4 +29,4 @@ git clone --recursive git@github.com:kuzzleio/sdk-c.git
 make
 ```
 
-You should know have the SDK in the build directory.
+You should now have the SDK in the build directory.

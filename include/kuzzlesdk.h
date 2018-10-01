@@ -102,19 +102,19 @@ typedef struct {
     const char *member;
     const char *member1;
     const char *member2;
-    char **members;
+    const char * const *members;
     size_t members_length;
     double lon;
     double lat;
     double distance;
     const char *unit;
     const char *options;
-    const char **keys;
+    const char * const *keys;
     size_t keys_length;
     long cursor;
     long offset;
     const char *field;
-    const char **fields;
+    const char * const *fields;
     size_t fields_length;
     const char *subcommand;
     const char *pattern;
@@ -238,7 +238,7 @@ typedef char *controllers;
 
 typedef struct  {
     const char *index;
-    char **collections;
+    const char * const *collections;
     size_t collections_length;
 } policy_restriction;
 
@@ -265,7 +265,7 @@ typedef struct {
 typedef struct {
     const char *id;
     const char *content;
-    char **profile_ids;
+    const char * const *profile_ids;
     size_t profile_ids_length;
     kuzzle *k;
 } kuzzle_user;
@@ -273,7 +273,7 @@ typedef struct {
 // user content passed to user constructor
 typedef struct {
     const char *content;
-    char **profile_ids;
+    const char * const *profile_ids;
     size_t profile_ids_length;
 } user_data;
 
@@ -478,7 +478,7 @@ typedef struct json_result {
 
 //any array of char result
 typedef struct json_array_result {
-    char **result;
+    const char * const *result;
     size_t result_length;
     int status;
     const char *error;
@@ -535,7 +535,7 @@ typedef struct string_result {
 
 //any array of strings result
 typedef struct string_array_result {
-    char **result;
+    const char * const *result;
     size_t result_length;
     int status;
     const char *error;
@@ -657,6 +657,16 @@ typedef struct collection_entry_result {
     const char *error;
     const char *stack;
 } collection_entry_result;
+
+typedef struct validation_response {
+  bool valid;
+  const char * const *details;
+  size_t details_length;
+  const char *description;
+  int status;
+  const char *error;
+  const char *stack;
+} validation_response;
 
 typedef void (*kuzzle_notification_listener)(notification_result*, void*);
 typedef void (*kuzzle_subscribe_listener)(room_result*, void*);
