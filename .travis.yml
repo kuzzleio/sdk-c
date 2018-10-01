@@ -24,7 +24,7 @@ install:
   - pip install awscli --upgrade --user
 
 before_deploy:
-  - sudo ./.ci/package_build.sh
+  - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make package
 
 deploy:
   provider: s3
@@ -64,7 +64,6 @@ matrix:
 # ---------------------------------------------
 # ARMV7: Build and deploy (only on master)
 # ---------------------------------------------
-
     - env:
         - ARCH="armhf"
 
@@ -75,7 +74,6 @@ matrix:
 # ---------------------------------------------
 # ARMV8: Build and deploy (only on master)
 # ---------------------------------------------
-
     - env:
          - ARCH="aarch64"
 

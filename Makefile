@@ -66,11 +66,31 @@ c: makedir core
 	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
 	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
 
+package: $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION)
+	mkdir $(ROOTOUTDIR)$(PATHSEP)lib
+	mkdir $(ROOTOUTDIR)$(PATHSEP)include
+	cp -fr $(ROOT_DIR)$(PATHSEP)include$(PATHSEP)*.h $(ROOTOUTDIR)$(PATHSEP)include
+	cp $(ROOTOUTDIR)$(PATHSEP)*.so  $(ROOTOUTDIR)$(PATHSEP)lib
+	cp $(ROOTOUTDIR)$(PATHSEP)*.a  $(ROOTOUTDIR)$(PATHSEP)lib
+	mkdir deploy && cd $(ROOTOUTDIR) && tar cfz ..$(PATHSEP)deploy$(PATHSEP)kuzzlesdk-c-$(ARCH)-$(VERSION).tar.gz lib include
+
 clean:
 ifeq ($(OS),Windows_NT)
 	if exist build $(RRM) build
+	$(RRM) $(ROOT_DIR)$(PATHSEP)deploy
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)pkg
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)bin
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)gorilla
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)satori
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)stretchr
 else
 	$(RRM) build
+	$(RRM) $(ROOT_DIR)$(PATHSEP)deploy
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)pkg
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)bin
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)gorilla
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)satori
+	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)stretchr
 endif
 .PHONY: all c core clean
 
