@@ -633,17 +633,12 @@ func goToCRolesResult(k *C.kuzzle, roles []*security.Role, err error) *C.roles_r
 	return result
 }
 
-func goToCUserRight(right *types.UserRights, dest *C.user_right) *C.user_right {
+func goToCUserRight(right *types.UserRights) *C.user_right {
 	if right == nil {
 		return nil
 	}
 
 	var cright *C.user_right
-	if dest == nil {
-		cright = (*C.user_right)(C.calloc(1, C.sizeof_user_right))
-	} else {
-		cright = dest
-	}
 
 	cright.controller = C.CString(right.Controller)
 	cright.action = C.CString(right.Action)
@@ -661,13 +656,13 @@ func goToCUserRightsResult(rights []*types.UserRights, err error) *C.user_rights
 		return result
 	}
 
-	result.user_rights_length = C.size_t(len(rights))
 	if rights != nil {
-		result.result = (*C.user_right)(C.calloc(C.size_t(len(rights)), C.sizeof_user_right))
-		carray := (*[1<<26 - 1]C.user_right)(unsafe.Pointer(result.result))[:len(rights):len(rights)]
+		result.user_rights_length = C.size_t(len(rights))
+		result.result = (**C.user_right)(C.calloc(C.size_t(len(rights)), C.sizeof_user_right))
+		carray := (*[1<<26 - 1]*C.user_right)(unsafe.Pointer(result.result))[:len(rights):len(rights)]
 
 		for i, right := range rights {
-			goToCUserRight(right, &carray[i])
+			carray[i] = goToCUserRight(right)
 		}
 	}
 
