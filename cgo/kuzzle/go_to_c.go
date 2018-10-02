@@ -639,6 +639,7 @@ func goToCUserRight(right *types.UserRights) *C.user_right {
 	}
 
 	var cright *C.user_right
+	cright = (*C.user_right)(C.calloc(1, C.sizeof_user_right))
 
 	cright.controller = C.CString(right.Controller)
 	cright.action = C.CString(right.Action)
@@ -659,7 +660,7 @@ func goToCUserRightsResult(rights []*types.UserRights, err error) *C.user_rights
 	if rights != nil {
 		result.user_rights_length = C.size_t(len(rights))
 		result.result = (**C.user_right)(C.calloc(C.size_t(len(rights)), C.sizeof_user_right))
-		carray := (*[1<<26 - 1]*C.user_right)(unsafe.Pointer(result.result))[:len(rights):len(rights)]
+		carray := (*[1<<28 - 1]*C.user_right)(unsafe.Pointer(result.result))[:len(rights):len(rights)]
 
 		for i, right := range rights {
 			carray[i] = goToCUserRight(right)
