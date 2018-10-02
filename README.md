@@ -39,3 +39,6 @@ arm32: https://dl.kuzzle.io/sdk/c/master/kuzzlesdk-c-armhf-1.0.0.tar.gz
 amd64: https://dl.kuzzle.io/sdk/c/master/kuzzlesdk-c-amd64-1.0.0.tar.gz
 
 x86:  https://dl.kuzzle.io/sdk/c/master/kuzzlesdk-c-x86-1.0.0.tar.gz
+
+You should now have the SDK in the build directory.
+
