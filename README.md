@@ -1,4 +1,4 @@
-(http://codecov.io/github/kuzzleio/sdk-cpp/coverage.svg?branch=master)](http://codecov.io/github/kuzzleio/sdk-cpp?branch=master)
+[![codecov](https://codecov.io/gh/kuzzleio/sdk-go/branch/master/graph/badge.svg)](https://codecov.io/gh/kuzzleio/sdk-go)
 
 Official Kuzzle C SDK
 ======

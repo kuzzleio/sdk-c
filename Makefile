@@ -38,13 +38,16 @@ GOTARGETSO = $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB)
 
 all: c
 
+pre_core:
+	cd $(SDKGOPATH) && go get .$(PATHSEP)...
+
+core: export GOFLAGS = -buildmode=c-shared
 core:
 ifneq ($(OS),Windows_NT)
 ifeq ($(wildcard $(GOCC)),)
 	$(error "Unable to find go compiler")
 endif
 endif
-	cd $(SDKGOPATH) && go get .$(PATHSEP)...
 	$(GOCC) build -o $(GOTARGET) $(GOFLAGS) $(GOSRC)
 	$(GOCC) build -o $(GOTARGETSO) $(GOFLAGSSHARED) $(GOSRC)
 ifeq ($(OS),Windows_NT)
@@ -61,7 +64,7 @@ else
 endif
 
 c: export GOPATH = $(ROOT_DIR)go
-c: makedir core
+c: makedir pre_core core
 	 cd $(ROOTOUTDIR) && mv $(GOTARGET) $(GOTARGET).$(VERSION) && mv $(GOTARGETSO) $(GOTARGETSO).$(VERSION)
 	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
 	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
