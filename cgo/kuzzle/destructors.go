@@ -365,16 +365,6 @@ func kuzzle_free_user_right(st *C.user_right) {
 //export kuzzle_free_user_rights_result
 func kuzzle_free_user_rights_result(st *C.user_rights_result) {
 	if st != nil {
-		if st.result != nil {
-			rights := (*[1<<26 - 1]C.user_right)(unsafe.Pointer(st.result))[:int(st.user_rights_length):int(st.user_rights_length)]
-
-			for _, right := range rights {
-				_free_user_right(&right)
-			}
-
-			C.free(unsafe.Pointer(st.result))
-		}
-
 		C.free(unsafe.Pointer(st.error))
 		C.free(unsafe.Pointer(st.stack))
 		C.free(unsafe.Pointer(st))
