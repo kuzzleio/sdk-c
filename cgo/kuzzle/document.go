@@ -88,7 +88,7 @@ func kuzzle_document_delete(d *C.document, index *C.char, collection *C.char, id
 
 //export kuzzle_document_delete_by_query
 func kuzzle_document_delete_by_query(d *C.document, index *C.char, collection *C.char, body *C.char, options *C.query_options) *C.string_array_result {
-	res, err := (*document.Document)(d.instance).DeleteByQuery(C.GoString(index), C.GoString(collection), C.GoString(body), SetQueryOptions(options))
+	res, err := (*document.Document)(d.instance).DeleteByQuery(C.GoString(index), C.GoString(collection), json.RawMessage(C.GoString(body)), SetQueryOptions(options))
 	return goToCStringArrayResult(res, err)
 }
 
