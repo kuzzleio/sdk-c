@@ -35,6 +35,9 @@ deploy:
   skip_cleanup: true
   upload-dir: sdk/c/$TRAVIS_BRANCH
   local-dir: deploy
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^master|*-dev$
 
 after_deploy:
   - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
