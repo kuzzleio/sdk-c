@@ -108,6 +108,6 @@ func kuzzle_realtime_subscribe(rt *C.realtime, index, collection, body *C.char, 
 
 //export kuzzle_realtime_validate
 func kuzzle_realtime_validate(rt *C.realtime, index, collection, body *C.char, options *C.query_options) *C.bool_result {
-	res, err := (*realtime.Realtime)(rt.instance).Validate(C.GoString(index), C.GoString(collection), C.GoString(body), SetQueryOptions(options))
+	res, err := (*realtime.Realtime)(rt.instance).Validate(C.GoString(index), C.GoString(collection), json.RawMessage(C.GoString(body)), SetQueryOptions(options))
 	return goToCBoolResult(res, err)
 }
