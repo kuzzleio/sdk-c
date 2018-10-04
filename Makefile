@@ -41,14 +41,17 @@ all: c
 pre_core:
 	cd $(SDKGOPATH) && go get .$(PATHSEP)...
 
-core: export GOFLAGS = -buildmode=c-shared
 core:
 ifneq ($(OS),Windows_NT)
 ifeq ($(wildcard $(GOCC)),)
 	$(error "Unable to find go compiler")
 endif
 endif
+ifeq ($(GOOS), android)
+	$(GOCC) build -o $(GOTARGET) $(GOFLAGSSHARED) $(GOSRC)
+else
 	$(GOCC) build -o $(GOTARGET) $(GOFLAGS) $(GOSRC)
+endif
 	$(GOCC) build -o $(GOTARGETSO) $(GOFLAGSSHARED) $(GOSRC)
 ifeq ($(OS),Windows_NT)
 	$(MV) $(subst /,\,$(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h) kuzzle.h
