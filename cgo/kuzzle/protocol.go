@@ -15,38 +15,38 @@ import (
 )
 
 type WrapProtocol struct {
-	p *C.protocol
+	P *C.protocol
 }
 
-func (wp *WrapProtocol) NewWrapProtocol(p *C.protocol) {
-	wp.p = p
+func NewWrapProtocol(p *C.protocol) *WrapProtocol {
+	return &WrapProtocol{p}
 }
 
 func (wp WrapProtocol) AddListener(event int, channel chan<- interface{}) {
 	c := func(event C.int, res *C.char, data unsafe.Pointer) {
-		(chan<- interface{})(chan_res) <- res
+		(chan<- interface{})(channel) <- res
 	}
 
-	wp.p.add_listener(C.int(event), (*C.kuzzle_event_listener)(c))
+	wp.P.add_listener(C.int(event), (*C.kuzzle_event_listener)(c))
 }
 
 func (wp WrapProtocol) RemoveListener(event int, channel chan<- interface{}) {
-	// wp.p.remove_listener(C.int(event), (*C.Kuzzle_event_listener)(C.cgo_listener_callback))
+	// wp.P.remove_listener(C.int(event), (*C.Kuzzle_event_listener)(C.cgo_listener_callback))
 }
 
 func (wp WrapProtocol) RemoveAllListeners(event int) {
-	wp.p.remove_all_listeners(C.int(event))
+	wp.P.remove_all_listeners(C.int(event))
 }
 func (wp WrapProtocol) Once(event int, channel chan<- interface{}) {
 
 }
 
 func (wp WrapProtocol) ListenerCount(event int) int {
-	return int(wp.p.listener_count(C.int(event)))
+	return int(wp.P.listener_count(C.int(event)))
 }
 
 func (wp WrapProtocol) Connect() (bool, error) {
-	if err := wp.p.connect(); err != nil {
+	if err := wp.P.connect(); err != nil {
 		return false, error.New(C.GoString(err))
 	}
 
@@ -55,7 +55,7 @@ func (wp WrapProtocol) Connect() (bool, error) {
 
 func (wp WrapProtocol) Send(query []byte, options types.QueryOptions, responseChannel chan<- *types.KuzzleResponse, requestId string) error {
 	/*
-		if err := wp.p.send(C.CString(query), ); err != nil {
+		if err := wp.P.send(C.CString(query), ); err != nil {
 			return error.New(C.GoString(err))
 		}
 
@@ -65,7 +65,7 @@ func (wp WrapProtocol) Send(query []byte, options types.QueryOptions, responseCh
 }
 
 func (wp WrapProtocol) Close() error {
-	if err := wp.p.close(); err != nil {
+	if err := wp.P.close(); err != nil {
 		return error.New(C.GoString(err))
 	}
 
@@ -73,11 +73,11 @@ func (wp WrapProtocol) Close() error {
 }
 
 func (wp WrapProtocol) State() int {
-	return int(wp.p.state())
+	return int(wp.P.state())
 }
 
 func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
-	wp.p.emit_event(C.int(event), unsafe.Pointer(data))
+	wp.P.emit_event(C.int(event), unsafe.Pointer(data))
 }
 
 func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<- types.KuzzleNotification, chan<- interface{}) {
@@ -85,11 +85,11 @@ func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<-
 }
 
 func (wp WrapProtocol) UnregisterSub(id string) {
-	wp.p.unregister_sub(C.CString(id))
+	wp.P.unregister_sub(C.CString(id))
 }
 
 func (wp WrapProtocol) CancelSubs() {
-	wp.p.cancel_subs()
+	wp.P.cancel_subs()
 }
 
 func (wp WrapProtocol) RequestHistory() map[string]time.Time {
@@ -97,17 +97,17 @@ func (wp WrapProtocol) RequestHistory() map[string]time.Time {
 }
 
 func (wp WrapProtocol) StartQueuing() {
-	wp.p.start_queuing()
+	wp.P.start_queuing()
 }
 
 func (wp WrapProtocol) StopQueuing() {
-	wp.p.stop_queuing()
+	wp.P.stop_queuing()
 }
 
 func (wp WrapProtocol) PlayQueue() {
-	wp.p.play_queue()
+	wp.P.play_queue()
 }
 
 func (wp WrapProtocol) ClearQueue() {
-	wp.p.clear_queue()
+	wp.P.clear_queue()
 }
