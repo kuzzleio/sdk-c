@@ -671,6 +671,26 @@ typedef struct validation_response {
 typedef void (*kuzzle_notification_listener)(notification_result*, void*);
 typedef void (*kuzzle_subscribe_listener)(room_result*, void*);
 
+typedef struct {
+  void (*add_listener)(int, kuzzle_event_listener*);
+  void (*remove_listener)(int, kuzzle_event_listener*);
+  void (*remove_all_listeners)(int);
+  void (*once)(int, kuzzle_event_listener*);
+  int (*listener_count)(int);
+  char* (*connect)();
+  char* (*send)(const char*, query_options*, kuzzle_response*, char*);
+  char* (*close)();
+  int (*get_state)();
+  void (*emit_event)(int, void*);
+  void (*register_sub)(const char*, const char*, const char*, int, kuzzle_notification_listener*, void*);
+  void (*unregister_sub)(const char*);
+  void (*cancel_subs)();
+  void (*start_queuing)();
+  void (*stop_queuing)();
+  void (*play_queue)();
+  void (*clear_queue)();
+} protocol;
+
 # ifdef __cplusplus
 }
 # endif

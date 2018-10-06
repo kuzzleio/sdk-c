@@ -28,8 +28,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/kuzzleio/sdk-go/connection"
-	"github.com/kuzzleio/sdk-go/connection/websocket"
 	"github.com/kuzzleio/sdk-go/kuzzle"
 	"github.com/kuzzleio/sdk-go/types"
 )
@@ -52,8 +50,8 @@ func unregisterKuzzle(k *C.kuzzle) {
 }
 
 //export kuzzle_new_kuzzle
-func kuzzle_new_kuzzle(k *C.kuzzle, host, protocol *C.char, options *C.options) {
-	var c connection.Connection
+func kuzzle_new_kuzzle(k *C.kuzzle, host, protocol *C.protocol, options *C.options) {
+	var p WrapProtocol
 
 	if listeners_list == nil {
 		listeners_list = make(map[uintptr]chan<- interface{})
@@ -61,11 +59,12 @@ func kuzzle_new_kuzzle(k *C.kuzzle, host, protocol *C.char, options *C.options) 
 
 	opts := SetOptions(options)
 
-	if C.GoString(protocol) == "websocket" {
-		c = websocket.NewWebSocket(C.GoString(host), opts)
-	}
+	// if C.GoString(protocol) == "websocket" {
+	// 	p = websocket.NewWebSocket(C.GoString(host), opts)
+	// }
+	p = NewWrapProtocol(protocol)
 
-	inst, err := kuzzle.NewKuzzle(c, opts)
+	inst, err := kuzzle.NewKuzzle(p, opts)
 
 	if err != nil {
 		panic(err.Error())
