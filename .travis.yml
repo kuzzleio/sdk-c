@@ -16,6 +16,9 @@ env:
   # GITHUB GH_TOKEN
   - secure: vHZEYkX8Wb+T+lMNNuv9poAqQTahtFe9mOLu7aWaKV6hMb3OGCusToQxxYnOI0JaZCZbb4eIycLxY+1d5Q+XrgYmuspkHD+1VDb9MJa27Zp+rp1XUumpc8S40V2mJSrK9L6ckcXbqO8c1IgN2CeStCIEpoq1V+ZhwDQ+LTmPEUKkwImP7slN/uD17pLH4b2YskXhmmcIuzUdY6qV6oxVBQicSLBISjVHJK1F9CVLsAr3wgCZIpMRwYRv7e5MNKJYxsdD2PDFehueg0FvcLBDb4Y3Oi4OU4+GU4TBFb/RDo9w2eK0rWUMm28yGmJ4DG5LMIiva/+xty4D5fFpNW3mE2uR8UFZA/h80zN+x/DXry+yO+ooJHvGJMC1tmcSPgka4LCjQ9ETESFCJLDKtGS3ua0tuycbzhsD4uTNQfZA1Dn9kxT28dKHHL22SrnmtQqoQhc7Q9lT0+u2bcVq7AORq+GtLd7iJANQocINfb+oOWcwitfJ2olte8hCNpi/TDpuuGN/PTijjTOWH0ooQuS7piDicMh74IsVTY/n8U8Elg/WnHbiGc7kC9H2zkaMI1ofZabrHNPDmYW2Vrq02oJNxKEG44hFbi6qgcT3FedWqvV/ZIrneP/cXE97ogVW6f2aU/dffyIUw0iNP3bgxH5/QFbRqiQoKA/5dnp51bS/HEQ=
 
+stages:
+  - name: Builds & tests
+
 addons:
   apt:
     packages:
@@ -28,9 +31,6 @@ install:
 before_script:
   - .ci/align-submodules-on-merge.sh
 
-after_success:
-  - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make package
-
 deploy:
   provider: s3
   access_key_id: $AWS_ACCESS_KEY_ID
@@ -42,49 +42,61 @@ deploy:
   local-dir: deploy
   on:
     all_branches: true
-    condition: branch = master OR branch =~ ^.?-dev$
+    condition: $TRAVIS_BRANCH = ^master|.?-dev$
 
 after_deploy:
   - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
 
-matrix:
+jobs:
   include:
 # ---------------------------------------------
 # AMD64: Build and deploy (only on master)
 # ---------------------------------------------
-    - env:
-        - ARCH="amd64"
+    - stage: Builds & tests
+      name: "Build and tests - amd64"
 
       script:
         # Build
         - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make
 
+      after_success:
+        - docker run --rm -it -e ARCH=amd64 -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make package
+
 # ---------------------------------------------
 # I386: Build and deploy (only on master)
 # ---------------------------------------------
-    - env:
-        - ARCH="i386"
+    - stage: Builds & tests
+      name: "Build and tests - i386"
 
       script:
         # Build
         - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-i386 make
 
+      after_success:
+        - docker run --rm -it -e ARCH=i386 -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-i386 make package
+
 # ---------------------------------------------
 # ARMV7: Build and deploy (only on master)
 # ---------------------------------------------
-    - env:
-        - ARCH="armhf"
+    - stage: Builds & tests
+      name: "Build and tests - armhf"
 
       script:
         # Build
         - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-armhf make
 
+      after_success:
+        - docker run --rm -it -e ARCH=armhf -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-armhf make package
+
 # ---------------------------------------------
 # ARMV8: Build and deploy (only on master)
 # ---------------------------------------------
-    - env:
-         - ARCH="aarch64"
+    - stage: Builds & tests
+      name: "Build and tests - aarch64"
 
       script:
         # Build
         - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-aarch64 make
+
+      after_success:
+        - docker run --rm -it -e ARCH=aarch64 -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-aarch64 make package
