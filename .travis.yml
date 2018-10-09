@@ -13,6 +13,8 @@ env:
   - secure: "aqnEqyjGjrr8xjMl+hVuV3rFHezb7UD9/yiN3099ZaHp7jGOZD7OGbaOKFiG6p5FFa19iAsiAkhVIeZfQbzy2F4ReUfEx4yLlpHhS/8ABvpUC3hto732heJKKmfyaKuku2vqXanQ+tH1eNKqhySSxXrzNdIQt+TeFyviqcTSXo6NQvdq7yWOF0vZekdvA6ZMGsfkDDiWSITEd5YgxU7Zadw9QoMs6CnY2XC9YQ4VZxgnyG9SAIX915n2u59TGAUkj1cbGUT4MP683EwXxFWD0JUNyb9HbgNq9tvgndytlTWzJaL5eUWXdz0+ARxXl3VFVTKxrAwUlcFT1BiZl365GhswTg36xigluSLl0fpJTQ7+oKJ9zPbrb8u6qY2YrxC9t/rIqu3RbWRtkPDQXCn7Cr+MdCFYjlag/bO/9Ruf1LCGkuq2roUlWOs2tjhfbokXqUXUcDglXbIutKnfqyjTz1Iny8O5xUeMJO6Ms//Dxqb4eH6rKIllAPMdEqZJvZTW15r9IgY/pSdN7yK14yqQ+oinJNDRwfhXztdPGs7pAsFih+iaeQ8YnXsJywtWXX0skIo7sSnxOfANzqbXmoMOaN1T6tZF4ByRX28TOLkucXqNsS1WUmEwM1APM2Rl+eE/HpEKUAkR4mShSx7LvQ8yOWN8loIWfdNqzyHges6TjBM="
   # AWS SECRET ACCESS KEY
   - secure: "elX7qqlJaJ8fHr8bTSkLlhsf5GAd73HjCvb4FbgbwxVCQF3ghiHTZF06GSOSFgKtTvN2KP5KKd9jq9xGlGcolTi5BcEB0L62Cn7JYuMx1N7V3vsPfBiMkSkbEXZ1Fc3NiYazsnaanxjNZTeXjYRSJ7oKfPDEgbGRESkGEPLLxtuF+OWl32v7aPIkLxIM6KFwh0kTJNP9oWr/t26peSAORpO9nU8ots2JzuHdWFUIGZP2McOQM4uLhj3bDrl0Nch/ZFX9XVrvvhurg41e4DYHFBusUgm6RM664JehqyMhsZly+Hch7gx8H1EKqlVVOhbkyD+5PclQVdQKGbZKb9PioUSzI7tW0nZNs5YmSgcB9jwpC3CB4aQobpoZmMZVXNLAltWmPe1HEWOAJK1hHi35yhXMzO6B1OA1OKIJQnPgwKWEUpXUoTLGkfwQuiTr+1ue1GR8j6J41B+Hyb2em5ylCF6tWcR4hxfG+2Ag7IUVtRdwaEpTmqqxV/F7zhr+Kn+j0bJUE7318CH+3ax+T/FkApeyTIAuPhdJ9QWWHDxPGor1yXcuZTFZM3OF/pQH00FxvazNhlSI4gYkFXmmWIfqr4gYtQO15nD7mmR0J/RMUzU+4p6ZZyAfI0BYKYe4sW3HPjgybkEseyDG9zJxrg2508Fi1yZsyl4G81Pb4DrtmgI="
+  # GITHUB GH_TOKEN
+  - secure: vHZEYkX8Wb+T+lMNNuv9poAqQTahtFe9mOLu7aWaKV6hMb3OGCusToQxxYnOI0JaZCZbb4eIycLxY+1d5Q+XrgYmuspkHD+1VDb9MJa27Zp+rp1XUumpc8S40V2mJSrK9L6ckcXbqO8c1IgN2CeStCIEpoq1V+ZhwDQ+LTmPEUKkwImP7slN/uD17pLH4b2YskXhmmcIuzUdY6qV6oxVBQicSLBISjVHJK1F9CVLsAr3wgCZIpMRwYRv7e5MNKJYxsdD2PDFehueg0FvcLBDb4Y3Oi4OU4+GU4TBFb/RDo9w2eK0rWUMm28yGmJ4DG5LMIiva/+xty4D5fFpNW3mE2uR8UFZA/h80zN+x/DXry+yO+ooJHvGJMC1tmcSPgka4LCjQ9ETESFCJLDKtGS3ua0tuycbzhsD4uTNQfZA1Dn9kxT28dKHHL22SrnmtQqoQhc7Q9lT0+u2bcVq7AORq+GtLd7iJANQocINfb+oOWcwitfJ2olte8hCNpi/TDpuuGN/PTijjTOWH0ooQuS7piDicMh74IsVTY/n8U8Elg/WnHbiGc7kC9H2zkaMI1ofZabrHNPDmYW2Vrq02oJNxKEG44hFbi6qgcT3FedWqvV/ZIrneP/cXE97ogVW6f2aU/dffyIUw0iNP3bgxH5/QFbRqiQoKA/5dnp51bS/HEQ=
 
 addons:
   apt:
@@ -24,6 +26,7 @@ install:
   - pip install awscli --upgrade --user
 
 before_deploy:
+  - .ci/align-submodules-on-merge.sh
   - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make package
 
 deploy:
@@ -37,7 +40,6 @@ deploy:
   local-dir: deploy
 
 after_deploy:
-  - .ci/align-submodules-on-merge.sh
   - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
 
 matrix:
