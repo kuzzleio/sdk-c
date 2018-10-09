@@ -2,7 +2,7 @@
 
 set -e
 
-if [[ "$TRAVIS_BRANCH" == *"-dev" ]] || [ "$TRAVIS_BRANCH" = "master" ]; then
+if [ "$TRAVIS_PULL_REQUEST" == "false" ] && ([[ "$TRAVIS_BRANCH" == *"-dev" ]] || [ "$TRAVIS_BRANCH" = "master" ]); then
 
   git config --global user.email "support@kuzzle.io"
   git config --global user.name "Travis CI"
