@@ -95,4 +95,3 @@ jobs:
 
       after_success:
         - docker run --rm -it -e ARCH=aarch64 -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-aarch64 make package
-
