@@ -25,8 +25,10 @@ addons:
 install:
   - pip install awscli --upgrade --user
 
-before_deploy:
+before_script:
   - .ci/align-submodules-on-merge.sh
+
+after_success:
   - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make package
 
 deploy:
@@ -38,6 +40,9 @@ deploy:
   skip_cleanup: true
   upload-dir: sdk/c/$TRAVIS_BRANCH
   local-dir: deploy
+  on:
+    all_branches: true
+    condition: branch = master OR branch =~ ^.?-dev$
 
 after_deploy:
   - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
