@@ -37,6 +37,7 @@ deploy:
   local-dir: deploy
 
 after_deploy:
+  - .ci/align-submodules-on-merge.sh
   - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
 
 matrix:
@@ -80,4 +81,3 @@ matrix:
       script:
         # Build
         - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-aarch64 make
-
