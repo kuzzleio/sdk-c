@@ -26,6 +26,12 @@ addons:
 install:
   - pip install awscli --upgrade --user
 
+before_deploy:
+  - |
+    if [[ $TRAVIS_BRANCH =~ ^.?-dev$ ]]; then
+      mv ./deploy/kuzzlesdk-c-$ARCH-*.tar.gz ./deploy/kuzzlesdk-c-$ARCH.tar.gz;
+    fi;
+
 deploy:
   provider: s3
   access_key_id: $AWS_ACCESS_KEY_ID
