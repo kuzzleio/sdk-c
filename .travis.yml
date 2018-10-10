@@ -29,7 +29,7 @@ install:
 before_deploy:
   - |
     if [[ $TRAVIS_BRANCH =~ ^.?-dev$ ]]; then
-      mv ./deploy/kuzzlesdk-c-$ARCH-*.tar.gz ./deploy/kuzzlesdk-c-$ARCH.tar.gz;
+      mv ./deploy/kuzzlesdk-*-$ARCH.tar.gz ./deploy/kuzzlesdk-$ARCH-experimental.tar.gz;
     fi;
 
 deploy:
