@@ -78,7 +78,7 @@ package: $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(
 	cp -fr $(ROOT_DIR)$(PATHSEP)include$(PATHSEP)*.h $(ROOTOUTDIR)$(PATHSEP)include
 	cp $(ROOTOUTDIR)$(PATHSEP)*.so  $(ROOTOUTDIR)$(PATHSEP)lib
 	cp $(ROOTOUTDIR)$(PATHSEP)*.a  $(ROOTOUTDIR)$(PATHSEP)lib
-	mkdir deploy && cd $(ROOTOUTDIR) && tar cfz ..$(PATHSEP)deploy$(PATHSEP)kuzzlesdk-$(VERSION)-$(ARCH).tar.gz lib include
+	mkdir deploy && cd $(ROOTOUTDIR) && tar cfz ..$(PATHSEP)deploy$(PATHSEP)kuzzlesdk-c-$(VERSION)-$(ARCH).tar.gz lib include
 
 clean:
 ifeq ($(OS),Windows_NT)
