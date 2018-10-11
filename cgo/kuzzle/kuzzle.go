@@ -28,9 +28,9 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/kuzzleio/sdk-go/connection"
-	"github.com/kuzzleio/sdk-go/connection/websocket"
 	"github.com/kuzzleio/sdk-go/kuzzle"
+	"github.com/kuzzleio/sdk-go/protocol"
+	"github.com/kuzzleio/sdk-go/protocol/websocket"
 	"github.com/kuzzleio/sdk-go/types"
 )
 
@@ -52,8 +52,8 @@ func unregisterKuzzle(k *C.kuzzle) {
 }
 
 //export kuzzle_new_kuzzle
-func kuzzle_new_kuzzle(k *C.kuzzle, host, protocol *C.char, options *C.options) {
-	var c connection.Connection
+func kuzzle_new_kuzzle(k *C.kuzzle, host, proto *C.char, options *C.options) {
+	var c protocol.Protocol
 
 	if listeners_list == nil {
 		listeners_list = make(map[uintptr]chan<- interface{})
@@ -61,7 +61,7 @@ func kuzzle_new_kuzzle(k *C.kuzzle, host, protocol *C.char, options *C.options) 
 
 	opts := SetOptions(options)
 
-	if C.GoString(protocol) == "websocket" {
+	if C.GoString(proto) == "websocket" {
 		c = websocket.NewWebSocket(C.GoString(host), opts)
 	}
 
