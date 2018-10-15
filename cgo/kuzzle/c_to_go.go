@@ -23,6 +23,7 @@ package main
 import "C"
 import (
 	"encoding/json"
+	"time"
 	"unsafe"
 
 	"github.com/kuzzleio/sdk-go/collection"
@@ -183,10 +184,10 @@ func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObje
 	}()
 
 	goqo := &types.QueryObject{
-		Query:     C.GoString(cqo.query),
-		Options:   SetQueryOptions(cqo.options),
+		Query:     []byte(C.GoString(cqo.query)),
+		Options:   SetQueryOptions(&cqo.options),
 		ResChan:   resChan,
-		Timestamp: int(cqo.timestamp),
+		Timestamp: time.Unix(int64(cqo.timestamp), 0),
 		RequestId: C.GoString(cqo.request_id),
 	}
 
