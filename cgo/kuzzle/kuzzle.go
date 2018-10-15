@@ -19,6 +19,7 @@ package main
 	#include <stdlib.h>
 	#include <string.h>
 	#include "kuzzlesdk.h"
+	#include "protocol.h"
 	#include "sdk_wrappers_internal.h"
 */
 import "C"
@@ -51,7 +52,7 @@ func unregisterKuzzle(k *C.kuzzle) {
 
 //export kuzzle_new_kuzzle
 func kuzzle_new_kuzzle(k *C.kuzzle, host, protocol *C.protocol, options *C.options) {
-	var p WrapProtocol
+	var p *WrapProtocol
 
 	if listeners_list == nil {
 		listeners_list = make(map[uintptr]chan<- interface{})
@@ -64,7 +65,7 @@ func kuzzle_new_kuzzle(k *C.kuzzle, host, protocol *C.protocol, options *C.optio
 	// }
 	p = NewWrapProtocol(protocol)
 
-	inst, err := kuzzle.NewKuzzle(p, opts)
+	inst, err := kuzzle.NewKuzzle(*p, opts)
 
 	if err != nil {
 		panic(err.Error())

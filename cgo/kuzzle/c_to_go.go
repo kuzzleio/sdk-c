@@ -18,6 +18,7 @@ package main
 	#cgo CFLAGS: -I../../include
 	#include <stdlib.h>
 	#include "kuzzlesdk.h"
+	#include "sdk_wrappers_internal.h"
 */
 import "C"
 import (
@@ -166,4 +167,28 @@ func cToGoSearchResult(s *C.search_result) *types.SearchResult {
 
 func cToGoKuzzleNotificationChannel(c *C.kuzzle_notification_listener) chan<- types.KuzzleNotification {
 	return make(chan<- types.KuzzleNotification)
+}
+
+func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObject {
+	resChan := make(chan *types.KuzzleResponse)
+	go func() {
+		for {
+			res, ok := <-resChan
+			if ok == false {
+				break
+			}
+
+			C.kuzzle_notify(cqo.listener, goToCNotificationResult(&res), data)
+		}
+	}()
+
+	goqo := &types.QueryObject{
+		Query:     C.GoString(cqo.query),
+		Options:   SetQueryOptions(cqo.options),
+		ResChan:   resChan,
+		Timestamp: int(cqo.timestamp),
+		RequestId: C.GoString(cqo.request_id),
+	}
+
+	return goqo
 }

@@ -62,11 +62,91 @@ enum is_action_allowed {
 namespace kuzzleio {
 # endif
 
+//meta of a document
+typedef struct {
+    const char *author;
+    unsigned long long created_at;
+    unsigned long long updated_at;
+    const char *updater;
+    bool active;
+    unsigned long long deleted_at;
+} meta;
+
+typedef struct {
+    const char *id;
+    meta *m;
+    const char *content;
+    int count;
+} notification_content;
+
+typedef struct notification_result {
+    const char *request_id;
+    notification_content *result;
+    const char *volatiles;
+    const char *index;
+    const char *collection;
+    const char *controller;
+    const char *action;
+    const char *protocol;
+    const char *scope;
+    const char *state;
+    const char *user;
+    const char *n_type;
+    const char *room_id;
+    unsigned long long timestamp;
+    int status;
+    const char *error;
+    const char *stack;
+} notification_result;
+
+//options passed to room constructor
+typedef struct {
+    const char *scope;
+    const char *state;
+    const char *user;
+    bool subscribe_to_self;
+    const char *volatiles;
+} room_options;
+
+typedef struct {
+    void *instance;
+    const char *filters;
+    room_options *options;
+} room;
+
+typedef struct {
+  room *result;
+  int status;
+  const char *error;
+  const char *stack;
+} room_result;
+
+// callback for listeners
+typedef void (*kuzzle_notification_listener)(notification_result*, void*);
+typedef void (*kuzzle_subscribe_listener)(room_result*, void*);
+
+//options passed to query()
+typedef struct {
+    bool queuable;
+    bool withdist;
+    bool withcoord;
+    long from;
+    long size;
+    const char *scroll;
+    const char *scroll_id;
+    const char *refresh;
+    const char *if_exist;
+    int retry_on_conflict;
+    const char *volatiles;
+} query_options;
+
 //query object used by query()
 typedef struct {
     char *query;
     unsigned long long timestamp;
     char   *request_id;
+    query_options options;
+    kuzzle_notification_listener listener;
 } query_object;
 
 typedef struct {
@@ -170,44 +250,7 @@ typedef struct {
   const char *stack;
 } subscribe_result;
 
-//options passed to room constructor
-typedef struct {
-    const char *scope;
-    const char *state;
-    const char *user;
-    bool subscribe_to_self;
-    const char *volatiles;
-} room_options;
-
-typedef struct {
-    void *instance;
-    const char *filters;
-    room_options *options;
-} room;
-
-typedef struct {
-  room *result;
-  int status;
-  const char *error;
-  const char *stack;
-} room_result;
-
 typedef void (callback)(char* notification);
-
-//options passed to query()
-typedef struct {
-    bool queuable;
-    bool withdist;
-    bool withcoord;
-    long from;
-    long size;
-    const char *scroll;
-    const char *scroll_id;
-    const char *refresh;
-    const char *if_exist;
-    int retry_on_conflict;
-    const char *volatiles;
-} query_options;
 
 typedef struct {
     unsigned queue_ttl;
@@ -221,16 +264,6 @@ typedef struct {
     unsigned long replay_interval;
     const char *refresh;
 } options;
-
-//meta of a document
-typedef struct {
-    const char *author;
-    unsigned long long created_at;
-    unsigned long long updated_at;
-    const char *updater;
-    bool active;
-    unsigned long long deleted_at;
-} meta;
 
 /* === Security === */
 
@@ -294,33 +327,6 @@ typedef struct {
     void *instance;
     kuzzle *k;
 } document;
-
-typedef struct {
-    const char *id;
-    meta *m;
-    const char *content;
-    int count;
-} notification_content;
-
-typedef struct notification_result {
-    const char *request_id;
-    notification_content *result;
-    const char *volatiles;
-    const char *index;
-    const char *collection;
-    const char *controller;
-    const char *action;
-    const char *protocol;
-    const char *scope;
-    const char *state;
-    const char *user;
-    const char *n_type;
-    const char *room_id;
-    unsigned long long timestamp;
-    int status;
-    const char *error;
-    const char *stack;
-} notification_result;
 
 typedef struct profile_result {
     profile *p;
@@ -667,29 +673,6 @@ typedef struct validation_response {
   const char *error;
   const char *stack;
 } validation_response;
-
-typedef void (*kuzzle_notification_listener)(notification_result*, void*);
-typedef void (*kuzzle_subscribe_listener)(room_result*, void*);
-
-typedef struct {
-  void (*add_listener)(int, kuzzle_event_listener*);
-  void (*remove_listener)(int, kuzzle_event_listener*);
-  void (*remove_all_listeners)(int);
-  void (*once)(int, kuzzle_event_listener*);
-  int (*listener_count)(int);
-  char* (*connect)();
-  char* (*send)(const char*, query_options*, kuzzle_response*, char*);
-  char* (*close)();
-  int (*get_state)();
-  void (*emit_event)(int, void*);
-  void (*register_sub)(const char*, const char*, const char*, int, kuzzle_notification_listener*, void*);
-  void (*unregister_sub)(const char*);
-  void (*cancel_subs)();
-  void (*start_queuing)();
-  void (*stop_queuing)();
-  void (*play_queue)();
-  void (*clear_queue)();
-} protocol;
 
 # ifdef __cplusplus
 }
