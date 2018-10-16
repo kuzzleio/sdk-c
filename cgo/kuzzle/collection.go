@@ -125,15 +125,15 @@ func kuzzle_collection_search_specifications(c *C.collection, options *C.query_o
 }
 
 //export kuzzle_collection_update_specifications
-func kuzzle_collection_update_specifications(c *C.collection, index *C.char, col *C.char, body *C.char, options *C.query_options) *C.string_result {
-	res, err := (*collection.Collection)(c.instance).UpdateSpecifications(C.GoString(index), C.GoString(col), json.RawMessage(C.GoString(body)), SetQueryOptions(options))
+func kuzzle_collection_update_specifications(c *C.collection, index *C.char, col *C.char, specifications *C.char, options *C.query_options) *C.string_result {
+	res, err := (*collection.Collection)(c.instance).UpdateSpecifications(C.GoString(index), C.GoString(col), json.RawMessage(C.GoString(specifications)), SetQueryOptions(options))
 	var stringResult string
 	stringResult = string(res)
 	return goToCStringResult(&stringResult, err)
 }
 
 //export kuzzle_collection_validate_specifications
-func kuzzle_collection_validate_specifications(c *C.collection, body *C.char, options *C.query_options) *C.validation_response {
-	res, err := (*collection.Collection)(c.instance).ValidateSpecifications(json.RawMessage(C.GoString(body)), SetQueryOptions(options))
+func kuzzle_collection_validate_specifications(c *C.collection, index *C.char, col *C.char, specifications *C.char, options *C.query_options) *C.validation_response {
+	res, err := (*collection.Collection)(c.instance).ValidateSpecifications(C.GoString(index), C.GoString(col), json.RawMessage(C.GoString(specifications)), SetQueryOptions(options))
 	return goToCValidationResponse(res, err)
 }
