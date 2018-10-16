@@ -5,10 +5,6 @@ package main
 	#include <stdlib.h>
 	#include "kuzzlesdk.h"
 	#include "protocol.h"
-
-	typedef struct {
-		void* instance;
-	} web_socket;
 */
 import "C"
 import (

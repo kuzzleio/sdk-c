@@ -51,7 +51,7 @@ func unregisterKuzzle(k *C.kuzzle) {
 }
 
 //export kuzzle_new_kuzzle
-func kuzzle_new_kuzzle(k *C.kuzzle, host, protocol *C.protocol, options *C.options) {
+func kuzzle_new_kuzzle(k *C.kuzzle, protocol *C.protocol, options *C.options) {
 	var p *WrapProtocol
 
 	if listeners_list == nil {

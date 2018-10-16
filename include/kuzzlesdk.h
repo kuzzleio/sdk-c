@@ -172,6 +172,10 @@ typedef struct {
     size_t queries_length;
 } offline_queue;
 
+typedef struct {
+    void* instance;
+} web_socket;
+
 typedef void (*kuzzle_event_listener)(int, char*, void*);
 
 //define a request
