@@ -42,3 +42,4 @@ x86:  https://dl.kuzzle.io/sdk/c/master/kuzzlesdk-c-x86-1.0.0.tar.gz
 
 You should now have the SDK in the build directory.
 
+You should now have the SDK in the build directory.

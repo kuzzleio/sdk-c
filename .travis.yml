@@ -23,7 +23,7 @@ addons:
 install:
   - pip install awscli --upgrade --user
 
-after_success:
+before_deploy:
   - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make package
 
 deploy:
