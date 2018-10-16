@@ -30,6 +30,8 @@ import (
 	"unsafe"
 
 	"github.com/kuzzleio/sdk-go/kuzzle"
+	"github.com/kuzzleio/sdk-go/protocol"
+	"github.com/kuzzleio/sdk-go/protocol/websocket"
 	"github.com/kuzzleio/sdk-go/types"
 )
 
