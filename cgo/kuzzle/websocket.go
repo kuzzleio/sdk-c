@@ -21,7 +21,7 @@ func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
 	webSocketInstances.Store(instance, ptr)
 }
 
-// export kuzzle_new_websocket
+//export kuzzle_new_websocket
 func kuzzle_new_websocket(ws *C.web_socket, host *C.char, options *C.options) {
 	inst := websocket.NewWebSocket(C.GoString(host), SetOptions(options))
 
