@@ -5,23 +5,22 @@ package main
 	#include <stdlib.h>
 	#include "protocol.h"
 
-  // void (*add_listener)(int, kuzzle_event_listener*);
-  // void (*remove_listener)(int, kuzzle_event_listener*);
-  // void (*once)(int, kuzzle_event_listener*);
-  // char* (*send)(const char*, query_options*, kuzzle_response*, char*);
-  // void (*emit_event)(int, void*);
-  // void (*register_sub)(const char*, const char*, const char*, int, kuzzle_notification_listener*, void*);
-
-	// void (*clear_queue)();
-
 	// Bridges
 
 	static void bridge_add_listener(void (*f)(int, kuzzle_event_listener*), int event, kuzzle_event_listener* listener) {
 		f(event, listener);
 	}
 
+	static void bridge_remove_listener(void (*f)(int, kuzzle_event_listener*), int event, kuzzle_event_listener* listener) {
+		f(event, listener);
+	}
+
 	static void bridge_remove_all_listeners(void (*f)(int), int event) {
 		f(event);
+	}
+
+	static void bridge_once(void (*f)(int, kuzzle_event_listener*), int event, kuzzle_event_listener* listener) {
+		f(event, listener);
 	}
 
 	static int bridge_listener_count(int (*f)(int), int event) {
@@ -30,6 +29,10 @@ package main
 
 	static char* bridge_connect(char* (*f)()) {
 		return f();
+	}
+
+	static char* bridge_send(char* (*f)(const char*, query_options*, kuzzle_response*, char*), const char* query, query_options* options, kuzzle_response* response, char* request_id) {
+		return f(query, options, response, request_id);
 	}
 
 	static char* bridge_close(char* (*f)()) {
@@ -68,10 +71,8 @@ package main
 		f();
 	}
 
-	void goAddListenerCallback(char*, void*);
-
-	static void bridge_kuzzle_event_listener(char* res, void* chan) {
-		goAddListenerCallback(res, chan);
+	static bool bridge_queue_filter(kuzzle_queue_filter f, const char* data) {
+		return f(data);
 	}
 */
 import "C"
@@ -93,17 +94,15 @@ func NewWrapProtocol(p *C.protocol) *WrapProtocol {
 	return &WrapProtocol{p}
 }
 
-//export goAddListenerCallback
-func goAddListenerCallback(res *C.char, channel unsafe.Pointer) {
-	// (chan<- interface{})(channel) <- res
+//export bridge_go_protocol_trigger_listener
+func bridge_go_protocol_trigger_listener(event C.int, res *C.char, data unsafe.Pointer) {
 }
 
 func (wp WrapProtocol) AddListener(event int, channel chan<- interface{}) {
-	// C.bridge_add_listener(wp.P.add_listener, C.int(event), C.bridge_kuzzle_event_listener)
 }
 
 func (wp WrapProtocol) RemoveListener(event int, channel chan<- interface{}) {
-	// wp.P.remove_listener(C.int(event), (*C.Kuzzle_event_listener)(C.cgo_listener_callback))
+	C.bridge_remove_listener(wp.P.add_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)))
 }
 
 func (wp WrapProtocol) RemoveAllListeners(event int) {
@@ -111,7 +110,7 @@ func (wp WrapProtocol) RemoveAllListeners(event int) {
 }
 
 func (wp WrapProtocol) Once(event int, channel chan<- interface{}) {
-
+	C.bridge_once(wp.P.add_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)))
 }
 
 func (wp WrapProtocol) ListenerCount(event int) int {
@@ -127,13 +126,7 @@ func (wp WrapProtocol) Connect() (bool, error) {
 }
 
 func (wp WrapProtocol) Send(query []byte, options types.QueryOptions, responseChannel chan<- *types.KuzzleResponse, requestId string) error {
-	/*
-		if err := wp.P.send(C.CString(query), ); err != nil {
-			return error.New(C.GoString(err))
-		}
-
-		return nil
-	*/
+	// return C.bridge_send(C.CString(query), SetQueryOptions(&options))
 	return nil
 }
 
@@ -154,7 +147,7 @@ func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
 }
 
 func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<- types.KuzzleNotification, chan<- interface{}) {
-
+	//@todo
 }
 
 func (wp WrapProtocol) UnregisterSub(id string) {
@@ -166,6 +159,7 @@ func (wp WrapProtocol) CancelSubs() {
 }
 
 func (wp WrapProtocol) RequestHistory() map[string]time.Time {
+	//@todo
 	return nil
 }
 
@@ -186,31 +180,19 @@ func (wp WrapProtocol) ClearQueue() {
 }
 
 func (wp WrapProtocol) AutoQueue() bool {
-	if int(wp.P.auto_queue) == 1 {
-		return true
-	}
-	return false
+	return bool(wp.P.auto_queue)
 }
 
 func (wp WrapProtocol) AutoReconnect() bool {
-	if int(wp.P.auto_reconnect) == 1 {
-		return true
-	}
-	return false
+	return bool(wp.P.auto_reconnect)
 }
 
 func (wp WrapProtocol) AutoResubscribe() bool {
-	if int(wp.P.auto_resubscribe) == 1 {
-		return true
-	}
-	return false
+	return bool(wp.P.auto_resubscribe)
 }
 
 func (wp WrapProtocol) AutoReplay() bool {
-	if int(wp.P.auto_replay) == 1 {
-		return true
-	}
-	return false
+	return bool(wp.P.auto_replay)
 }
 
 func (wp WrapProtocol) Host() string {
@@ -230,42 +212,65 @@ func (wp WrapProtocol) OfflineQueue() []*types.QueryObject {
 }
 
 func (wp WrapProtocol) OfflineQueueLoader() protocol.OfflineQueueLoader {
+	// @todo
 	var offline protocol.OfflineQueueLoader
 	return offline
 }
 
 func (wp WrapProtocol) Port() int {
-	return -1
+	return int(wp.P.port)
 }
 
 func (wp WrapProtocol) QueueFilter() protocol.QueueFilter {
-	return func([]byte) bool { return false }
+	return func(data []byte) bool {
+		return bool(C.bridge_queue_filter(wp.P.queue_filter, C.CString(string(data))))
+	}
 }
 
 func (wp WrapProtocol) QueueMaxSize() int {
-	return -1
+	return int(wp.P.queue_max_size)
 }
 
 func (wp WrapProtocol) QueueTTL() time.Duration {
-	return time.Duration(1)
+	return time.Duration(int(wp.P.queue_ttl))
 }
 
 func (wp WrapProtocol) ReplayInterval() time.Duration {
-	return time.Duration(1)
+	return time.Duration(int(wp.P.replay_interval))
 }
 
 func (wp WrapProtocol) ReconnectionDelay() time.Duration {
-	return time.Duration(1)
+	return time.Duration(int(wp.P.reconnection_delay))
 }
 
 func (wp WrapProtocol) SslConnection() bool {
-	return false
+	return bool(wp.P.ssl_connection)
 }
 
-func (wp WrapProtocol) SetAutoQueue(value bool)                                 {}
-func (wp WrapProtocol) SetAutoReplay(value bool)                                {}
-func (wp WrapProtocol) SetOfflineQueueLoader(value protocol.OfflineQueueLoader) {}
-func (wp WrapProtocol) SetQueueFilter(value protocol.QueueFilter)               {}
-func (wp WrapProtocol) SetQueueMaxSize(value int)                               {}
-func (wp WrapProtocol) SetQueueTTL(time.Duration)                               {}
-func (wp WrapProtocol) SetReplayInterval(time.Duration)                         {}
+func (wp WrapProtocol) SetAutoQueue(value bool) {
+	wp.P.auto_queue = C.bool(value)
+}
+
+func (wp WrapProtocol) SetAutoReplay(value bool) {
+	wp.P.auto_replay = C.bool(value)
+}
+
+func (wp WrapProtocol) SetOfflineQueueLoader(value protocol.OfflineQueueLoader) {
+	//@todo
+}
+
+func (wp WrapProtocol) SetQueueFilter(value protocol.QueueFilter) {
+	wp.P.queue_filter = C.kuzzle_queue_filter(unsafe.Pointer(&value))
+}
+
+func (wp WrapProtocol) SetQueueMaxSize(value int) {
+	wp.P.queue_max_size = C.ulonglong(value)
+}
+
+func (wp WrapProtocol) SetQueueTTL(value time.Duration) {
+	wp.P.queue_ttl = C.ulonglong(value)
+}
+
+func (wp WrapProtocol) SetReplayInterval(value time.Duration) {
+	wp.P.replay_interval = C.ulonglong(value)
+}
