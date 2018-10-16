@@ -121,9 +121,26 @@ typedef struct {
   const char *stack;
 } room_result;
 
+// raw Kuzzle response
+typedef struct {
+    const char *request_id;
+    const char *result;
+    const char *volatiles;
+    const char *index;
+    const char *collection;
+    const char *controller;
+    const char *action;
+    const char *room_id;
+    const char *channel;
+    int status;
+    const char *error;
+    const char *stack;
+} kuzzle_response;
+
 // callback for listeners
 typedef void (*kuzzle_notification_listener)(notification_result*, void*);
 typedef void (*kuzzle_subscribe_listener)(room_result*, void*);
+typedef void (*kuzzle_response_listener)(kuzzle_response*, void*);
 
 //options passed to query()
 typedef struct {
@@ -147,6 +164,7 @@ typedef struct {
     char   *request_id;
     query_options options;
     kuzzle_notification_listener listener;
+    kuzzle_response_listener response_listener;
 } query_object;
 
 typedef struct {
@@ -450,22 +468,6 @@ typedef struct token_validity {
 } token_validity;
 
 /* === Generic response structures === */
-
-// raw Kuzzle response
-typedef struct {
-    const char *request_id;
-    const char *result;
-    const char *volatiles;
-    const char *index;
-    const char *collection;
-    const char *controller;
-    const char *action;
-    const char *room_id;
-    const char *channel;
-    int status;
-    const char *error;
-    const char *stack;
-} kuzzle_response;
 
 //any void result
 typedef struct error_result {

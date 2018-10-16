@@ -219,15 +219,14 @@ func (wp WrapProtocol) Host() string {
 
 func (wp WrapProtocol) OfflineQueue() []*types.QueryObject {
 	tmpslice := (*[1<<28 - 1]*C.query_object)(unsafe.Pointer(wp.P.kuzzle_offline_queue.queries))[:wp.P.kuzzle_offline_queue.queries_length]
-	goOfflineQueue := make([]types.QueryObject, 0, int(wp.P.kuzzle_offline_queue.queries_length))
+	goOfflineQueue := make([]*types.QueryObject, 0, int(wp.P.kuzzle_offline_queue.queries_length))
 
-	var goQo []*types.QueryObject
 	for _, s := range tmpslice {
 		cQuery := cToGoQueryObject(s, nil)
-		goQo = append(goQo, cQuery)
+		goOfflineQueue = append(goOfflineQueue, cQuery)
 	}
 
-	return goQo
+	return goOfflineQueue
 }
 
 func (wp WrapProtocol) OfflineQueueLoader() protocol.OfflineQueueLoader {

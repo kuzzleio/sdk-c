@@ -19,6 +19,14 @@ package main
 	#include <stdlib.h>
 	#include "kuzzlesdk.h"
 	#include "sdk_wrappers_internal.h"
+
+	static void bridge_trigger_kuzzle_notification_result(kuzzle_notification_listener f, notification_result* res, void* data) {
+    f(res, data);
+	}
+
+	static void bridge_trigger_kuzzle_response(kuzzle_response_listener f, kuzzle_response* res, void* data) {
+    f(res, data);
+	}
 */
 import "C"
 import (
@@ -171,6 +179,18 @@ func cToGoKuzzleNotificationChannel(c *C.kuzzle_notification_listener) chan<- ty
 }
 
 func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObject {
+	notifChan := make(chan *types.KuzzleNotification)
+	go func() {
+		for {
+			res, ok := <-notifChan
+			if ok == false {
+				break
+			}
+
+			C.bridge_trigger_kuzzle_notification_result(cqo.listener, goToCNotificationResult(res), data)
+		}
+	}()
+
 	resChan := make(chan *types.KuzzleResponse)
 	go func() {
 		for {
@@ -179,13 +199,14 @@ func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObje
 				break
 			}
 
-			C.kuzzle_notify(cqo.listener, goToCNotificationResult(&res), data)
+			C.bridge_trigger_kuzzle_response(cqo.response_listener, goToCKuzzleResponse(res), data)
 		}
 	}()
 
 	goqo := &types.QueryObject{
 		Query:     []byte(C.GoString(cqo.query)),
 		Options:   SetQueryOptions(&cqo.options),
+		NotifChan: notifChan,
 		ResChan:   resChan,
 		Timestamp: time.Unix(int64(cqo.timestamp), 0),
 		RequestId: C.GoString(cqo.request_id),
