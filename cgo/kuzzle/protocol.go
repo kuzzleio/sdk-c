@@ -4,12 +4,14 @@ package main
 	#cgo CFLAGS: -I../../include
 	#include <stdlib.h>
 	#include "protocol.h"
+	#include <stdio.h>
 
 	// Bridges
 
-	static void bridge_add_listener(void (*f)(int, kuzzle_event_listener*), int event, kuzzle_event_listener* listener) {
-		printf("OKKKKK");
-		f(event, listener);
+	static void bridge_add_listener(void (*f)(int, kuzzle_event_listener*, void*), int event, kuzzle_event_listener* listener, void* data) {
+		printf("bridge_add_listener: %p\n", data);
+		fflush(NULL);
+		f(event, listener, data);
 	}
 
 	static void bridge_remove_listener(void (*f)(int, kuzzle_event_listener*), int event, kuzzle_event_listener* listener) {
@@ -80,8 +82,10 @@ import "C"
 import (
 	"encoding/json"
 	"errors"
+	"sync"
 	"time"
 	"unsafe"
+	"fmt"
 
 	"github.com/kuzzleio/sdk-go/protocol"
 	"github.com/kuzzleio/sdk-go/types"
@@ -91,7 +95,22 @@ type WrapProtocol struct {
 	P *C.protocol
 }
 
+var proto_instances sync.Map
+
+// register new instance to the instances map
+func registerProtocol(instance interface{}, ptr unsafe.Pointer) {
+	proto_instances.Store(instance, ptr)
+}
+
+//export unregisterProtocol
+func unregisterProtocol(p *C.protocol) {
+	proto_instances.Delete(p)
+}
+
 func NewWrapProtocol(p *C.protocol) *WrapProtocol {
+	ptr_proto := unsafe.Pointer(p.instance)
+	registerProtocol(p, ptr_proto)
+
 	return &WrapProtocol{p}
 }
 
@@ -100,7 +119,7 @@ func bridge_go_protocol_trigger_listener(event C.int, res *C.char, data unsafe.P
 }
 
 func (wp WrapProtocol) AddListener(event int, channel chan<- interface{}) {
-	C.bridge_add_listener(wp.P.add_listener, C.int(event), nil);
+	C.bridge_add_listener(wp.P.add_listener, C.int(event), nil, wp.P.instance)
 }
 
 func (wp WrapProtocol) RemoveListener(event int, channel chan<- interface{}) {

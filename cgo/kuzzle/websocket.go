@@ -26,10 +26,12 @@ package main
 */
 import "C"
 import (
-	"unsafe"
-	"sync"
-	"github.com/kuzzleio/sdk-go/protocol/websocket"
 	"encoding/json"
+	"fmt"
+	"sync"
+	"unsafe"
+
+	"github.com/kuzzleio/sdk-go/protocol/websocket"
 )
 
 // map which stores instances to keep references in case the gc passes
@@ -44,17 +46,20 @@ func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
 }
 
 //export kuzzle_websocket_new_web_socket
-func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.options) {
+func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.options, cppInstance unsafe.Pointer) {
+	if websocket_listeners_list == nil {
+		websocket_listeners_list = make(map[uintptr]chan<- interface{})
+	}
+
 	inst := websocket.NewWebSocket(C.GoString(host), SetOptions(options))
 
-	ptr := unsafe.Pointer(&inst)
-	ws.instance = ptr
+	ws.instance = cppInstance
 
-	registerWebSocket(inst, ptr)
+	registerWebSocket(inst, cppInstance)
 }
 
 //export kuzzle_websocket_add_listener
-func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuzzle_event_listener, data unsafe.Pointer) {
+func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuzzle_event_listener) {
 	c := make(chan interface{})
 	websocket_listeners_list[uintptr(unsafe.Pointer(listener))] = c
 	(*websocket.WebSocket)(ws.instance).AddListener(int(event), c)
@@ -66,7 +71,7 @@ func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuz
 			}
 			r, _ := json.Marshal(res)
 
-			C.bridge_trigger_event_listener(listener, event, C.CString(string(r)), data)
+			C.bridge_trigger_event_listener(listener, event, C.CString(string(r)), ws.instance)
 		}
 	}()
 }

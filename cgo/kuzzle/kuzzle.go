@@ -28,6 +28,7 @@ import (
 	"sync"
 	"time"
 	"unsafe"
+	"fmt"
 
 	"github.com/kuzzleio/sdk-go/kuzzle"
 	"github.com/kuzzleio/sdk-go/types"
@@ -52,15 +53,13 @@ func unregisterKuzzle(k *C.kuzzle) {
 
 //export kuzzle_new_kuzzle
 func kuzzle_new_kuzzle(k *C.kuzzle, protocol *C.protocol, options *C.options) {
-	var p *WrapProtocol
-
 	if listeners_list == nil {
 		listeners_list = make(map[uintptr]chan<- interface{})
 	}
 
 	opts := SetOptions(options)
 
-	p = NewWrapProtocol(protocol)
+	p := NewWrapProtocol(protocol)
 
 	inst, err := kuzzle.NewKuzzle(*p, opts)
 
@@ -73,6 +72,8 @@ func kuzzle_new_kuzzle(k *C.kuzzle, protocol *C.protocol, options *C.options) {
 	k.loader = nil
 
 	registerKuzzle(inst, ptr)
+
+	fmt.Printf("###### %s\n", protocol)
 }
 
 //export kuzzle_get_document_controller

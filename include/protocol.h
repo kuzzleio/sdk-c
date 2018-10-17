@@ -19,6 +19,7 @@
 #include "sdk_wrappers_internal.h"
 
 typedef struct {
+  void* instance;
   bool auto_queue;
   bool auto_reconnect;
   bool auto_resubscribe;
