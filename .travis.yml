@@ -39,14 +39,14 @@ deploy:
   bucket: $AWS_S3_BUCKET
   region: us-west-2
   skip_cleanup: true
-  upload-dir: sdk/c/$TRAVIS_BRANCH
+  upload-dir: releases/sdk/c/$TRAVIS_BRANCH
   local-dir: deploy
   on:
     all_branches: true
     condition: $TRAVIS_BRANCH =~ ^master|.?-dev$
 
 after_deploy:
-  - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+  - sleep 10 && aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/releases/*"
 
 jobs:
   include:
