@@ -50,3 +50,8 @@ func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuz
 	}()
 	(*websocket.WebSocket)(ws.instance).AddListener(int(event), channel)
 }
+
+//export kuzzle_websocket_emit_event
+func kuzzle_websocket_emit_event(ws *C.web_socket, event C.int, body *C.char) {
+	(*websocket.WebSocket)(ws.instance).EmitEvent(int(event), C.GoString(body))
+}
