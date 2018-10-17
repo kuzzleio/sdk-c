@@ -15,10 +15,14 @@ import (
 	"unsafe"
 	"sync"
 	"github.com/kuzzleio/sdk-go/protocol/websocket"
+	"encoding/json"
 )
 
 // map which stores instances to keep references in case the gc passes
 var webSocketInstances sync.Map
+
+// map which stores channel and function's pointers adresses for listeners
+var websocket_listeners_list map[uintptr]chan<- interface{}
 
 // register new instance to the instances map
 func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
@@ -37,18 +41,20 @@ func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.
 
 //export kuzzle_websocket_add_listener
 func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuzzle_event_listener, data unsafe.Pointer) {
-	channel := make(chan interface{})
+	c := make(chan interface{})
+	websocket_listeners_list[uintptr(unsafe.Pointer(listener))] = c
+	(*websocket.WebSocket)(ws.instance).AddListener(int(event), c)
 	go func() {
 		for {
-			res, ok := <-channel
+			res, ok := <-c
 			if ok == false {
 				break
 			}
+			r, _ := json.Marshal(res)
 
-			C.bridge_trigger_event_listener(listener, event, C.CString(res.(string)), data)
+			C.bridge_trigger_event_listener(listener, event, C.CString(string(r)), data)
 		}
 	}()
-	(*websocket.WebSocket)(ws.instance).AddListener(int(event), channel)
 }
 
 //export kuzzle_websocket_emit_event
