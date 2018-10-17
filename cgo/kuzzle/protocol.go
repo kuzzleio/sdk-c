@@ -99,10 +99,11 @@ func bridge_go_protocol_trigger_listener(event C.int, res *C.char, data unsafe.P
 }
 
 func (wp WrapProtocol) AddListener(event int, channel chan<- interface{}) {
+	C.bridge_add_listener(wp.P.add_listener, C.int(event), nil);
 }
 
 func (wp WrapProtocol) RemoveListener(event int, channel chan<- interface{}) {
-	C.bridge_remove_listener(wp.P.add_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)))
+	C.bridge_remove_listener(wp.P.remove_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)))
 }
 
 func (wp WrapProtocol) RemoveAllListeners(event int) {
