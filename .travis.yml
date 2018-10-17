@@ -1,5 +1,5 @@
 os: linux
-language: c
+language: minimal
 sudo: required
 
 services:
@@ -26,6 +26,12 @@ addons:
 install:
   - pip install awscli --upgrade --user
 
+before_deploy:
+  - |
+    if [[ $TRAVIS_BRANCH =~ ^.?-dev$ ]]; then
+      sudo mv ./deploy/kuzzlesdk-c-*-$ARCH.tar.gz ./deploy/kuzzlesdk-c-experimental-$ARCH.tar.gz;
+    fi;
+
 deploy:
   provider: s3
   access_key_id: $AWS_ACCESS_KEY_ID
@@ -37,7 +43,7 @@ deploy:
   local-dir: deploy
   on:
     all_branches: true
-    condition: $TRAVIS_BRANCH = ^master|.?-dev$
+    condition: $TRAVIS_BRANCH =~ ^master|.?-dev$
 
 after_deploy:
   - aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
@@ -49,6 +55,9 @@ jobs:
 # ---------------------------------------------
     - stage: Builds & tests
       name: "Build and tests - amd64"
+
+      env:
+        - ARCH=amd64
 
       script:
         # Build
@@ -63,6 +72,9 @@ jobs:
     - stage: Builds & tests
       name: "Build and tests - i386"
 
+      env:
+        - ARCH=i386
+
       script:
         # Build
         - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-i386 make
@@ -76,6 +88,9 @@ jobs:
     - stage: Builds & tests
       name: "Build and tests - armhf"
 
+      env:
+        - ARCH=armhf
+
       script:
         # Build
         - docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc-armhf make
@@ -88,6 +103,9 @@ jobs:
 # ---------------------------------------------
     - stage: Builds & tests
       name: "Build and tests - aarch64"
+
+      env:
+        - ARCH=aarch64
 
       script:
         # Build

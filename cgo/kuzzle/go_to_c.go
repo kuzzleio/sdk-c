@@ -765,12 +765,12 @@ func goToCDateResult(goRes int64, err error) *C.date_result {
 func goToCValidationResponse(validationResponse *types.ValidationResponse, err error) *C.validation_response {
 	var cvalidation_response *C.validation_response
 
+	cvalidation_response = (*C.validation_response)(C.calloc(1, C.sizeof_validation_response))
+
 	if err != nil {
 		Set_validation_response_error(cvalidation_response, err)
 		return cvalidation_response
 	}
-
-	cvalidation_response = (*C.validation_response)(C.calloc(1, C.sizeof_validation_response))
 
 	cvalidation_response.valid = C.bool(validationResponse.Valid)
 	cvalidation_response.description = C.CString(validationResponse.Description)
