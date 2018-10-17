@@ -85,7 +85,6 @@ import (
 	"sync"
 	"time"
 	"unsafe"
-	"fmt"
 
 	"github.com/kuzzleio/sdk-go/protocol"
 	"github.com/kuzzleio/sdk-go/types"
