@@ -8,6 +8,7 @@ package main
 	// Bridges
 
 	static void bridge_add_listener(void (*f)(int, kuzzle_event_listener*), int event, kuzzle_event_listener* listener) {
+		printf("OKKKKK");
 		f(event, listener);
 	}
 
