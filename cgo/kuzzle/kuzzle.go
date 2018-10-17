@@ -60,9 +60,6 @@ func kuzzle_new_kuzzle(k *C.kuzzle, protocol *C.protocol, options *C.options) {
 
 	opts := SetOptions(options)
 
-	// if C.GoString(protocol) == "websocket" {
-	// 	p = websocket.NewWebSocket(C.GoString(host), opts)
-	// }
 	p = NewWrapProtocol(protocol)
 
 	inst, err := kuzzle.NewKuzzle(*p, opts)
