@@ -113,10 +113,7 @@ func goToCKuzzleResponse(gRes *types.KuzzleResponse) *C.kuzzle_response {
 	result := (*C.kuzzle_response)(C.calloc(1, C.sizeof_kuzzle_response))
 
 	result.request_id = C.CString(gRes.RequestId)
-
-	bufResult := C.CString(string(gRes.Result))
-	result.result = bufResult
-	C.free(unsafe.Pointer(bufResult))
+	result.result = C.CString(string(gRes.Result))
 
 	result.volatiles = C.CString(string(gRes.Volatile))
 	result.index = C.CString(gRes.Index)
