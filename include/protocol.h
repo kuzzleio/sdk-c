@@ -40,11 +40,11 @@ typedef struct {
   void (*remove_all_listeners)(int);
   void (*once)(int, kuzzle_event_listener*);
   int (*listener_count)(int);
-  char* (*connect)();
-  char* (*send)(const char*, query_options*, kuzzle_response*, char*);
-  char* (*close)();
+  char* (*connect)(void*);
+  kuzzle_response* (*send)(const char*, query_options*, char*, void*);
+  const char* (*close)();
   int (*get_state)();
-  void (*emit_event)(int, void*);
+  void (*emit_event)(int, void*, void*);
   void (*register_sub)(const char*, const char*, const char*, int, kuzzle_notification_listener*, void*);
   void (*unregister_sub)(const char*);
   void (*cancel_subs)();

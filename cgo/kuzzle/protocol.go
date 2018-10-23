@@ -9,8 +9,6 @@ package main
 	// Bridges
 
 	static void bridge_add_listener(void (*f)(int, kuzzle_event_listener*, void*), int event, kuzzle_event_listener* listener, void* data) {
-		printf("bridge_add_listener: %p\n", data);
-		fflush(NULL);
 		f(event, listener, data);
 	}
 
@@ -30,12 +28,12 @@ package main
 		return f(event);
 	}
 
-	static char* bridge_connect(char* (*f)()) {
-		return f();
+	static char* bridge_connect(char* (*f)(void*), void* data) {
+		return f(data);
 	}
 
-	static char* bridge_send(char* (*f)(const char*, query_options*, kuzzle_response*, char*), const char* query, query_options* options, kuzzle_response* response, char* request_id) {
-		return f(query, options, response, request_id);
+	static kuzzle_response* bridge_send(kuzzle_response* (*f)(const char*, query_options*, char*, void*), const char* query, query_options* options, char* request_id, void* data) {
+		return f(query, options, request_id, data);
 	}
 
 	static char* bridge_close(char* (*f)()) {
@@ -46,8 +44,8 @@ package main
 		return f();
 	}
 
-	static void bridge_emit_event(void (*f)(int, void*), int event, void* data) {
-		f(event, data);
+	static void bridge_emit_event(void (*f)(int, void*, void*), int event, void* res, void* data) {
+		f(event, res, data);
 	}
 
 	static void bridge_unregister_sub(void (*f)(char*), char* id) {
@@ -77,6 +75,8 @@ package main
 	static bool bridge_queue_filter(kuzzle_queue_filter f, const char* data) {
 		return f(data);
 	}
+
+	void bridge(int event, char* res, void* data);
 */
 import "C"
 import (
@@ -85,6 +85,7 @@ import (
 	"sync"
 	"time"
 	"unsafe"
+	"fmt"
 
 	"github.com/kuzzleio/sdk-go/protocol"
 	"github.com/kuzzleio/sdk-go/types"
@@ -113,12 +114,16 @@ func NewWrapProtocol(p *C.protocol) *WrapProtocol {
 	return &WrapProtocol{p}
 }
 
-//export bridge_go_protocol_trigger_listener
-func bridge_go_protocol_trigger_listener(event C.int, res *C.char, data unsafe.Pointer) {
+//export bridge
+func bridge(event C.int, res *C.char, channel unsafe.Pointer) {
+	fmt.Printf("okkkkkkkkk\n")
 }
 
+var bridge_ptr *C.kuzzle_event_listener
+
 func (wp WrapProtocol) AddListener(event int, channel chan<- interface{}) {
-	C.bridge_add_listener(wp.P.add_listener, C.int(event), nil, wp.P.instance)
+	bridge_ptr = (*C.kuzzle_event_listener)(unsafe.Pointer(C.bridge))
+	C.bridge_add_listener(wp.P.add_listener, C.int(event), bridge_ptr, wp.P.instance)
 }
 
 func (wp WrapProtocol) RemoveListener(event int, channel chan<- interface{}) {
@@ -138,7 +143,7 @@ func (wp WrapProtocol) ListenerCount(event int) int {
 }
 
 func (wp WrapProtocol) Connect() (bool, error) {
-	if err := C.bridge_connect(wp.P.connect); err != nil {
+	if err := C.bridge_connect(wp.P.connect, wp.P.instance); err != nil {
 		return false, errors.New(C.GoString(err))
 	}
 
@@ -146,7 +151,13 @@ func (wp WrapProtocol) Connect() (bool, error) {
 }
 
 func (wp WrapProtocol) Send(query []byte, options types.QueryOptions, responseChannel chan<- *types.KuzzleResponse, requestId string) error {
-	// return C.bridge_send(C.CString(query), SetQueryOptions(&options))
+	res := C.bridge_send(wp.P.send, C.CString(string(query[:])), goToCQueryOptions(options), C.CString(requestId), wp.P.instance)
+	if res.error != nil {
+		return errors.New(C.GoString(res.error))
+	}
+	if responseChannel != nil {
+		responseChannel <- cToGoKuzzleResponse(res)
+	}
 	return nil
 }
 
@@ -163,7 +174,7 @@ func (wp WrapProtocol) State() int {
 }
 
 func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
-	C.bridge_emit_event(wp.P.emit_event, C.int(event), data.(unsafe.Pointer))
+	C.bridge_emit_event(wp.P.emit_event, C.int(event), nil, wp.P.instance)
 }
 
 func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<- types.KuzzleNotification, chan<- interface{}) {

@@ -174,6 +174,7 @@ typedef struct {
 
 typedef struct {
     void* instance;
+    void* cpp_instance;
 } web_socket;
 
 typedef void (*kuzzle_event_listener)(int, char*, void*);

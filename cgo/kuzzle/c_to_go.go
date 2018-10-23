@@ -214,3 +214,24 @@ func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObje
 
 	return goqo
 }
+
+func cToGoKuzzleResponse(res *C.kuzzle_response) *types.KuzzleResponse {
+	r := &types.KuzzleResponse{
+		RequestId: C.GoString(res.request_id),
+		Result: json.RawMessage(C.GoString(res.result)),
+		Volatile: types.VolatileData(C.GoString(res.volatiles)),
+		Index: C.GoString(res.index),
+		Collection: C.GoString(res.collection),
+		Controller: C.GoString(res.controller),
+		Action: C.GoString(res.action),
+		RoomId: C.GoString(res.room_id),
+		Channel: C.GoString(res.channel),
+		Status: int(res.status),
+	}
+
+	if res.error != nil {
+		r.Error = types.KuzzleError{Message: C.GoString(res.error)}
+	}
+
+	return r
+}

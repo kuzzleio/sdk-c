@@ -28,7 +28,6 @@ import (
 	"sync"
 	"time"
 	"unsafe"
-	"fmt"
 
 	"github.com/kuzzleio/sdk-go/kuzzle"
 	"github.com/kuzzleio/sdk-go/types"
@@ -72,8 +71,6 @@ func kuzzle_new_kuzzle(k *C.kuzzle, protocol *C.protocol, options *C.options) {
 	k.loader = nil
 
 	registerKuzzle(inst, ptr)
-
-	fmt.Printf("###### %s\n", protocol)
 }
 
 //export kuzzle_get_document_controller
@@ -158,7 +155,7 @@ func kuzzle_disconnect(k *C.kuzzle) {
 
 //export kuzzle_emit_event
 func kuzzle_emit_event(k *C.kuzzle, event C.int, body *C.char) {
-	(*kuzzle.Kuzzle)(k.instance).EmitEvent(int(event), C.GoString(body))
+	(*kuzzle.Kuzzle)(k.instance).EmitEvent(int(event), nil)
 }
 
 //export kuzzle_get_offline_queue

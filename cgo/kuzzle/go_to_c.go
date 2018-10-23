@@ -113,10 +113,7 @@ func goToCKuzzleResponse(gRes *types.KuzzleResponse) *C.kuzzle_response {
 	result := (*C.kuzzle_response)(C.calloc(1, C.sizeof_kuzzle_response))
 
 	result.request_id = C.CString(gRes.RequestId)
-
-	bufResult := C.CString(string(gRes.Result))
-	result.result = bufResult
-	C.free(unsafe.Pointer(bufResult))
+	result.result = C.CString(string(gRes.Result))
 
 	result.volatiles = C.CString(string(gRes.Volatile))
 	result.index = C.CString(gRes.Index)
@@ -786,4 +783,22 @@ func goToCValidationResponse(validationResponse *types.ValidationResponse, err e
 	}
 
 	return cvalidation_response
+}
+
+func goToCQueryOptions(opts types.QueryOptions) *C.query_options {
+	cOpts := (*C.query_options)(C.calloc(1, C.sizeof_query_options))
+
+	cOpts.queuable = C.bool(opts.Queuable())
+	cOpts.withdist = C.bool(opts.Withdist())
+	cOpts.withcoord = C.bool(opts.Withcoord())
+	cOpts.from = C.long(opts.From())
+	cOpts.size = C.long(opts.Size())
+	cOpts.scroll = C.CString(opts.Scroll())
+	cOpts.scroll_id = C.CString(opts.ScrollId())
+	cOpts.refresh = C.CString(opts.Refresh())
+	cOpts.if_exist = C.CString(opts.IfExist())
+	cOpts.retry_on_conflict = C.int(opts.RetryOnConflict())
+	cOpts.volatiles = C.CString(string(opts.Volatile()))
+
+	return cOpts
 }

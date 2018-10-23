@@ -31,6 +31,7 @@ import (
 	"unsafe"
 
 	"github.com/kuzzleio/sdk-go/protocol/websocket"
+	"github.com/kuzzleio/sdk-go/types"
 )
 
 // map which stores instances to keep references in case the gc passes
@@ -52,9 +53,11 @@ func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.
 
 	inst := websocket.NewWebSocket(C.GoString(host), SetOptions(options))
 
-	ws.instance = cppInstance
+	ws.cpp_instance = cppInstance
+	ptr := unsafe.Pointer(inst)
+	ws.instance = ptr
 
-	registerWebSocket(inst, cppInstance)
+	registerWebSocket(inst, ptr)
 }
 
 //export kuzzle_websocket_add_listener
@@ -70,12 +73,30 @@ func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuz
 			}
 			r, _ := json.Marshal(res)
 
-			C.bridge_trigger_event_listener(listener, event, C.CString(string(r)), ws.instance)
+			C.bridge_trigger_event_listener(listener, event, C.CString(string(r)), ws.cpp_instance)
 		}
 	}()
 }
 
 //export kuzzle_websocket_emit_event
 func kuzzle_websocket_emit_event(ws *C.web_socket, event C.int, body *C.char) {
-	(*websocket.WebSocket)(ws.instance).EmitEvent(int(event), C.GoString(body))
+	(*websocket.WebSocket)(ws.instance).EmitEvent(int(event), nil)
+}
+
+//export kuzzle_websocket_connect
+func kuzzle_websocket_connect(ws *C.web_socket) *C.char {
+	_, err := (*websocket.WebSocket)(ws.instance).Connect()
+	if err != nil {
+		return C.CString(err.Error())
+	}
+	return C.CString("")
+}
+
+//export kuzzle_websocket_send
+func kuzzle_websocket_send(ws *C.web_socket, query *C.char, options *C.query_options, request_id *C.char) *C.kuzzle_response {
+	c := make(chan *types.KuzzleResponse)
+
+	(*websocket.WebSocket)(ws.instance).Send(json.RawMessage(C.GoString(query)), SetQueryOptions(options), c, C.GoString(request_id))
+
+	return goToCKuzzleResponse(<-c)
 }
