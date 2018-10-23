@@ -46,7 +46,7 @@ deploy:
     condition: $TRAVIS_BRANCH =~ ^master|.?-dev$
 
 after_deploy:
-  - sleep 10 && aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/releases/*"
+  - sleep 10 && aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
 
 jobs:
   include:
