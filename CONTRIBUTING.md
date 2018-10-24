@@ -11,5 +11,5 @@ You can use the `align-submodules.sh` script to achieve this. (e.g. `./align-sub
 
 You can use this Docker image to build the SDK:  
 ```
-docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make
+docker run --rm -it -v "$(pwd)":/mnt kuzzleio/sdk-cross:gcc make clean all
 ```

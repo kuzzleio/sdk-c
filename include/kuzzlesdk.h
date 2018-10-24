@@ -40,7 +40,7 @@ enum Mode {AUTO, MANUAL};
 #define KUZZLE_ROOM_OPTIONS_DEFAULT { \
     .scope = "all", \
     .state = "all", \
-    .user = "none", \
+    .users = "none", \
     .subscribe_to_self = true, \
     .volatiles = NULL \
 }
@@ -182,7 +182,7 @@ typedef struct {
 typedef struct {
     const char *scope;
     const char *state;
-    const char *user;
+    const char *users;
     bool subscribe_to_self;
     const char *volatiles;
 } room_options;
