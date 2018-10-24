@@ -37,6 +37,14 @@ enum Mode {AUTO, MANUAL};
     .refresh = NULL \
 }
 
+#define KUZZLE_ROOM_OPTIONS_DEFAULT { \
+    .scope = "all", \
+    .state = "all", \
+    .user = "none", \
+    .subscribe_to_self = true, \
+    .volatiles = NULL \
+}
+
 enum Event {
     CONNECTED,
     DISCARDED,
