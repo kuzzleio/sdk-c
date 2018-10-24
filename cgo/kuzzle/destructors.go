@@ -120,9 +120,7 @@ func kuzzle_free_room_options(st *C.room_options) {
 		C.free(unsafe.Pointer(st.scope))
 		C.free(unsafe.Pointer(st.state))
 		C.free(unsafe.Pointer(st.users))
-		if st.volatiles != nil {
-			C.free(unsafe.Pointer(st.volatiles))
-		}
+		C.free(unsafe.Pointer(st.volatiles))
 		C.free(unsafe.Pointer(st))
 	}
 }
