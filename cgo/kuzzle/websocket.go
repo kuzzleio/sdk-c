@@ -100,3 +100,57 @@ func kuzzle_websocket_send(ws *C.web_socket, query *C.char, options *C.query_opt
 
 	return goToCKuzzleResponse(<-c)
 }
+
+//export kuzzle_websocket_get_state
+func kuzzle_websocket_get_state(ws *C.web_socket) C.int {
+	return C.int((*websocket.WebSocket)(ws.instance).State())
+}
+
+//export kuzzle_websocket_listener_count
+func kuzzle_websocket_listener_count(ws *C.web_socket, event int) C.int {
+	return C.int((*websocket.WebSocket)(ws.instance).ListenerCount(event))
+}
+
+//export kuzzle_websocket_close
+func kuzzle_websocket_close(ws *C.web_socket) *C.char {
+	err := (*websocket.WebSocket)(ws.instance).Close()
+	if err != nil {
+		return C.CString(err.Error())
+	}
+	return nil
+}
+
+//export kuzzle_websocket_unregister_sub
+func kuzzle_websocket_unregister_sub(ws *C.web_socket, id *C.char) {
+	(*websocket.WebSocket)(ws.instance).UnregisterSub(C.GoString(id))
+}
+
+//export kuzzle_websocket_cancel_subs
+func kuzzle_websocket_cancel_subs(ws *C.web_socket) {
+	(*websocket.WebSocket)(ws.instance).CancelSubs()
+}
+
+//export kuzzle_websocket_start_queuing
+func kuzzle_websocket_start_queuing(ws *C.web_socket) {
+	(*websocket.WebSocket)(ws.instance).StartQueuing()
+}
+
+//export kuzzle_websocket_stop_queuing
+func kuzzle_websocket_stop_queuing(ws *C.web_socket) {
+	(*websocket.WebSocket)(ws.instance).StopQueuing()
+}
+
+//export kuzzle_websocket_play_queue
+func kuzzle_websocket_play_queue(ws *C.web_socket) {
+	(*websocket.WebSocket)(ws.instance).PlayQueue()
+}
+
+//export kuzzle_websocket_clear_queue
+func kuzzle_websocket_clear_queue(ws *C.web_socket) {
+	(*websocket.WebSocket)(ws.instance).ClearQueue()
+}
+
+//export kuzzle_websocket_remove_all_listeners
+func kuzzle_websocket_remove_all_listeners(ws *C.web_socket, event C.int) {
+	(*websocket.WebSocket)(ws.instance).RemoveAllListeners(int(event))
+}

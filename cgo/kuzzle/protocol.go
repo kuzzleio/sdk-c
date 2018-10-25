@@ -12,20 +12,20 @@ package main
 		f(event, listener, data);
 	}
 
-	static void bridge_remove_listener(void (*f)(int, kuzzle_event_listener*), int event, kuzzle_event_listener* listener) {
-		f(event, listener);
+	static void bridge_remove_listener(void (*f)(int, kuzzle_event_listener*, void*), int event, kuzzle_event_listener* listener, void* data) {
+		f(event, listener, data);
 	}
 
-	static void bridge_remove_all_listeners(void (*f)(int), int event) {
-		f(event);
+	static void bridge_remove_all_listeners(void (*f)(int, void*), int event, void* data) {
+		f(event, data);
 	}
 
-	static void bridge_once(void (*f)(int, kuzzle_event_listener*), int event, kuzzle_event_listener* listener) {
-		f(event, listener);
+	static void bridge_once(void (*f)(int, kuzzle_event_listener*, void*), int event, kuzzle_event_listener* listener, void* data) {
+		f(event, listener, data);
 	}
 
-	static int bridge_listener_count(int (*f)(int), int event) {
-		return f(event);
+	static int bridge_listener_count(int (*f)(int, void*), int event, void* data) {
+		return f(event, data);
 	}
 
 	static char* bridge_connect(char* (*f)(void*), void* data) {
@@ -36,40 +36,40 @@ package main
 		return f(query, options, request_id, data);
 	}
 
-	static char* bridge_close(char* (*f)()) {
-		return f();
+	static char* bridge_close(char* (*f)(void*), void* data) {
+		return f(data);
 	}
 
-	static int bridge_get_state(int (*f)()) {
-		return f();
+	static int bridge_get_state(int (*f)(void*), void* data) {
+		return f(data);
 	}
 
 	static void bridge_emit_event(void (*f)(int, void*, void*), int event, void* res, void* data) {
 		f(event, res, data);
 	}
 
-	static void bridge_unregister_sub(void (*f)(char*), char* id) {
-		f(id);
+	static void bridge_unregister_sub(void (*f)(char*, void*), char* id, void* data) {
+		f(id, data);
 	}
 
-	static void bridge_cancel_subs(void (*f)()) {
-		f();
+	static void bridge_cancel_subs(void (*f)(void*), void* data) {
+		f(data);
 	}
 
-	static void bridge_start_queuing(void (*f)()) {
-		f();
+	static void bridge_start_queuing(void (*f)(void*), void* data) {
+		f(data);
 	}
 
-	static void bridge_stop_queuing(void (*f)()) {
-		f();
+	static void bridge_stop_queuing(void (*f)(void*), void* data) {
+		f(data);
 	}
 
-	static void bridge_play_queue(void (*f)()) {
-		f();
+	static void bridge_play_queue(void (*f)(void*), void* data) {
+		f(data);
 	}
 
-	static void bridge_clear_queue(void (*f)()) {
-		f();
+	static void bridge_clear_queue(void (*f)(void*), void* data) {
+		f(data);
 	}
 
 	static bool bridge_queue_filter(kuzzle_queue_filter f, const char* data) {
@@ -127,19 +127,19 @@ func (wp WrapProtocol) AddListener(event int, channel chan<- interface{}) {
 }
 
 func (wp WrapProtocol) RemoveListener(event int, channel chan<- interface{}) {
-	C.bridge_remove_listener(wp.P.remove_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)))
+	C.bridge_remove_listener(wp.P.remove_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)), wp.P.instance)
 }
 
 func (wp WrapProtocol) RemoveAllListeners(event int) {
-	C.bridge_remove_all_listeners(wp.P.remove_all_listeners, C.int(event))
+	C.bridge_remove_all_listeners(wp.P.remove_all_listeners, C.int(event), wp.P.instance)
 }
 
 func (wp WrapProtocol) Once(event int, channel chan<- interface{}) {
-	C.bridge_once(wp.P.add_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)))
+	C.bridge_once(wp.P.add_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)), wp.P.instance)
 }
 
 func (wp WrapProtocol) ListenerCount(event int) int {
-	return int(C.bridge_listener_count(wp.P.listener_count, C.int(event)))
+	return int(C.bridge_listener_count(wp.P.listener_count, C.int(event), wp.P.instance))
 }
 
 func (wp WrapProtocol) Connect() (bool, error) {
@@ -162,7 +162,7 @@ func (wp WrapProtocol) Send(query []byte, options types.QueryOptions, responseCh
 }
 
 func (wp WrapProtocol) Close() error {
-	if err := C.bridge_close(wp.P.close); err != nil {
+	if err := C.bridge_close(wp.P.close, wp.P.instance); err != nil {
 		return errors.New(C.GoString(err))
 	}
 
@@ -170,7 +170,7 @@ func (wp WrapProtocol) Close() error {
 }
 
 func (wp WrapProtocol) State() int {
-	return int(C.bridge_get_state(wp.P.get_state))
+	return int(C.bridge_get_state(wp.P.get_state, wp.P.instance))
 }
 
 func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
@@ -182,11 +182,11 @@ func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<-
 }
 
 func (wp WrapProtocol) UnregisterSub(id string) {
-	C.bridge_unregister_sub(wp.P.unregister_sub, C.CString(id))
+	C.bridge_unregister_sub(wp.P.unregister_sub, C.CString(id), wp.P.instance)
 }
 
 func (wp WrapProtocol) CancelSubs() {
-	C.bridge_cancel_subs(wp.P.cancel_subs)
+	C.bridge_cancel_subs(wp.P.cancel_subs, wp.P.instance)
 }
 
 func (wp WrapProtocol) RequestHistory() map[string]time.Time {
@@ -195,19 +195,19 @@ func (wp WrapProtocol) RequestHistory() map[string]time.Time {
 }
 
 func (wp WrapProtocol) StartQueuing() {
-	C.bridge_start_queuing(wp.P.start_queuing)
+	C.bridge_start_queuing(wp.P.start_queuing, wp.P.instance)
 }
 
 func (wp WrapProtocol) StopQueuing() {
-	C.bridge_stop_queuing(wp.P.stop_queuing)
+	C.bridge_stop_queuing(wp.P.stop_queuing, wp.P.instance)
 }
 
 func (wp WrapProtocol) PlayQueue() {
-	C.bridge_play_queue(wp.P.play_queue)
+	C.bridge_play_queue(wp.P.play_queue, wp.P.instance)
 }
 
 func (wp WrapProtocol) ClearQueue() {
-	C.bridge_clear_queue(wp.P.clear_queue)
+	C.bridge_clear_queue(wp.P.clear_queue, wp.P.instance)
 }
 
 func (wp WrapProtocol) AutoQueue() bool {

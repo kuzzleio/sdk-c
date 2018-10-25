@@ -37,21 +37,21 @@ typedef struct {
 
   void (*add_listener)(int, kuzzle_event_listener*, void*);
   void (*remove_listener)(int, kuzzle_event_listener*);
-  void (*remove_all_listeners)(int);
+  void (*remove_all_listeners)(int, void*);
   void (*once)(int, kuzzle_event_listener*);
-  int (*listener_count)(int);
+  int (*listener_count)(int, void*);
   char* (*connect)(void*);
   kuzzle_response* (*send)(const char*, query_options*, char*, void*);
-  const char* (*close)();
-  int (*get_state)();
+  const char* (*close)(void*);
+  int (*get_state)(void*);
   void (*emit_event)(int, void*, void*);
   void (*register_sub)(const char*, const char*, const char*, int, kuzzle_notification_listener*, void*);
-  void (*unregister_sub)(const char*);
-  void (*cancel_subs)();
-  void (*start_queuing)();
-  void (*stop_queuing)();
-  void (*play_queue)();
-  void (*clear_queue)();
+  void (*unregister_sub)(const char*, void*);
+  void (*cancel_subs)(void*);
+  void (*start_queuing)(void*);
+  void (*stop_queuing)(void*);
+  void (*play_queue)(void*);
+  void (*clear_queue)(void*);
 } protocol;
 
 #endif
