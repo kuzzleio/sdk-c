@@ -37,6 +37,14 @@ enum Mode {AUTO, MANUAL};
     .refresh = NULL \
 }
 
+#define KUZZLE_ROOM_OPTIONS_DEFAULT { \
+    .scope = "all", \
+    .state = "all", \
+    .users = "none", \
+    .subscribe_to_self = true, \
+    .volatiles = NULL \
+}
+
 enum Event {
     CONNECTED,
     DISCARDED,
@@ -174,7 +182,7 @@ typedef struct {
 typedef struct {
     const char *scope;
     const char *state;
-    const char *user;
+    const char *users;
     bool subscribe_to_self;
     const char *volatiles;
 } room_options;
