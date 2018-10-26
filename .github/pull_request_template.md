@@ -20,7 +20,7 @@
 -->
 
 <!-- Uncomment this section to link PR on other SDKs
-:arrow_left: https://github.com/kuzzleio/sdk-go/pull/<id>  :large_blue_circle: https://github.com/kuzzleio/sdk-cpp/pull/<id> :arrow_right:
+https://github.com/kuzzleio/sdk-go/pull/ :arrow_left: :large_blue_circle: :arrow_right: https://github.com/kuzzleio/sdk-cpp/pull/
 -->
 
 ### How should this be manually tested?
