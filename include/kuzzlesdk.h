@@ -639,6 +639,7 @@ typedef struct search_result {
     unsigned total;
     unsigned fetched;
     const char *scroll_id;
+    void *instance;
     kuzzle *k;
     kuzzle_request *request;
     kuzzle_response *response;
@@ -650,21 +651,54 @@ typedef struct search_result {
 } search_result;
 
 typedef struct search_profiles_result {
-    profile_search *result;
+    const char *aggregations;
+    profile *hits;
+    size_t hits_length;
+    unsigned total;
+    unsigned fetched;
+    const char *scroll_id;
+    void *instance;
+    kuzzle *k;
+    kuzzle_request *request;
+    kuzzle_response *response;
+    query_options *options;
+    const char *scroll_action;
     int status;
     const char *error;
     const char *stack;
 } search_profiles_result;
 
 typedef struct search_roles_result {
-    role_search *result;
+    const char *aggregations;
+    role *hits;
+    size_t hits_length;
+    unsigned total;
+    unsigned fetched;
+    const char *scroll_id;
+    void *instance;
+    kuzzle *k;
+    kuzzle_request *request;
+    kuzzle_response *response;
+    query_options *options;
+    const char *scroll_action;
     int status;
     const char *error;
     const char *stack;
 } search_roles_result;
 
 typedef struct search_users_result {
-    user_search *result;
+    const char *aggregations;
+    kuzzle_user *hits;
+    size_t hits_length;
+    unsigned total;
+    unsigned fetched;
+    const char *scroll_id;
+    void *instance;
+    kuzzle *k;
+    kuzzle_request *request;
+    kuzzle_response *response;
+    query_options *options;
+    const char *scroll_action;
     int status;
     const char *error;
     const char *stack;
