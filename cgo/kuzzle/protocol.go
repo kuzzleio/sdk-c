@@ -84,8 +84,8 @@ package main
 		bridge(event, res, data);
 	}
 
-	static inline kuzzle_event_listener get_fptr() {
-		return call_bridge;
+	static inline kuzzle_event_listener* get_fptr() {
+		return &call_bridge;
 	}
 */
 import "C"

@@ -60,7 +60,6 @@ func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.
 //export kuzzle_websocket_add_listener
 func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuzzle_event_listener) {
 	c := make(chan interface{})
-	(*websocket.WebSocket)(ws.instance).AddListener(int(event), c)
 	go func() {
 		for {
 			res, ok := <-c
@@ -73,6 +72,7 @@ func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuz
 			C.bridge_trigger_event_listener(listener, event, C.CString(string(r)), ws.cpp_instance)
 		}
 	}()
+	(*websocket.WebSocket)(ws.instance).AddListener(int(event), c)
 }
 
 //export kuzzle_websocket_emit_event
