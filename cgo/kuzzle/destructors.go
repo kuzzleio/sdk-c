@@ -50,7 +50,7 @@ func kuzzle_free_kuzzle_request(st *C.kuzzle_request) {
 		C.free(unsafe.Pointer(st.strategy))
 		C.free(unsafe.Pointer(st.scope))
 		C.free(unsafe.Pointer(st.state))
-		C.free(unsafe.Pointer(st.user))
+		C.free(unsafe.Pointer(st.users))
 		C.free(unsafe.Pointer(st.member))
 		C.free(unsafe.Pointer(st.member1))
 		C.free(unsafe.Pointer(st.member2))
@@ -623,15 +623,20 @@ func kuzzle_free_specification_result(st *C.specification_result) {
 }
 
 //export kuzzle_free_search_result
-func kuzzle_free_search_result(st *C.search_result) {
-	if st != nil {
-		kuzzle_free_query_options(st.options)
-		C.free(unsafe.Pointer(st.aggregations))
-		C.free(unsafe.Pointer(st.filters))
+func kuzzle_free_search_result(sr *C.search_result) {
+	if sr != nil {
+		C.free(unsafe.Pointer(sr.aggregations))
+		C.free(unsafe.Pointer(sr.hits))
+		C.free(unsafe.Pointer(sr.scroll_id))
+		C.free(unsafe.Pointer(sr.k))
+		kuzzle_free_kuzzle_request(sr.request)
+		kuzzle_free_kuzzle_response(sr.response)
+		kuzzle_free_query_options(sr.options)
+		C.free(unsafe.Pointer(sr.scroll_action))
 
-		C.free(unsafe.Pointer(st.error))
-		C.free(unsafe.Pointer(st.stack))
-		C.free(unsafe.Pointer(st))
+		C.free(unsafe.Pointer(sr.error))
+		C.free(unsafe.Pointer(sr.stack))
+		C.free(unsafe.Pointer(sr))
 	}
 }
 

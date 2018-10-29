@@ -121,7 +121,7 @@ func kuzzle_collection_get_specifications(c *C.collection, index *C.char, col *C
 //export kuzzle_collection_search_specifications
 func kuzzle_collection_search_specifications(c *C.collection, options *C.query_options) *C.search_result {
 	res, err := (*collection.Collection)(c.instance).SearchSpecifications(SetQueryOptions(options))
-	return goToCSearchResult(res, err)
+	return goToCSearchResult(c.k, res, err)
 }
 
 //export kuzzle_collection_update_specifications

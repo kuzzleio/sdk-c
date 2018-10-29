@@ -141,27 +141,106 @@ func cToGoUserRigh(r *C.user_right) *types.UserRights {
 	return right
 }
 
-func cToGoSearchResult(s *C.search_result) *types.SearchResult {
-	opts := types.NewQueryOptions()
-
-	opts.SetSize(int(s.options.size))
-	opts.SetFrom(int(s.options.from))
-	opts.SetScrollId(C.GoString(s.options.scroll_id))
-
-	c, _ := json.Marshal(s.collection)
-
-	var documents json.RawMessage
-	d, _ := json.Marshal(s.documents)
-	documents = d
-
-	return &types.SearchResult{
-		Collection: string(c),
-		Documents:  documents,
-		Total:      int(s.total),
-		Fetched:    int(s.fetched),
-		Options:    opts,
-		Filters:    json.RawMessage(C.GoString(s.filters)),
+func cToGoKuzzleRequest(r *C.kuzzle_request) *types.KuzzleRequest {
+	request := &types.KuzzleRequest{
+		RequestId:    C.GoString(r.request_id),
+		Controller:   C.GoString(r.controller),
+		Action:       C.GoString(r.action),
+		Index:        C.GoString(r.index),
+		Collection:   C.GoString(r.collection),
+		Id:           C.GoString(r.id),
+		From:         int(r.from),
+		Size:         int(r.size),
+		Scroll:       C.GoString(r.scroll),
+		ScrollId:     C.GoString(r.scroll_id),
+		Strategy:     C.GoString(r.strategy),
+		ExpiresIn:    int(r.expires_in),
+		Scope:        C.GoString(r.scope),
+		Users:        C.GoString(r.users),
+		Start:        int(r.start),
+		Stop:         int(r.stop),
+		End:          int(r.end),
+		Bit:          int(r.bit),
+		Member:       C.GoString(r.member),
+		Member1:      C.GoString(r.member1),
+		Member2:      C.GoString(r.member2),
+		Lon:          float64(r.lon),
+		Lat:          float64(r.lat),
+		Distance:     float64(r.distance),
+		Unit:         C.GoString(r.unit),
+		Cursor:       int(r.cursor),
+		Offset:       int(r.offset),
+		Field:        C.GoString(r.field),
+		Subcommand:   C.GoString(r.subcommand),
+		Pattern:      C.GoString(r.pattern),
+		Idx:          int(r.idx),
+		Min:          C.GoString(r.min),
+		Max:          C.GoString(r.max),
+		Limit:        C.GoString(r.limit),
+		Count:        int(r.count),
+		Match:        C.GoString(r.match),
+		Reset:        bool(r.reset),
+		IncludeTrash: bool(r.include_trash),
 	}
+
+	if r.body != nil {
+		request.Body = json.RawMessage(C.GoString(r.body))
+	}
+	if r.volatiles != nil {
+		request.Volatile = json.RawMessage(C.GoString(r.volatiles))
+	}
+
+	request.Members = cToGoStrings(r.members, r.members_length)
+	request.Keys = cToGoStrings(r.keys, r.keys_length)
+	request.Fields = cToGoStrings(r.fields, r.fields_length)
+	options := cToGoStrings(r.options, r.options_length)
+	for _, option := range options {
+		request.Options = append(request.Options, option)
+	}
+
+	return request
+}
+
+func cToGoKuzzleResponse(r *C.kuzzle_response) *types.KuzzleResponse {
+	response := &types.KuzzleResponse{
+		RequestId:  C.GoString(r.request_id),
+		Index:      C.GoString(r.index),
+		Collection: C.GoString(r.collection),
+		Controller: C.GoString(r.controller),
+		Action:     C.GoString(r.action),
+		RoomId:     C.GoString(r.room_id),
+		Channel:    C.GoString(r.channel),
+		Status:     int(r.status),
+	}
+
+	response.Error = types.NewError(C.GoString(r.error), int(r.status))
+	response.Error.Stack = C.GoString(r.stack)
+
+	response.Result, _ = json.Marshal(r.result)
+	response.Volatile, _ = json.Marshal(r.volatiles)
+
+	return response
+}
+
+func cToGoSearchResult(s *C.search_result) *types.SearchResult {
+	options := types.NewQueryOptions()
+
+	options.SetSize(int(s.options.size))
+	options.SetFrom(int(s.options.from))
+	options.SetScroll(C.GoString(s.options.scroll))
+	options.SetScrollId(C.GoString(s.options.scroll_id))
+
+	kuzzle := (*kuzzle.Kuzzle)(s.k.instance)
+	scrollAction := C.GoString(s.scroll_action)
+	request := cToGoKuzzleRequest(s.request)
+	response := cToGoKuzzleResponse(s.response)
+
+	sr, err := types.NewSearchResult(kuzzle, scrollAction, request, options, response)
+	if err != nil {
+		panic(err)
+	}
+
+	return sr
 }
 
 func cToGoKuzzleNotificationChannel(c *C.kuzzle_notification_listener) chan<- types.KuzzleNotification {

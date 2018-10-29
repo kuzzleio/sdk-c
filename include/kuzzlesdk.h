@@ -81,7 +81,7 @@ typedef struct {
     const char *volatiles;
     const char *scope;
     const char *state;
-    const char *user;
+    const char *users;
     long start;
     long stop;
     long end;
@@ -95,7 +95,8 @@ typedef struct {
     double lat;
     double distance;
     const char *unit;
-    const char *options;
+    const char * const *options;
+    size_t options_length;
     const char * const *keys;
     size_t keys_length;
     long cursor;
@@ -111,6 +112,8 @@ typedef struct {
     const char *limit;
     unsigned long count;
     const char *match;
+    const bool reset;
+    const bool include_trash;
 } kuzzle_request;
 
 typedef offline_queue* (*kuzzle_offline_queue_loader)(void);
@@ -631,13 +634,16 @@ typedef struct specification_result {
 } specification_result;
 
 typedef struct search_result {
-    const char *documents;
-    unsigned fetched;
-    unsigned total;
     const char *aggregations;
-    const char *filters;
+    const char *hits;
+    unsigned total;
+    unsigned fetched;
+    const char *scroll_id;
+    kuzzle *k;
+    kuzzle_request *request;
+    kuzzle_response *response;
     query_options *options;
-    const char *collection;
+    const char *scroll_action;
     int status;
     const char *error;
     const char *stack;
