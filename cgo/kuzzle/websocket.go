@@ -19,8 +19,11 @@ package main
 	#include <stdlib.h>
 	#include "kuzzlesdk.h"
 	#include "protocol.h"
+	#include "sdk_wrappers_internal.h"
 
 	static void bridge_trigger_event_listener(kuzzle_event_listener listener, int event, char* res, void* data) {
+		printf("-- kuzzle.websocket.go:bridge_trigger_event_listener: %p\n", listener);
+		fflush(NULL);
 		listener(event, res, data);
 	}
 */
@@ -29,6 +32,7 @@ import (
 	"encoding/json"
 	"sync"
 	"unsafe"
+	"fmt"
 
 	"github.com/kuzzleio/sdk-go/protocol/websocket"
 	"github.com/kuzzleio/sdk-go/types"
@@ -37,9 +41,6 @@ import (
 // map which stores instances to keep references in case the gc passes
 var webSocketInstances sync.Map
 
-// map which stores channel and function's pointers adresses for listeners
-var websocket_listeners_list map[uintptr]chan<- interface{}
-
 // register new instance to the instances map
 func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
 	webSocketInstances.Store(instance, ptr)
@@ -47,10 +48,6 @@ func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
 
 //export kuzzle_websocket_new_web_socket
 func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.options, cppInstance unsafe.Pointer) {
-	if websocket_listeners_list == nil {
-		websocket_listeners_list = make(map[uintptr]chan<- interface{})
-	}
-
 	inst := websocket.NewWebSocket(C.GoString(host), SetOptions(options))
 
 	ws.cpp_instance = cppInstance
@@ -63,7 +60,6 @@ func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.
 //export kuzzle_websocket_add_listener
 func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuzzle_event_listener) {
 	c := make(chan interface{})
-	websocket_listeners_list[uintptr(unsafe.Pointer(listener))] = c
 	(*websocket.WebSocket)(ws.instance).AddListener(int(event), c)
 	go func() {
 		for {
@@ -73,6 +69,7 @@ func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuz
 			}
 			r, _ := json.Marshal(res)
 
+			fmt.Printf("# kuzzle/websocket.go:kuzzle_websocket_add_listener: %p\n", listener)
 			C.bridge_trigger_event_listener(listener, event, C.CString(string(r)), ws.cpp_instance)
 		}
 	}()

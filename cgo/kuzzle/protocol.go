@@ -8,7 +8,8 @@ package main
 
 	// Bridges
 
-	static void bridge_add_listener(void (*f)(int, kuzzle_event_listener*, void*), int event, kuzzle_event_listener* listener, void* data) {
+	static void bridge_add_listener(void (*f)(int, kuzzle_event_listener, void*), int event, kuzzle_event_listener listener, void* data) {
+		printf("- protocol.go: %p\n", listener);
 		f(event, listener, data);
 	}
 
@@ -76,7 +77,16 @@ package main
 		return f(data);
 	}
 
-	void bridge(int event, char* res, void* data);
+	extern void bridge(int, char*, void*);
+
+	static inline void call_bridge(int event, char* res, void* data) {
+		printf("############# ok calling bridge\n");
+		bridge(event, res, data);
+	}
+
+	static inline kuzzle_event_listener get_fptr() {
+		return call_bridge;
+	}
 */
 import "C"
 import (
@@ -119,11 +129,8 @@ func bridge(event C.int, res *C.char, channel unsafe.Pointer) {
 	fmt.Printf("okkkkkkkkk\n")
 }
 
-var bridge_ptr *C.kuzzle_event_listener
-
 func (wp WrapProtocol) AddListener(event int, channel chan<- interface{}) {
-	bridge_ptr = (*C.kuzzle_event_listener)(unsafe.Pointer(C.bridge))
-	C.bridge_add_listener(wp.P.add_listener, C.int(event), bridge_ptr, wp.P.instance)
+	C.bridge_add_listener(wp.P.add_listener, C.int(event), C.get_fptr(), wp.P.instance)
 }
 
 func (wp WrapProtocol) RemoveListener(event int, channel chan<- interface{}) {
