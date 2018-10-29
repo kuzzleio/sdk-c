@@ -125,7 +125,7 @@ func kuzzle_collection_search_specifications(c *C.collection, options *C.query_o
 	return goToCSearchResult(c.k, res, err)
 }
 
-// export kuzzle_collection_search_specifications_next
+//export kuzzle_collection_search_specifications_next
 func kuzzle_collection_search_specifications_next(sr *C.search_result) *C.search_result {
 	res, err := (*types.SearchResult)(sr.instance).Next()
 	return goToCSearchResult(sr.k, res, err)
