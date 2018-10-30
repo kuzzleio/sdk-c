@@ -59,8 +59,8 @@ func kuzzle_new_realtime(rt *C.realtime, k *C.kuzzle) {
 }
 
 //export kuzzle_realtime_count
-func kuzzle_realtime_count(rt *C.realtime, index, collection, roomId *C.char, options *C.query_options) *C.int_result {
-	res, err := (*realtime.Realtime)(rt.instance).Count(C.GoString(index), C.GoString(collection), C.GoString(roomId), SetQueryOptions(options))
+func kuzzle_realtime_count(rt *C.realtime, roomId *C.char, options *C.query_options) *C.int_result {
+	res, err := (*realtime.Realtime)(rt.instance).Count(C.GoString(roomId), SetQueryOptions(options))
 	return goToCIntResult(res, err)
 }
 
