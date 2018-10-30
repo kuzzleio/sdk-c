@@ -92,7 +92,6 @@ import (
 	"sync"
 	"time"
 	"unsafe"
-	"fmt"
 
 	"github.com/kuzzleio/sdk-go/protocol"
 	"github.com/kuzzleio/sdk-go/types"
@@ -103,6 +102,8 @@ type WrapProtocol struct {
 }
 
 var proto_instances sync.Map
+
+var _list_listeners sync.Map
 
 // register new instance to the instances map
 func registerProtocol(instance interface{}, ptr unsafe.Pointer) {
@@ -123,11 +124,15 @@ func NewWrapProtocol(p *C.protocol) *WrapProtocol {
 
 //export bridge
 func bridge(event C.int, res *C.char, channel unsafe.Pointer) {
-	fmt.Printf("okkkkkkkkk\n")
+	c, ok := _list_listeners.Load(int(event))
+	if ok == true {
+		c.(chan<- json.RawMessage) <- json.RawMessage(C.GoString(res))
+	}
 }
 
 func (wp WrapProtocol) AddListener(event int, channel chan<- json.RawMessage) {
 	fptr := C.get_fptr()
+	_list_listeners.Store(event, channel)
 	C.bridge_protocol_add_listener(wp.P.add_listener, C.int(event), &fptr, wp.P.instance)
 }
 
