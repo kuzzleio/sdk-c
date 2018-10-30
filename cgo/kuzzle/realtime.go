@@ -59,17 +59,9 @@ func kuzzle_new_realtime(rt *C.realtime, k *C.kuzzle) {
 }
 
 //export kuzzle_realtime_count
-func kuzzle_realtime_count(rt *C.realtime, index, collection, roomId *C.char, options *C.query_options) *C.int_result {
-	res, err := (*realtime.Realtime)(rt.instance).Count(C.GoString(index), C.GoString(collection), C.GoString(roomId), SetQueryOptions(options))
+func kuzzle_realtime_count(rt *C.realtime, roomId *C.char, options *C.query_options) *C.int_result {
+	res, err := (*realtime.Realtime)(rt.instance).Count(C.GoString(roomId), SetQueryOptions(options))
 	return goToCIntResult(res, err)
-}
-
-//export kuzzle_realtime_list
-func kuzzle_realtime_list(rt *C.realtime, index, collection *C.char, options *C.query_options) *C.string_result {
-	res, err := (*realtime.Realtime)(rt.instance).List(C.GoString(index), C.GoString(collection), SetQueryOptions(options))
-	var stringResult string
-	json.Unmarshal(res, &stringResult)
-	return goToCStringResult(&stringResult, err)
 }
 
 //export kuzzle_realtime_publish
@@ -104,10 +96,4 @@ func kuzzle_realtime_subscribe(rt *C.realtime, index, collection, body *C.char, 
 	}()
 
 	return goToCSubscribeResult(subRes, err)
-}
-
-//export kuzzle_realtime_validate
-func kuzzle_realtime_validate(rt *C.realtime, index, collection, body *C.char, options *C.query_options) *C.bool_result {
-	res, err := (*realtime.Realtime)(rt.instance).Validate(C.GoString(index), C.GoString(collection), json.RawMessage(C.GoString(body)), SetQueryOptions(options))
-	return goToCBoolResult(res, err)
 }
