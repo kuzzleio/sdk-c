@@ -38,7 +38,7 @@ import (
 var instances sync.Map
 
 // map which stores channel and function's pointers adresses for listeners
-var listeners_list map[uintptr]chan<- interface{}
+var listeners_list map[uintptr]chan<- json.RawMessage
 
 // register new instance to the instances map
 func registerKuzzle(instance interface{}, ptr unsafe.Pointer) {
@@ -56,7 +56,7 @@ func kuzzle_new_kuzzle(k *C.kuzzle, host, proto *C.char, options *C.options) {
 	var c protocol.Protocol
 
 	if listeners_list == nil {
-		listeners_list = make(map[uintptr]chan<- interface{})
+		listeners_list = make(map[uintptr]chan<- json.RawMessage)
 	}
 
 	opts := SetOptions(options)
@@ -213,7 +213,7 @@ func kuzzle_stop_queuing(k *C.kuzzle) {
 //export kuzzle_add_listener
 // TODO loop and close on Unsubscribe
 func kuzzle_add_listener(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data unsafe.Pointer) {
-	c := make(chan interface{})
+	c := make(chan json.RawMessage)
 
 	listeners_list[uintptr(unsafe.Pointer(cb))] = c
 	(*kuzzle.Kuzzle)(k.instance).AddListener(int(e), c)
@@ -232,7 +232,7 @@ func kuzzle_add_listener(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data 
 
 //export kuzzle_once
 func kuzzle_once(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data unsafe.Pointer) {
-	c := make(chan interface{})
+	c := make(chan json.RawMessage)
 
 	listeners_list[uintptr(unsafe.Pointer(cb))] = c
 	(*kuzzle.Kuzzle)(k.instance).Once(int(e), c)
