@@ -22,8 +22,6 @@ package main
 	#include "sdk_wrappers_internal.h"
 
 	static void bridge_trigger_event_listener(kuzzle_event_listener listener, int event, char* res, void* data) {
-		printf("-- kuzzle.websocket.go:bridge_trigger_event_listener: %p\n", listener);
-		fflush(NULL);
 		listener(event, res, data);
 	}
 */
@@ -32,7 +30,6 @@ import (
 	"encoding/json"
 	"sync"
 	"unsafe"
-	"fmt"
 
 	"github.com/kuzzleio/sdk-go/protocol/websocket"
 	"github.com/kuzzleio/sdk-go/types"
@@ -68,7 +65,6 @@ func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuz
 			}
 			r, _ := json.Marshal(res)
 
-			fmt.Printf("# kuzzle/websocket.go:kuzzle_websocket_add_listener: %p\n", listener)
 			C.bridge_trigger_event_listener(listener, event, C.CString(string(r)), ws.cpp_instance)
 		}
 	}()
