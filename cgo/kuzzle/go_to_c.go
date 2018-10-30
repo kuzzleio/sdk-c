@@ -488,6 +488,10 @@ func goToCBoolResult(goRes bool, err error) *C.bool_result {
 func goToCQueryOptions(options types.QueryOptions) *C.query_options {
 	res := (*C.query_options)(C.calloc(1, C.sizeof_query_options))
 
+	if options == nil {
+		return res
+	}
+
 	res.queuable = C.bool(options.Queuable())
 	res.withdist = C.bool(options.Withdist())
 	res.withcoord = C.bool(options.Withcoord())
