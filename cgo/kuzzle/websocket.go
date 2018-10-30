@@ -56,7 +56,7 @@ func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.
 
 //export kuzzle_websocket_add_listener
 func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuzzle_event_listener) {
-	c := make(chan interface{})
+	c := make(chan json.RawMessage)
 	go func() {
 		for {
 			res, ok := <-c

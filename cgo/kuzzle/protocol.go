@@ -126,12 +126,12 @@ func bridge(event C.int, res *C.char, channel unsafe.Pointer) {
 	fmt.Printf("okkkkkkkkk\n")
 }
 
-func (wp WrapProtocol) AddListener(event int, channel chan<- interface{}) {
+func (wp WrapProtocol) AddListener(event int, channel chan<- json.RawMessage) {
 	fptr := C.get_fptr()
 	C.bridge_protocol_add_listener(wp.P.add_listener, C.int(event), &fptr, wp.P.instance)
 }
 
-func (wp WrapProtocol) RemoveListener(event int, channel chan<- interface{}) {
+func (wp WrapProtocol) RemoveListener(event int, channel chan<- json.RawMessage) {
 	C.bridge_remove_listener(wp.P.remove_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)), wp.P.instance)
 }
 
@@ -139,8 +139,8 @@ func (wp WrapProtocol) RemoveAllListeners(event int) {
 	C.bridge_remove_all_listeners(wp.P.remove_all_listeners, C.int(event), wp.P.instance)
 }
 
-func (wp WrapProtocol) Once(event int, channel chan<- interface{}) {
-	C.bridge_once(wp.P.add_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)), wp.P.instance)
+func (wp WrapProtocol) Once(event int, channel chan<- json.RawMessage) {
+	C.bridge_once(wp.P.once, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)), wp.P.instance)
 }
 
 func (wp WrapProtocol) ListenerCount(event int) int {

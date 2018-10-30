@@ -86,14 +86,31 @@ typedef struct notification_result {
     const char *stack;
 } notification_result;
 
-//options passed to room constructor
-typedef struct {
+typedef struct s_room_options {
     const char *scope;
     const char *state;
-    const char *user;
+    const char *users;
     bool subscribe_to_self;
     const char *volatiles;
+
+  // C++ constructor to have default values
+  # ifdef __cplusplus
+    s_room_options()
+    : scope("all"),
+      state("all"),
+      users("none"),
+      subscribe_to_self(true),
+      volatiles(nullptr) { }
+  # endif
 } room_options;
+
+#define KUZZLE_ROOM_OPTIONS_DEFAULT { \
+    .scope = "all", \
+    .state = "all", \
+    .users = "none", \
+    .subscribe_to_self = true, \
+    .volatiles = NULL \
+}
 
 typedef struct {
     void *instance;
@@ -107,6 +124,23 @@ typedef struct {
   const char *error;
   const char *stack;
 } room_result;
+
+typedef void (callback)(char* notification);
+
+//options passed to query()
+typedef struct {
+    bool queuable;
+    bool withdist;
+    bool withcoord;
+    long from;
+    long size;
+    const char *scroll;
+    const char *scroll_id;
+    const char *refresh;
+    const char *if_exist;
+    int retry_on_conflict;
+    const char *volatiles;
+} query_options;
 
 // raw Kuzzle response
 typedef struct {
@@ -128,21 +162,6 @@ typedef struct {
 typedef void (*kuzzle_notification_listener)(notification_result*, void*);
 typedef void (*kuzzle_subscribe_listener)(room_result*, void*);
 typedef void (*kuzzle_response_listener)(kuzzle_response*, void*);
-
-//options passed to query()
-typedef struct {
-    bool queuable;
-    bool withdist;
-    bool withcoord;
-    long from;
-    long size;
-    const char *scroll;
-    const char *scroll_id;
-    const char *refresh;
-    const char *if_exist;
-    int retry_on_conflict;
-    const char *volatiles;
-} query_options;
 
 //query object used by query()
 typedef struct {
@@ -262,64 +281,8 @@ typedef struct {
 
 typedef void (callback)(char* notification);
 
-typedef struct s_room_options {
-    const char *scope;
-    const char *state;
-    const char *users;
-    bool subscribe_to_self;
-    const char *volatiles;
-
-  // C++ constructor to have default values
-  # ifdef __cplusplus
-    s_room_options()
-    : scope("all"),
-      state("all"),
-      users("none"),
-      subscribe_to_self(true),
-      volatiles(nullptr) { }
-  # endif
-} room_options;
-
-#define KUZZLE_ROOM_OPTIONS_DEFAULT { \
-    .scope = "all", \
-    .state = "all", \
-    .users = "none", \
-    .subscribe_to_self = true, \
-    .volatiles = NULL \
-}
-
-typedef struct {
-    void *instance;
-    const char *filters;
-    room_options *options;
-} room;
-
-typedef struct {
-  room *result;
-  int status;
-  const char *error;
-  const char *stack;
-} room_result;
-
-typedef void (callback)(char* notification);
-
-//options passed to query()
-typedef struct {
-    bool queuable;
-    bool withdist;
-    bool withcoord;
-    long from;
-    long size;
-    const char *scroll;
-    const char *scroll_id;
-    const char *refresh;
-    const char *if_exist;
-    int retry_on_conflict;
-    const char *volatiles;
-} query_options;
-
 typedef struct s_options {
->>>>>>> origin/1-dev
+    unsigned queue_ttl;
     unsigned long queue_max_size;
     enum Mode offline_mode;
     bool auto_queue;
@@ -358,16 +321,6 @@ typedef struct s_options {
     .replay_interval = 10, \
     .refresh = NULL \
 }
-
-//meta of a document
-typedef struct {
-    const char *author;
-    unsigned long long created_at;
-    unsigned long long updated_at;
-    const char *updater;
-    bool active;
-    unsigned long long deleted_at;
-} meta;
 
 /* === Security === */
 
