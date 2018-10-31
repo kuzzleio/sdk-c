@@ -112,8 +112,8 @@ typedef struct {
     const char *limit;
     unsigned long count;
     const char *match;
-    const bool reset;
-    const bool include_trash;
+    bool reset;
+    bool include_trash;
 } kuzzle_request;
 
 typedef offline_queue* (*kuzzle_offline_queue_loader)(void);
