@@ -806,7 +806,7 @@ func goToCUserSearchResult(k *C.kuzzle, sr *security.UserSearchResult, err error
 	result.hits_length = C.size_t(len(sr.Hits))
 	if len(sr.Hits) > 0 {
 		result.hits = (*C.kuzzle_user)(C.calloc(result.hits_length, C.sizeof_kuzzle_user))
-		carr := (*[1<<27 - 1]C.kuzzle_user)(unsafe.Pointer(result.hits))[:len(sr.Hits)]
+		carr := (*[1<<26 - 1]C.kuzzle_user)(unsafe.Pointer(result.hits))[:len(sr.Hits)]
 
 		for i, user := range sr.Hits {
 			goToCUser(k, user, &carr[i])
