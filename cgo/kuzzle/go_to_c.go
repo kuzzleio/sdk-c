@@ -24,6 +24,7 @@ package main
 import "C"
 import (
 	"encoding/json"
+	"fmt"
 	"unsafe"
 
 	"github.com/kuzzleio/sdk-go/security"
@@ -105,6 +106,111 @@ func goToCNotificationResult(gNotif *types.KuzzleNotification) *C.notification_r
 	result.room_id = C.CString(gNotif.RoomId)
 	result.timestamp = C.ulonglong(gNotif.Timestamp)
 	result.status = C.int(gNotif.Status)
+
+	return result
+}
+
+func goToCKuzzleRequest(gReq *types.KuzzleRequest) *C.kuzzle_request {
+	result := (*C.kuzzle_request)(C.calloc(1, C.sizeof_kuzzle_request))
+
+	result.request_id = C.CString(gReq.RequestId)
+	result.controller = C.CString(gReq.Controller)
+	result.action = C.CString(gReq.Action)
+	result.index = C.CString(gReq.Index)
+	result.collection = C.CString(gReq.Collection)
+
+	marshalled, _ := json.Marshal(gReq.Body)
+	result.body = C.CString(string(marshalled))
+
+	result.id = C.CString(gReq.Id)
+	result.from = C.long(gReq.From)
+	result.size = C.long(gReq.Size)
+	result.scroll = C.CString(gReq.Scroll)
+	result.scroll_id = C.CString(gReq.ScrollId)
+	result.strategy = C.CString(gReq.Strategy)
+	result.expires_in = C.ulonglong(gReq.ExpiresIn)
+	result.volatiles = C.CString(string(gReq.Volatile))
+	result.scope = C.CString(gReq.Scope)
+	result.state = C.CString(gReq.State)
+	result.users = C.CString(gReq.Users)
+	result.start = C.long(gReq.Start)
+	result.stop = C.long(gReq.Stop)
+	result.end = C.long(gReq.End)
+	result.bit = C.uchar(gReq.Bit)
+	result.member = C.CString(gReq.Member)
+	result.member1 = C.CString(gReq.Member1)
+	result.member2 = C.CString(gReq.Member2)
+
+	if len(gReq.Members) > 0 {
+		result.members_length = C.size_t(len(gReq.Members))
+
+		result.members = (**C.char)(C.calloc(C.size_t(len(gReq.Members)), C.sizeof_char_ptr))
+		carr := (*[1<<28 - 1]*C.char)(unsafe.Pointer(result.members))[:len(gReq.Members)]
+
+		for i, member := range gReq.Members {
+			carr[i] = C.CString(member)
+		}
+	}
+
+	result.lon = C.double(gReq.Lon)
+	result.lat = C.double(gReq.Lat)
+	result.distance = C.double(gReq.Distance)
+	result.unit = C.CString(gReq.Unit)
+
+	if len(gReq.Options) > 0 {
+		result.options_length = C.size_t(len(gReq.Options))
+
+		result.options = (**C.char)(C.calloc(C.size_t(len(gReq.Options)), C.sizeof_char_ptr))
+		carr := (*[1<<28 - 1]*C.char)(unsafe.Pointer(result.options))[:len(gReq.Options)]
+
+		// force []interface{} to []string here as this option is used by memoryStorage only
+		// which is quite tolerant to accept strings
+		for i, option := range gReq.Options {
+			s, ok := option.(string)
+			if ok {
+				carr[i] = C.CString(s)
+			} else {
+				carr[i] = C.CString(fmt.Sprint(option))
+			}
+		}
+	}
+
+	if len(gReq.Keys) > 0 {
+		result.keys_length = C.size_t(len(gReq.Keys))
+
+		result.keys = (**C.char)(C.calloc(C.size_t(len(gReq.Keys)), C.sizeof_char_ptr))
+		carr := (*[1<<28 - 1]*C.char)(unsafe.Pointer(result.keys))[:len(gReq.Keys)]
+
+		for i, key := range gReq.Keys {
+			carr[i] = C.CString(key)
+		}
+	}
+
+	result.cursor = C.long(gReq.Cursor)
+	result.offset = C.long(gReq.Offset)
+	result.field = C.CString(gReq.Field)
+
+	if len(gReq.Fields) > 0 {
+		result.fields_length = C.size_t(len(gReq.Fields))
+
+		result.fields = (**C.char)(C.calloc(C.size_t(len(gReq.Fields)), C.sizeof_char_ptr))
+		carr := (*[1<<28 - 1]*C.char)(unsafe.Pointer(result.fields))[:len(gReq.Fields)]
+
+		for i, field := range gReq.Fields {
+			carr[i] = C.CString(field)
+		}
+	}
+
+	result.subcommand = C.CString(gReq.Subcommand)
+	result.pattern = C.CString(gReq.Pattern)
+	result.idx = C.long(gReq.Idx)
+	result.min = C.CString(gReq.Min)
+	result.max = C.CString(gReq.Max)
+	result.limit = C.CString(gReq.Limit)
+	result.count = C.ulong(gReq.Count)
+	result.match = C.CString(gReq.Match)
+	result.reset = C.bool(gReq.Reset)
+	result.include_trash = C.bool(gReq.IncludeTrash)
 
 	return result
 }
@@ -303,7 +409,7 @@ func goToCProfile(k *C.kuzzle, profile *security.Profile, dest *C.profile) *C.pr
 	return cprofile
 }
 
-func goToCProfileSearchResult(k *C.kuzzle, res *security.ProfileSearchResult, err error) *C.search_profiles_result {
+func goToCProfileSearchResult(k *C.kuzzle, sr *security.ProfileSearchResult, err error) *C.search_profiles_result {
 	result := (*C.search_profiles_result)(C.calloc(1, C.sizeof_search_profiles_result))
 
 	if err != nil {
@@ -311,26 +417,30 @@ func goToCProfileSearchResult(k *C.kuzzle, res *security.ProfileSearchResult, er
 		return result
 	}
 
-	result.result = (*C.profile_search)(C.calloc(1, C.sizeof_profile_search))
-	result.result.hits_length = C.size_t(len(res.Hits))
-	result.result.total = C.uint(res.Total)
-	if res.ScrollId != "" {
-		result.result.scroll_id = C.CString(res.ScrollId)
-	}
+	result.aggregations = C.CString(string(sr.Aggregations))
+	result.hits_length = C.size_t(len(sr.Hits))
+	if len(sr.Hits) > 0 {
+		result.hits = (*C.profile)(C.calloc(result.hits_length, C.sizeof_profile))
+		carr := (*[1<<27 - 1]C.profile)(unsafe.Pointer(result.hits))[:len(sr.Hits)]
 
-	if len(res.Hits) > 0 {
-		result.result.hits = (*C.profile)(C.calloc(C.size_t(len(res.Hits)), C.sizeof_profile))
-		profiles := (*[1<<27 - 1]C.profile)(unsafe.Pointer(result.result.hits))[:len(res.Hits)]
-
-		for i, profile := range res.Hits {
-			goToCProfile(k, profile, &profiles[i])
+		for i, profile := range sr.Hits {
+			goToCProfile(k, profile, &carr[i])
 		}
 	}
+	result.total = C.uint(sr.Total)
+	result.fetched = C.uint(sr.Fetched)
+	result.scroll_id = C.CString(sr.ScrollId)
+
+	result.instance = unsafe.Pointer(sr)
+	result.k = k
+	result.request = goToCKuzzleRequest(sr.Request())
+	result.response = goToCKuzzleResponse(sr.Response())
+	result.options = goToCQueryOptions(sr.Options())
 
 	return result
 }
 
-func goToCRoleSearchResult(k *C.kuzzle, res *security.RoleSearchResult, err error) *C.search_roles_result {
+func goToCRoleSearchResult(k *C.kuzzle, sr *security.RoleSearchResult, err error) *C.search_roles_result {
 	result := (*C.search_roles_result)(C.calloc(1, C.sizeof_search_roles_result))
 
 	if err != nil {
@@ -338,18 +448,25 @@ func goToCRoleSearchResult(k *C.kuzzle, res *security.RoleSearchResult, err erro
 		return result
 	}
 
-	result.result = (*C.role_search)(C.calloc(1, C.sizeof_role_search))
-	result.result.hits_length = C.size_t(len(res.Hits))
-	result.result.total = C.uint(res.Total)
+	result.aggregations = C.CString(string(sr.Aggregations))
+	result.hits_length = C.size_t(len(sr.Hits))
+	if len(sr.Hits) > 0 {
+		result.hits = (*C.role)(C.calloc(result.hits_length, C.sizeof_role))
+		carr := (*[1<<27 - 1]C.role)(unsafe.Pointer(result.hits))[:len(sr.Hits)]
 
-	if len(res.Hits) > 0 {
-		result.result.hits = (*C.role)(C.calloc(C.size_t(len(res.Hits)), C.sizeof_role))
-		cArray := (*[1<<27 - 1]C.role)(unsafe.Pointer(result.result.hits))[:len(res.Hits):len(res.Hits)]
-
-		for i, role := range res.Hits {
-			goToCRole(k, role, &cArray[i])
+		for i, role := range sr.Hits {
+			goToCRole(k, role, &carr[i])
 		}
 	}
+	result.total = C.uint(sr.Total)
+	result.fetched = C.uint(sr.Fetched)
+	result.scroll_id = C.CString(sr.ScrollId)
+
+	result.instance = unsafe.Pointer(sr)
+	result.k = k
+	result.request = goToCKuzzleRequest(sr.Request())
+	result.response = goToCKuzzleResponse(sr.Response())
+	result.options = goToCQueryOptions(sr.Options())
 
 	return result
 }
@@ -368,8 +485,30 @@ func goToCBoolResult(goRes bool, err error) *C.bool_result {
 	return result
 }
 
+func goToCQueryOptions(options types.QueryOptions) *C.query_options {
+	res := (*C.query_options)(C.calloc(1, C.sizeof_query_options))
+
+	if options == nil {
+		return res
+	}
+
+	res.queuable = C.bool(options.Queuable())
+	res.withdist = C.bool(options.Withdist())
+	res.withcoord = C.bool(options.Withcoord())
+	res.from = C.long(options.From())
+	res.size = C.long(options.Size())
+	res.scroll = C.CString(options.Scroll())
+	res.scroll_id = C.CString(options.ScrollId())
+	res.refresh = C.CString(options.Refresh())
+	res.if_exist = C.CString(options.IfExist())
+	res.retry_on_conflict = C.int(options.RetryOnConflict())
+	res.volatiles = C.CString(string(options.Volatile()))
+
+	return res
+}
+
 // Allocates memory
-func goToCSearchResult(goRes *types.SearchResult, err error) *C.search_result {
+func goToCSearchResult(k *C.kuzzle, sr *types.SearchResult, err error) *C.search_result {
 	result := (*C.search_result)(C.calloc(1, C.sizeof_search_result))
 
 	if err != nil {
@@ -377,29 +516,17 @@ func goToCSearchResult(goRes *types.SearchResult, err error) *C.search_result {
 		return result
 	}
 
-	result.collection = C.CString(string(goRes.Collection))
-	result.documents = C.CString(string(goRes.Documents))
-
-	result.fetched = C.uint(goRes.Fetched)
-	result.total = C.uint(goRes.Total)
-
-	if goRes.Filters != nil {
-		result.filters = C.CString(string(goRes.Filters))
-	}
-
-	result.options = (*C.query_options)(C.calloc(1, C.sizeof_query_options))
-	if goRes.Options != nil {
-		result.options.from = C.long(goRes.Options.From())
-		result.options.size = C.long(goRes.Options.Size())
-
-		if goRes.Options.ScrollId() != "" {
-			result.options.scroll_id = C.CString(goRes.Options.ScrollId())
-		}
-	}
-
-	if len(goRes.Aggregations) > 0 {
-		result.aggregations = C.CString(string(goRes.Aggregations))
-	}
+	result.aggregations = C.CString(string(sr.Aggregations))
+	result.hits = C.CString(string(sr.Hits))
+	result.total = C.uint(sr.Total)
+	result.fetched = C.uint(sr.Fetched)
+	result.scroll_id = C.CString(sr.ScrollId)
+	result.instance = unsafe.Pointer(sr)
+	result.k = k
+	result.request = goToCKuzzleRequest(sr.Request())
+	result.response = goToCKuzzleResponse(sr.Response())
+	result.options = goToCQueryOptions(sr.Options())
+	result.scroll_action = C.CString(sr.ScrollAction())
 
 	return result
 }
@@ -667,7 +794,7 @@ func goToCUserRightsResult(rights []*types.UserRights, err error) *C.user_rights
 	return result
 }
 
-func goToCUserSearchResult(k *C.kuzzle, res *security.UserSearchResult, err error) *C.search_users_result {
+func goToCUserSearchResult(k *C.kuzzle, sr *security.UserSearchResult, err error) *C.search_users_result {
 	result := (*C.search_users_result)(C.calloc(1, C.sizeof_search_users_result))
 
 	if err != nil {
@@ -675,21 +802,25 @@ func goToCUserSearchResult(k *C.kuzzle, res *security.UserSearchResult, err erro
 		return result
 	}
 
-	result.result = (*C.user_search)(C.calloc(1, C.sizeof_user_search))
-	result.result.hits_length = C.size_t(len(res.Hits))
-	result.result.total = C.uint(res.Total)
-	if res.ScrollId != "" {
-		result.result.scroll_id = C.CString(res.ScrollId)
-	}
+	result.aggregations = C.CString(string(sr.Aggregations))
+	result.hits_length = C.size_t(len(sr.Hits))
+	if len(sr.Hits) > 0 {
+		result.hits = (*C.kuzzle_user)(C.calloc(result.hits_length, C.sizeof_kuzzle_user))
+		carr := (*[1<<26 - 1]C.kuzzle_user)(unsafe.Pointer(result.hits))[:len(sr.Hits)]
 
-	if len(res.Hits) > 0 {
-		result.result.hits = (*C.kuzzle_user)(C.calloc(C.size_t(len(res.Hits)), C.sizeof_kuzzle_user))
-		users := (*[1<<26 - 1]C.kuzzle_user)(unsafe.Pointer(result.result.hits))[:len(res.Hits)]
-
-		for i, user := range res.Hits {
-			goToCUser(k, user, &users[i])
+		for i, user := range sr.Hits {
+			goToCUser(k, user, &carr[i])
 		}
 	}
+	result.total = C.uint(sr.Total)
+	result.fetched = C.uint(sr.Fetched)
+	result.scroll_id = C.CString(sr.ScrollId)
+
+	result.instance = unsafe.Pointer(sr)
+	result.k = k
+	result.request = goToCKuzzleRequest(sr.Request())
+	result.response = goToCKuzzleResponse(sr.Response())
+	result.options = goToCQueryOptions(sr.Options())
 
 	return result
 }
