@@ -26,9 +26,20 @@ import (
 	"github.com/kuzzleio/sdk-go/types"
 )
 
-//export kuzzle_new_options
-func kuzzle_new_options() *C.options {
-	copts := (*C.options)(C.calloc(1, C.sizeof_options))
+//export kuzzle_set_default_room_options
+func kuzzle_set_default_room_options(copts *C.room_options) {
+	opts := types.NewRoomOptions()
+
+	copts.scope = C.CString(opts.Scope())
+	copts.state = C.CString(opts.State())
+	copts.users = C.CString(opts.Users())
+	copts.volatiles = C.CString(string(opts.Volatile()))
+	copts.subscribe_to_self = C.bool(opts.SubscribeToSelf())
+	copts.auto_resubscribe = C.bool(opts.AutoResubscribe())
+}
+
+//export kuzzle_set_default_options
+func kuzzle_set_default_options(copts *C.options) {
 	opts := types.NewOptions()
 
 	copts.queue_ttl = C.uint(opts.QueueTTL())
@@ -50,8 +61,6 @@ func kuzzle_new_options() *C.options {
 	if len(refresh) > 0 {
 		copts.refresh = C.CString(refresh)
 	}
-
-	return copts
 }
 
 func SetQueryOptions(options *C.query_options) (opts types.QueryOptions) {
