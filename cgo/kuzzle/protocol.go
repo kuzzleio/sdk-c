@@ -11,6 +11,10 @@ package main
 		f(event, listener, data);
 	}
 
+	static void bridge_protocol_once(void (*f)(int, kuzzle_event_listener*, void*), int event, kuzzle_event_listener* listener, void* data) {
+		f(event, listener, data);
+	}
+
 	static void bridge_remove_listener(void (*f)(int, kuzzle_event_listener*, void*), int event, kuzzle_event_listener* listener, void* data) {
 		f(event, listener, data);
 	}
@@ -75,14 +79,23 @@ package main
 		return f(data);
 	}
 
-	extern void bridge(int, char*, void*);
+	extern void bridge_listener(int, char*, void*);
+	extern void bridge_listener_once(int, char*, void*);
 
 	static void call_bridge(int event, char* res, void* data) {
-		bridge(event, res, data);
+		bridge_listener(event, res, data);
 	}
 
-	static kuzzle_event_listener get_fptr() {
+	static void call_bridge_once(int event, char* res, void* data) {
+		bridge_listener_once(event, res, data);
+	}
+
+	static kuzzle_event_listener get_bridge_fptr() {
 		return &call_bridge;
+	}
+
+	static kuzzle_event_listener get_bridge_once_fptr() {
+		return &call_bridge_once;
 	}
 */
 import "C"
@@ -103,7 +116,8 @@ type WrapProtocol struct {
 
 var proto_instances sync.Map
 
-var _list_listeners sync.Map
+var _list_listeners map[int]map[chan<- json.RawMessage]bool
+var _list_once_listeners map[int]map[chan<- json.RawMessage]bool
 
 // register new instance to the instances map
 func registerProtocol(instance interface{}, ptr unsafe.Pointer) {
@@ -118,26 +132,39 @@ func unregisterProtocol(p *C.protocol) {
 func NewWrapProtocol(p *C.protocol) *WrapProtocol {
 	ptr_proto := unsafe.Pointer(p.instance)
 	registerProtocol(p, ptr_proto)
+	_list_listeners = make(map[int]map[chan<- json.RawMessage]bool)
+	_list_once_listeners = make(map[int]map[chan<- json.RawMessage]bool)
 
 	return &WrapProtocol{p}
 }
 
-//export bridge
-func bridge(event C.int, res *C.char, channel unsafe.Pointer) {
-	c, ok := _list_listeners.Load(int(event))
-	if ok == true {
-		c.(chan<- json.RawMessage) <- json.RawMessage(C.GoString(res))
+//export bridge_listener
+func bridge_listener(event C.int, res *C.char, data unsafe.Pointer) {
+	for c := range _list_listeners[int(event)] {
+		c <- json.RawMessage(C.GoString(res))
+	}
+}
+
+//export bridge_listener_once
+func bridge_listener_once(event C.int, res *C.char, data unsafe.Pointer) {
+	for c := range _list_once_listeners[int(event)] {
+		c <- json.RawMessage(C.GoString(res))
 	}
 }
 
 func (wp WrapProtocol) AddListener(event int, channel chan<- json.RawMessage) {
-	fptr := C.get_fptr()
-	_list_listeners.Store(event, channel)
+	fptr := C.get_bridge_fptr()
+	if _list_listeners[event] == nil {
+		_list_listeners[event] = make(map[chan<- json.RawMessage]bool)
+	}
+	_list_listeners[event][channel] = true
 	C.bridge_protocol_add_listener(wp.P.add_listener, C.int(event), &fptr, wp.P.instance)
 }
 
 func (wp WrapProtocol) RemoveListener(event int, channel chan<- json.RawMessage) {
-	C.bridge_remove_listener(wp.P.remove_listener, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)), wp.P.instance)
+	fptr := C.get_bridge_fptr()
+	C.bridge_remove_listener(wp.P.remove_listener, C.int(event), &fptr, wp.P.instance)
+	delete(_list_listeners[event], channel)
 }
 
 func (wp WrapProtocol) RemoveAllListeners(event int) {
@@ -145,7 +172,12 @@ func (wp WrapProtocol) RemoveAllListeners(event int) {
 }
 
 func (wp WrapProtocol) Once(event int, channel chan<- json.RawMessage) {
-	C.bridge_once(wp.P.once, C.int(event), (*C.kuzzle_event_listener)(unsafe.Pointer(&channel)), wp.P.instance)
+	fptr := C.get_bridge_once_fptr()
+	if _list_once_listeners[event] == nil {
+		_list_once_listeners[event] = make(map[chan<- json.RawMessage]bool)
+	}
+	_list_once_listeners[event][channel] = true
+	C.bridge_protocol_once(wp.P.once, C.int(event), &fptr, wp.P.instance)
 }
 
 func (wp WrapProtocol) ListenerCount(event int) int {

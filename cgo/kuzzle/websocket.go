@@ -38,6 +38,11 @@ import (
 // map which stores instances to keep references in case the gc passes
 var webSocketInstances sync.Map
 
+// listeners
+var _event_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage
+var _event_once_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage
+
+
 // register new instance to the instances map
 func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
 	webSocketInstances.Store(instance, ptr)
@@ -46,6 +51,9 @@ func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
 //export kuzzle_websocket_new_web_socket
 func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.options, cppInstance unsafe.Pointer) {
 	inst := websocket.NewWebSocket(C.GoString(host), SetOptions(options))
+
+	_event_listeners = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
+	_event_once_listeners = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
 
 	ws.cpp_instance = cppInstance
 	ptr := unsafe.Pointer(inst)
@@ -57,6 +65,10 @@ func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.
 //export kuzzle_websocket_add_listener
 func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuzzle_event_listener) {
 	c := make(chan json.RawMessage)
+	if _event_listeners[int(event)] == nil {
+		_event_listeners[int(event)] = make(map[C.kuzzle_event_listener]chan json.RawMessage)
+	}
+	_event_listeners[int(event)][listener] = c
 	go func() {
 		for {
 			res, ok := <-c
@@ -69,6 +81,34 @@ func kuzzle_websocket_add_listener(ws *C.web_socket, event C.int, listener C.kuz
 		}
 	}()
 	(*websocket.WebSocket)(ws.instance).AddListener(int(event), c)
+}
+
+//export kuzzle_websocket_once
+func kuzzle_websocket_once(ws *C.web_socket, event C.int, listener C.kuzzle_event_listener) {
+	c := make(chan json.RawMessage)
+	if _event_once_listeners[int(event)] == nil {
+		_event_once_listeners[int(event)] = make(map[C.kuzzle_event_listener]chan json.RawMessage)
+	}
+	_event_once_listeners[int(event)][listener] = c
+	go func() {
+		for {
+			res, ok := <-c
+			if ok == false {
+				break
+			}
+			r, _ := json.Marshal(res)
+
+			C.bridge_trigger_event_listener(listener, event, C.CString(string(r)), ws.cpp_instance)
+			delete(_event_once_listeners[int(event)], listener)
+		}
+	}()
+	(*websocket.WebSocket)(ws.instance).Once(int(event), c)
+}
+
+//export kuzzle_websocket_remove_listener
+func kuzzle_websocket_remove_listener(ws *C.web_socket, event C.int, listener C.kuzzle_event_listener) {
+	(*websocket.WebSocket)(ws.instance).RemoveListener(int(event), _event_listeners[int(event)][listener])
+	delete(_event_listeners[int(event)], listener)
 }
 
 //export kuzzle_websocket_emit_event
