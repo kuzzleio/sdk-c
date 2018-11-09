@@ -169,6 +169,7 @@ typedef struct s_room_options {
     const char *volatiles;
 
   // C++ constructor to have default values
+  // TODO use default values from Go
   # ifdef __cplusplus
     s_room_options()
     : scope("all"),
@@ -230,6 +231,7 @@ typedef struct s_options {
     const char *refresh;
 
   // C++ constructor to have default values
+  // TODO use default values from Go
   # ifdef __cplusplus
     s_options()
     : queue_ttl(120000),
