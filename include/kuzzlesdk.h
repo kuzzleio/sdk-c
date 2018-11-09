@@ -161,14 +161,31 @@ typedef struct {
 } subscribe_result;
 
 //options passed to room constructor
-typedef struct {
+typedef struct s_room_options {
     const char *scope;
     const char *state;
     const char *users;
     bool subscribe_to_self;
-    bool auto_resubscribe;
     const char *volatiles;
+
+  // C++ constructor to have default values
+  # ifdef __cplusplus
+    s_room_options()
+    : scope("all"),
+      state("all"),
+      users("none"),
+      subscribe_to_self(true),
+      volatiles(nullptr) { }
+  # endif
 } room_options;
+
+#define KUZZLE_ROOM_OPTIONS_DEFAULT { \
+    .scope = "all", \
+    .state = "all", \
+    .users = "none", \
+    .subscribe_to_self = true, \
+    .volatiles = NULL \
+}
 
 typedef struct {
     void *instance;
@@ -200,7 +217,7 @@ typedef struct {
     const char *volatiles;
 } query_options;
 
-typedef struct {
+typedef struct s_options {
     unsigned queue_ttl;
     unsigned long queue_max_size;
     enum Mode offline_mode;
@@ -211,10 +228,37 @@ typedef struct {
     unsigned long reconnection_delay;
     unsigned long replay_interval;
     const char *refresh;
+
+  // C++ constructor to have default values
+  # ifdef __cplusplus
+    s_options()
+    : queue_ttl(120000),
+      queue_max_size(500),
+      offline_mode(MANUAL),
+      auto_queue(false),
+      auto_reconnect(true),
+      auto_replay(false),
+      auto_resubscribe(true),
+      reconnection_delay(1000),
+      replay_interval(10),
+      refresh(nullptr) {}
+  # endif
 } options;
 
-//meta of a document
-typedef struct {
+#define KUZZLE_OPTIONS_DEFAULT { \
+    .queue_ttl = 120000, \
+    .queue_max_size = 500, \
+    .offline_mode = MANUAL,  \
+    .auto_queue = false,  \
+    .auto_reconnect = true,  \
+    .auto_replay = false, \
+    .auto_resubscribe = true, \
+    .reconnection_delay = 1000, \
+    .replay_interval = 10, \
+    .refresh = NULL \
+}
+
+//meta of a documenttypedef struct {
     const char *author;
     unsigned long long created_at;
     unsigned long long updated_at;
