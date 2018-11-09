@@ -35,7 +35,6 @@ func kuzzle_set_default_room_options(copts *C.room_options) {
 	copts.users = C.CString(opts.Users())
 	copts.volatiles = C.CString(string(opts.Volatile()))
 	copts.subscribe_to_self = C.bool(opts.SubscribeToSelf())
-	copts.auto_resubscribe = C.bool(opts.AutoResubscribe())
 }
 
 //export kuzzle_set_default_options
