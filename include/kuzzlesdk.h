@@ -260,7 +260,8 @@ typedef struct s_options {
     .refresh = NULL \
 }
 
-//meta of a documenttypedef struct {
+//meta of a document
+typedef struct {
     const char *author;
     unsigned long long created_at;
     unsigned long long updated_at;
