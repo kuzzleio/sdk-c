@@ -49,14 +49,6 @@ enum is_action_allowed {
 namespace kuzzleio {
 # endif
 
-// Typedef here to use the type in the function signature
-// function is used to set default value coming from Go to struct
-typedef struct s_options options;
-typedef struct s_room_options room_options;
-
-extern void kuzzle_set_default_options(options*);
-extern void kuzzle_set_default_room_options(room_options*);
-
 //query object used by query()
 typedef struct {
     char *query;
@@ -169,22 +161,18 @@ typedef struct {
 } subscribe_result;
 
 //options passed to room constructor
-struct s_room_options {
+typedef struct s_room_options {
     const char *scope;
     const char *state;
     const char *users;
     bool subscribe_to_self;
-    bool auto_resubscribe;
     const char *volatiles;
 
-  // C++ constructor to have default values
-  # ifdef __cplusplus
-    s_room_options()
-    {
-      kuzzle_set_default_room_options(this);
-    }
-  # endif
-};
+    // C++ constructor to have default values
+    # ifdef __cplusplus
+      s_room_options();
+    # endif
+} room_options;
 
 typedef struct {
     void *instance;
@@ -202,7 +190,7 @@ typedef struct {
 typedef void (callback)(char* notification);
 
 //options passed to query()
-typedef struct {
+typedef struct s_query_options {
     bool queuable;
     bool withdist;
     bool withcoord;
@@ -214,9 +202,14 @@ typedef struct {
     const char *if_exist;
     int retry_on_conflict;
     const char *volatiles;
+
+    // C++ constructor to have default values
+    # ifdef __cplusplus
+      s_query_options();
+    # endif
 } query_options;
 
-struct s_options {
+typedef struct s_options {
     unsigned queue_ttl;
     unsigned long queue_max_size;
     enum Mode offline_mode;
@@ -228,14 +221,11 @@ struct s_options {
     unsigned long replay_interval;
     const char *refresh;
 
-  // C++ constructor to have default values
-  # ifdef __cplusplus
-    s_options()
-    {
-      kuzzle_set_default_options(this);
-    }
-  # endif
-};
+    // C++ constructor to have default values
+    # ifdef __cplusplus
+      s_options();
+    # endif
+} options;
 
 //meta of a document
 typedef struct {
