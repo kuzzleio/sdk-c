@@ -190,7 +190,7 @@ typedef struct {
 typedef void (callback)(char* notification);
 
 //options passed to query()
-typedef struct {
+typedef struct s_query_options {
     bool queuable;
     bool withdist;
     bool withcoord;
@@ -202,6 +202,11 @@ typedef struct {
     const char *if_exist;
     int retry_on_conflict;
     const char *volatiles;
+
+    // C++ constructor to have default values
+    # ifdef __cplusplus
+      s_query_options();
+    # endif
 } query_options;
 
 typedef struct s_options {

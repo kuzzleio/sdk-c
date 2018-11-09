@@ -26,6 +26,23 @@ import (
 	"github.com/kuzzleio/sdk-go/types"
 )
 
+//export kuzzle_set_default_query_options
+func kuzzle_set_default_query_options(copts *C.query_options) {
+	opts := types.NewQueryOptions()
+
+	copts.queuable = C.bool(opts.Queuable())
+	copts.withdist = C.bool(opts.Withdist())
+	copts.withcoord = C.bool(opts.Withcoord())
+	copts.from = C.long(opts.From())
+	copts.size = C.long(opts.Size())
+	copts.scroll = C.CString(opts.Scroll())
+	copts.scroll_id = C.CString(opts.ScrollId())
+	copts.refresh = C.CString(opts.Refresh())
+	copts.if_exist = C.CString(opts.IfExist())
+	copts.retry_on_conflict = C.int(opts.RetryOnConflict())
+	copts.volatiles = C.CString(string(opts.Volatile()))
+}
+
 //export kuzzle_set_default_room_options
 func kuzzle_set_default_room_options(copts *C.room_options) {
 	opts := types.NewRoomOptions()
