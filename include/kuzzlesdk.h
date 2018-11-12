@@ -86,6 +86,8 @@ typedef struct notification_result {
     const char *stack;
 } notification_result;
 
+
+//options passed to room constructor
 typedef struct s_room_options {
     const char *scope;
     const char *state;
@@ -93,24 +95,11 @@ typedef struct s_room_options {
     bool subscribe_to_self;
     const char *volatiles;
 
-  // C++ constructor to have default values
-  # ifdef __cplusplus
-    s_room_options()
-    : scope("all"),
-      state("all"),
-      users("none"),
-      subscribe_to_self(true),
-      volatiles(nullptr) { }
-  # endif
+    // C++ constructor to have default values
+    # ifdef __cplusplus
+      s_room_options();
+    # endif
 } room_options;
-
-#define KUZZLE_ROOM_OPTIONS_DEFAULT { \
-    .scope = "all", \
-    .state = "all", \
-    .users = "none", \
-    .subscribe_to_self = true, \
-    .volatiles = NULL \
-}
 
 typedef struct {
     void *instance;
@@ -125,10 +114,9 @@ typedef struct {
   const char *stack;
 } room_result;
 
-typedef void (callback)(char* notification);
 
 //options passed to query()
-typedef struct {
+typedef struct s_query_options {
     bool queuable;
     bool withdist;
     bool withcoord;
@@ -140,7 +128,15 @@ typedef struct {
     const char *if_exist;
     int retry_on_conflict;
     const char *volatiles;
+
+    // C++ constructor to have default values
+    # ifdef __cplusplus
+      s_query_options();
+    # endif
 } query_options;
+
+
+typedef void (callback)(char* notification);
 
 // raw Kuzzle response
 typedef struct {
@@ -203,7 +199,7 @@ typedef struct {
     const char *volatiles;
     const char *scope;
     const char *state;
-    const char *user;
+    const char *users;
     long start;
     long stop;
     long end;
@@ -217,7 +213,8 @@ typedef struct {
     double lat;
     double distance;
     const char *unit;
-    const char *options;
+    const char * const *options;
+    size_t options_length;
     const char * const *keys;
     size_t keys_length;
     long cursor;
@@ -233,6 +230,8 @@ typedef struct {
     const char *limit;
     unsigned long count;
     const char *match;
+    bool reset;
+    bool include_trash;
 } kuzzle_request;
 
 typedef offline_queue* (*kuzzle_offline_queue_loader)(void);
@@ -279,8 +278,6 @@ typedef struct {
   const char *stack;
 } subscribe_result;
 
-typedef void (callback)(char* notification);
-
 typedef struct s_options {
     unsigned queue_ttl;
     unsigned long queue_max_size;
@@ -293,34 +290,11 @@ typedef struct s_options {
     unsigned long replay_interval;
     const char *refresh;
 
-  // C++ constructor to have default values
-  # ifdef __cplusplus
-    s_options()
-    : queue_ttl(120000),
-      queue_max_size(500),
-      offline_mode(MANUAL),
-      auto_queue(false),
-      auto_reconnect(true),
-      auto_replay(false),
-      auto_resubscribe(true),
-      reconnection_delay(1000),
-      replay_interval(10),
-      refresh(nullptr) {}
-  # endif
+    // C++ constructor to have default values
+    # ifdef __cplusplus
+      s_options();
+    # endif
 } options;
-
-#define KUZZLE_OPTIONS_DEFAULT { \
-    .queue_ttl = 120000, \
-    .queue_max_size = 500, \
-    .offline_mode = MANUAL,  \
-    .auto_queue = false,  \
-    .auto_reconnect = true,  \
-    .auto_replay = false, \
-    .auto_resubscribe = true, \
-    .reconnection_delay = 1000, \
-    .replay_interval = 10, \
-    .refresh = NULL \
-}
 
 /* === Security === */
 
@@ -645,34 +619,71 @@ typedef struct specification_result {
 } specification_result;
 
 typedef struct search_result {
-    const char *documents;
-    unsigned fetched;
-    unsigned total;
     const char *aggregations;
-    const char *filters;
+    const char *hits;
+    unsigned total;
+    unsigned fetched;
+    const char *scroll_id;
+    void *instance;
+    kuzzle *k;
+    kuzzle_request *request;
+    kuzzle_response *response;
     query_options *options;
-    const char *collection;
+    const char *scroll_action;
     int status;
     const char *error;
     const char *stack;
 } search_result;
 
 typedef struct search_profiles_result {
-    profile_search *result;
+    const char *aggregations;
+    profile *hits;
+    size_t hits_length;
+    unsigned total;
+    unsigned fetched;
+    const char *scroll_id;
+    void *instance;
+    kuzzle *k;
+    kuzzle_request *request;
+    kuzzle_response *response;
+    query_options *options;
+    const char *scroll_action;
     int status;
     const char *error;
     const char *stack;
 } search_profiles_result;
 
 typedef struct search_roles_result {
-    role_search *result;
+    const char *aggregations;
+    role *hits;
+    size_t hits_length;
+    unsigned total;
+    unsigned fetched;
+    const char *scroll_id;
+    void *instance;
+    kuzzle *k;
+    kuzzle_request *request;
+    kuzzle_response *response;
+    query_options *options;
+    const char *scroll_action;
     int status;
     const char *error;
     const char *stack;
 } search_roles_result;
 
 typedef struct search_users_result {
-    user_search *result;
+    const char *aggregations;
+    kuzzle_user *hits;
+    size_t hits_length;
+    unsigned total;
+    unsigned fetched;
+    const char *scroll_id;
+    void *instance;
+    kuzzle *k;
+    kuzzle_request *request;
+    kuzzle_response *response;
+    query_options *options;
+    const char *scroll_action;
     int status;
     const char *error;
     const char *stack;

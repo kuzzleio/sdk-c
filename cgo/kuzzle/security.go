@@ -258,6 +258,12 @@ func kuzzle_security_search_profiles(k *C.kuzzle, body *C.char, o *C.query_optio
 	return goToCProfileSearchResult(k, res, err)
 }
 
+//export kuzzle_security_search_profiles_next
+func kuzzle_security_search_profiles_next(sr *C.search_profiles_result) *C.search_profiles_result {
+	res, err := (*security.ProfileSearchResult)(sr.instance).Next()
+	return goToCProfileSearchResult(sr.k, res, err)
+}
+
 //export kuzzle_security_search_roles
 func kuzzle_security_search_roles(k *C.kuzzle, body *C.char, o *C.query_options) *C.search_roles_result {
 	options := SetQueryOptions(o)
@@ -266,10 +272,22 @@ func kuzzle_security_search_roles(k *C.kuzzle, body *C.char, o *C.query_options)
 	return goToCRoleSearchResult(k, res, err)
 }
 
+//export kuzzle_security_search_roles_next
+func kuzzle_security_search_roles_next(sr *C.search_roles_result) *C.search_roles_result {
+	res, err := (*security.RoleSearchResult)(sr.instance).Next()
+	return goToCRoleSearchResult(sr.k, res, err)
+}
+
 //export kuzzle_security_search_users
 func kuzzle_security_search_users(k *C.kuzzle, body *C.char, o *C.query_options) *C.search_users_result {
 	res, err := (*kuzzle.Kuzzle)(k.instance).Security.SearchUsers(json.RawMessage(C.GoString(body)), SetQueryOptions(o))
 	return goToCUserSearchResult(k, res, err)
+}
+
+//export kuzzle_security_search_users_next
+func kuzzle_security_search_users_next(sr *C.search_users_result) *C.search_users_result {
+	res, err := (*security.UserSearchResult)(sr.instance).Next()
+	return goToCUserSearchResult(sr.k, res, err)
 }
 
 //export kuzzle_security_delete_role

@@ -27,6 +27,7 @@ import (
 
 	"github.com/kuzzleio/sdk-go/collection"
 	"github.com/kuzzleio/sdk-go/kuzzle"
+	"github.com/kuzzleio/sdk-go/types"
 )
 
 // map which stores instances to keep references in case the gc passes
@@ -121,7 +122,13 @@ func kuzzle_collection_get_specifications(c *C.collection, index *C.char, col *C
 //export kuzzle_collection_search_specifications
 func kuzzle_collection_search_specifications(c *C.collection, options *C.query_options) *C.search_result {
 	res, err := (*collection.Collection)(c.instance).SearchSpecifications(SetQueryOptions(options))
-	return goToCSearchResult(res, err)
+	return goToCSearchResult(c.k, res, err)
+}
+
+//export kuzzle_collection_search_specifications_next
+func kuzzle_collection_search_specifications_next(sr *C.search_result) *C.search_result {
+	res, err := (*types.SearchResult)(sr.instance).Next()
+	return goToCSearchResult(sr.k, res, err)
 }
 
 //export kuzzle_collection_update_specifications

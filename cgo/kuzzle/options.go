@@ -26,9 +26,36 @@ import (
 	"github.com/kuzzleio/sdk-go/types"
 )
 
-//export kuzzle_new_options
-func kuzzle_new_options() *C.options {
-	copts := (*C.options)(C.calloc(1, C.sizeof_options))
+//export kuzzle_set_default_query_options
+func kuzzle_set_default_query_options(copts *C.query_options) {
+	opts := types.NewQueryOptions()
+
+	copts.queuable = C.bool(opts.Queuable())
+	copts.withdist = C.bool(opts.Withdist())
+	copts.withcoord = C.bool(opts.Withcoord())
+	copts.from = C.long(opts.From())
+	copts.size = C.long(opts.Size())
+	copts.scroll = C.CString(opts.Scroll())
+	copts.scroll_id = C.CString(opts.ScrollId())
+	copts.refresh = C.CString(opts.Refresh())
+	copts.if_exist = C.CString(opts.IfExist())
+	copts.retry_on_conflict = C.int(opts.RetryOnConflict())
+	copts.volatiles = C.CString(string(opts.Volatile()))
+}
+
+//export kuzzle_set_default_room_options
+func kuzzle_set_default_room_options(copts *C.room_options) {
+	opts := types.NewRoomOptions()
+
+	copts.scope = C.CString(opts.Scope())
+	copts.state = C.CString(opts.State())
+	copts.users = C.CString(opts.Users())
+	copts.volatiles = C.CString(string(opts.Volatile()))
+	copts.subscribe_to_self = C.bool(opts.SubscribeToSelf())
+}
+
+//export kuzzle_set_default_options
+func kuzzle_set_default_options(copts *C.options) {
 	opts := types.NewOptions()
 
 	copts.queue_ttl = C.uint(opts.QueueTTL())
@@ -50,8 +77,6 @@ func kuzzle_new_options() *C.options {
 	if len(refresh) > 0 {
 		copts.refresh = C.CString(refresh)
 	}
-
-	return copts
 }
 
 func SetQueryOptions(options *C.query_options) (opts types.QueryOptions) {
