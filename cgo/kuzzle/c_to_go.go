@@ -229,7 +229,7 @@ func cToGoKuzzleResponse(r *C.kuzzle_response) *types.KuzzleResponse {
 	}
 
 	response.Result = json.RawMessage(C.GoString(r.result))
-	response.Volatile, _ = json.Marshal(r.volatiles)
+	response.Volatile = json.RawMessage(C.GoString(r.volatiles))
 
 	return response
 }
