@@ -223,11 +223,13 @@ func cToGoKuzzleResponse(r *C.kuzzle_response) *types.KuzzleResponse {
 		Status:     int(r.status),
 	}
 
-	response.Error = types.NewError(C.GoString(r.error), int(r.status))
-	response.Error.Stack = C.GoString(r.stack)
+	if r.error != nil {
+		response.Error = types.NewError(C.GoString(r.error), int(r.status))
+		response.Error.Stack = C.GoString(r.stack)
+	}
 
-	response.Result, _ = json.Marshal(r.result)
-	response.Volatile, _ = json.Marshal(r.volatiles)
+	response.Result = json.RawMessage(C.GoString(r.result))
+	response.Volatile = json.RawMessage(C.GoString(r.volatiles))
 
 	return response
 }
