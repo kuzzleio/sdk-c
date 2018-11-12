@@ -20,20 +20,6 @@
 
 typedef struct {
   void* instance;
-  bool auto_queue;
-  bool auto_reconnect;
-  bool auto_resubscribe;
-  bool auto_replay;
-  const char* host;
-  offline_queue* kuzzle_offline_queue;
-  kuzzle_offline_queue_loader offline_queue_loader;
-  int port;
-  kuzzle_queue_filter queue_filter;
-  unsigned long long queue_max_size;
-  unsigned long long queue_ttl;
-  unsigned long long replay_interval;
-  unsigned long long reconnection_delay;
-  bool ssl_connection;
 
   void (*add_listener)(int, kuzzle_event_listener*, void*);
   void (*remove_listener)(int, kuzzle_event_listener*, void*);
@@ -52,6 +38,15 @@ typedef struct {
   void (*stop_queuing)(void*);
   void (*play_queue)(void*);
   void (*clear_queue)(void*);
+
+  bool (*is_auto_queue)(void*);
+  bool (*is_auto_reconnect)(void*);
+  bool (*is_auto_resubscribe)(void*);
+  const char* (*get_host)(void*);
+  unsigned int (*get_port)(void*);
+  unsigned long long (*get_reconnection_delay)(void*);
+  bool (*is_ssl_connection)(void*);
+
 } protocol;
 
 #endif

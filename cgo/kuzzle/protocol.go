@@ -79,6 +79,34 @@ package main
 		return f(data);
 	}
 
+	static bool bridge_is_auto_queue(bool (*f)(void*), void* data) {
+		return f(data);
+	}
+
+	static bool bridge_is_auto_reconnect(bool (*f)(void*), void* data) {
+		return f(data);
+	}
+
+	static bool bridge_is_auto_resubscribe(bool (*f)(void*), void* data) {
+		return f(data);
+	}
+
+	static const char* bridge_get_host(const char* (*f)(void*), void* data) {
+		return f(data);
+	}
+
+	static unsigned int bridge_get_port(unsigned int (*f)(void*), void* data) {
+		return f(data);
+	}
+
+	static unsigned long long bridge_get_reconnection_delay(unsigned long long (*f)(void*), void* data) {
+		return f(data);
+	}
+
+	static bool bridge_is_ssl_connection(bool (*f)(void*), void* data) {
+		return f(data);
+	}
+
 	extern void bridge_listener(int, char*, void*);
 	extern void bridge_listener_once(int, char*, void*);
 
@@ -148,6 +176,7 @@ func bridge_listener(event C.int, res *C.char, data unsafe.Pointer) {
 //export bridge_listener_once
 func bridge_listener_once(event C.int, res *C.char, data unsafe.Pointer) {
 	for c := range _list_once_listeners[int(event)] {
+		println("bridge_listener_once protocol")
 		c <- json.RawMessage(C.GoString(res))
 	}
 }
@@ -253,97 +282,109 @@ func (wp WrapProtocol) ClearQueue() {
 }
 
 func (wp WrapProtocol) AutoQueue() bool {
-	return bool(wp.P.auto_queue)
+	return bool(C.bridge_is_auto_queue(wp.P.is_auto_queue, wp.P.instance))
 }
 
 func (wp WrapProtocol) AutoReconnect() bool {
-	return bool(wp.P.auto_reconnect)
+	return bool(C.bridge_is_auto_reconnect(wp.P.is_auto_reconnect, wp.P.instance))
 }
 
 func (wp WrapProtocol) AutoResubscribe() bool {
-	return bool(wp.P.auto_resubscribe)
+	return bool(C.bridge_is_auto_resubscribe(wp.P.is_auto_resubscribe, wp.P.instance))
 }
 
+// Deprecated
 func (wp WrapProtocol) AutoReplay() bool {
-	return bool(wp.P.auto_replay)
+	//@todo will be moved in Kuzzle object
+	return false
 }
 
 func (wp WrapProtocol) Host() string {
-	return C.GoString(wp.P.host)
+	return C.GoString(C.bridge_get_host(wp.P.get_host, wp.P.instance))
 }
 
+// Deprecated
 func (wp WrapProtocol) OfflineQueue() []*types.QueryObject {
-	tmpslice := (*[1<<28 - 1]*C.query_object)(unsafe.Pointer(wp.P.kuzzle_offline_queue.queries))[:wp.P.kuzzle_offline_queue.queries_length]
-	goOfflineQueue := make([]*types.QueryObject, 0, int(wp.P.kuzzle_offline_queue.queries_length))
-
-	for _, s := range tmpslice {
-		cQuery := cToGoQueryObject(s, nil)
-		goOfflineQueue = append(goOfflineQueue, cQuery)
-	}
-
-	return goOfflineQueue
+	//@todo will be moved in Kuzzle object
+	return nil
 }
 
+// Deprecated
 func (wp WrapProtocol) OfflineQueueLoader() protocol.OfflineQueueLoader {
-	// @todo
+	//@todo will be moved in Kuzzle object
 	var offline protocol.OfflineQueueLoader
 	return offline
 }
 
 func (wp WrapProtocol) Port() int {
-	return int(wp.P.port)
+	return int(C.bridge_get_port(wp.P.get_port, wp.P.instance))
 }
 
+// Deprecated
 func (wp WrapProtocol) QueueFilter() protocol.QueueFilter {
+	//@todo will be moved in Kuzzle object
 	return func(data []byte) bool {
-		return bool(C.bridge_queue_filter(wp.P.queue_filter, C.CString(string(data))))
+		return false
 	}
 }
 
+// Deprecated
 func (wp WrapProtocol) QueueMaxSize() int {
-	return int(wp.P.queue_max_size)
+	//@todo will be moved in Kuzzle object
+	return -1
 }
 
+// Deprecated
 func (wp WrapProtocol) QueueTTL() time.Duration {
-	return time.Duration(int(wp.P.queue_ttl))
+	//@todo will be moved in Kuzzle object
+	return time.Duration(0)
 }
 
+// Deprecated
 func (wp WrapProtocol) ReplayInterval() time.Duration {
-	return time.Duration(int(wp.P.replay_interval))
+	//@todo will be moved in Kuzzle object
+	return time.Duration(0)
 }
 
 func (wp WrapProtocol) ReconnectionDelay() time.Duration {
-	return time.Duration(int(wp.P.reconnection_delay))
+	return time.Duration(int(C.bridge_get_reconnection_delay(wp.P.get_reconnection_delay, wp.P.instance)))
 }
 
 func (wp WrapProtocol) SslConnection() bool {
-	return bool(wp.P.ssl_connection)
+	return bool(C.bridge_is_ssl_connection(wp.P.is_ssl_connection, wp.P.instance))
 }
 
+// Deprecated
 func (wp WrapProtocol) SetAutoQueue(value bool) {
-	wp.P.auto_queue = C.bool(value)
+	//@todo will be moved in Kuzzle object
 }
 
+// Deprecated
 func (wp WrapProtocol) SetAutoReplay(value bool) {
-	wp.P.auto_replay = C.bool(value)
+	//@todo will be moved in Kuzzle object
 }
 
+// Deprecated
 func (wp WrapProtocol) SetOfflineQueueLoader(value protocol.OfflineQueueLoader) {
-	//@todo
+	//@todo will be moved in Kuzzle object
 }
 
+// Deprecated
 func (wp WrapProtocol) SetQueueFilter(value protocol.QueueFilter) {
-	wp.P.queue_filter = C.kuzzle_queue_filter(unsafe.Pointer(&value))
+	//@todo will be moved in Kuzzle object
 }
 
+// Deprecated
 func (wp WrapProtocol) SetQueueMaxSize(value int) {
-	wp.P.queue_max_size = C.ulonglong(value)
+	//@todo will be moved in Kuzzle object
 }
 
+// Deprecated
 func (wp WrapProtocol) SetQueueTTL(value time.Duration) {
-	wp.P.queue_ttl = C.ulonglong(value)
+	//@todo will be moved in Kuzzle object
 }
 
+// Deprecated
 func (wp WrapProtocol) SetReplayInterval(value time.Duration) {
-	wp.P.replay_interval = C.ulonglong(value)
+	//@todo will be moved in Kuzzle object
 }

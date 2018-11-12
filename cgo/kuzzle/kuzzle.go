@@ -211,7 +211,6 @@ func kuzzle_add_listener(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data 
 	c := make(chan json.RawMessage)
 
 	listeners_list[uintptr(unsafe.Pointer(cb))] = c
-	(*kuzzle.Kuzzle)(k.instance).AddListener(int(e), c)
 	go func() {
 		for {
 			res, ok := <-c
@@ -223,6 +222,7 @@ func kuzzle_add_listener(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data 
 			C.kuzzle_trigger_event(e, cb, C.CString(string(r)), data)
 		}
 	}()
+	(*kuzzle.Kuzzle)(k.instance).AddListener(int(e), c)
 }
 
 //export kuzzle_once
@@ -230,7 +230,6 @@ func kuzzle_once(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data unsafe.P
 	c := make(chan json.RawMessage)
 
 	listeners_list[uintptr(unsafe.Pointer(cb))] = c
-	(*kuzzle.Kuzzle)(k.instance).Once(int(e), c)
 	go func() {
 		res := <-c
 
@@ -238,6 +237,7 @@ func kuzzle_once(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data unsafe.P
 
 		C.kuzzle_trigger_event(e, cb, C.CString(string(r)), data)
 	}()
+	(*kuzzle.Kuzzle)(k.instance).Once(int(e), c)
 }
 
 //export kuzzle_listener_count

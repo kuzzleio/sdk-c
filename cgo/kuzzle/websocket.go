@@ -42,7 +42,6 @@ var webSocketInstances sync.Map
 var _event_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage
 var _event_once_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage
 
-
 // register new instance to the instances map
 func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
 	webSocketInstances.Store(instance, ptr)
@@ -186,4 +185,34 @@ func kuzzle_websocket_clear_queue(ws *C.web_socket) {
 //export kuzzle_websocket_remove_all_listeners
 func kuzzle_websocket_remove_all_listeners(ws *C.web_socket, event C.int) {
 	(*websocket.WebSocket)(ws.instance).RemoveAllListeners(int(event))
+}
+
+//export kuzzle_websocket_is_auto_reconnect
+func kuzzle_websocket_is_auto_reconnect(ws *C.web_socket) C.bool {
+	return C.bool((*websocket.WebSocket)(ws.instance).AutoReconnect())
+}
+
+//export kuzzle_websocket_is_auto_resubscribe
+func kuzzle_websocket_is_auto_resubscribe(ws *C.web_socket) C.bool {
+	return C.bool((*websocket.WebSocket)(ws.instance).AutoResubscribe())
+}
+
+//export kuzzle_websocket_get_host
+func kuzzle_websocket_get_host(ws *C.web_socket) *C.char {
+	return C.CString((*websocket.WebSocket)(ws.instance).Host())
+}
+
+//export kuzzle_websocket_get_port
+func kuzzle_websocket_get_port(ws *C.web_socket) C.int {
+	return C.int((*websocket.WebSocket)(ws.instance).Port())
+}
+
+//export kuzzle_websocket_get_reconnection_delay
+func kuzzle_websocket_get_reconnection_delay(ws *C.web_socket) C.int {
+	return C.int((*websocket.WebSocket)(ws.instance).ReconnectionDelay())
+}
+
+//export kuzzle_websocket_is_ssl_connection
+func kuzzle_websocket_is_ssl_connection(ws *C.web_socket) C.bool {
+	return C.bool((*websocket.WebSocket)(ws.instance).SslConnection())
 }
