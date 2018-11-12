@@ -121,7 +121,9 @@ func SetOptions(options *C.options) (opts types.Options) {
 	opts.SetAutoResubscribe(bool(options.auto_resubscribe))
 	opts.SetReconnectionDelay(time.Duration(int(options.reconnection_delay)))
 	opts.SetReplayInterval(time.Duration(int(options.replay_interval)))
-	opts.SetRefresh(C.GoString(options.refresh))
+	if options.refresh != nil {
+		opts.SetRefresh(C.GoString(options.refresh))
+	}
 
 	return
 }
