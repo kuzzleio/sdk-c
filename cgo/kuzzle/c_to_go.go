@@ -222,7 +222,7 @@ func cToGoKuzzleResponse(r *C.kuzzle_response) *types.KuzzleResponse {
 	return response
 }
 
-func cToGoSearchResult(s *C.search_result) *types.SearchResult {
+func cToGoSearchResult(s *C.search_result) (*types.SearchResult, error) {
 	options := types.NewQueryOptions()
 
 	options.SetSize(int(s.options.size))
@@ -237,10 +237,10 @@ func cToGoSearchResult(s *C.search_result) *types.SearchResult {
 
 	sr, err := types.NewSearchResult(kuzzle, scrollAction, request, options, response)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return sr
+	return sr, nil
 }
 
 func cToGoKuzzleNotificationChannel(c *C.kuzzle_notification_listener) chan<- types.KuzzleNotification {
