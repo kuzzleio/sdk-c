@@ -48,11 +48,11 @@ ifeq ($(wildcard $(GOCC)),)
 endif
 endif
 ifeq ($(GOOS), android)
-	$(GOCC) build -o $(GOTARGET) $(GOFLAGSSHARED) $(GOSRC)
+	$(GOCC) build  -o $(GOTARGET) $(GOFLAGSSHARED) $(GOSRC)
 else
-	$(GOCC) build -o $(GOTARGET) $(GOFLAGS) $(GOSRC)
+	$(GOCC) build  -o $(GOTARGET) $(GOFLAGS) $(GOSRC)
 endif
-	$(GOCC) build -o $(GOTARGETSO) $(GOFLAGSSHARED) $(GOSRC)
+	$(GOCC) build  -o $(GOTARGETSO) $(GOFLAGSSHARED) $(GOSRC)
 ifeq ($(OS),Windows_NT)
 	$(MV) $(subst /,\,$(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h) kuzzle.h
 else
@@ -69,8 +69,8 @@ endif
 c: export GOPATH = $(ROOT_DIR)go
 c: makedir pre_core core
 	 cd $(ROOTOUTDIR) && mv $(GOTARGET) $(GOTARGET).$(VERSION) && mv $(GOTARGETSO) $(GOTARGETSO).$(VERSION)
-	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
-	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
+	 cd $(ROOTOUTDIR) && ln -s $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
+	 cd $(ROOTOUTDIR) && ln -s $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
 
 package: $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION)
 	mkdir $(ROOTOUTDIR)$(PATHSEP)lib
