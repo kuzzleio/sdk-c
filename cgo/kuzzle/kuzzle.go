@@ -19,6 +19,7 @@ package main
 	#include <stdlib.h>
 	#include <string.h>
 	#include "kuzzlesdk.h"
+	#include "protocol.h"
 	#include "sdk_wrappers_internal.h"
 */
 import "C"
@@ -29,8 +30,6 @@ import (
 	"unsafe"
 
 	"github.com/kuzzleio/sdk-go/kuzzle"
-	"github.com/kuzzleio/sdk-go/protocol"
-	"github.com/kuzzleio/sdk-go/protocol/websocket"
 	"github.com/kuzzleio/sdk-go/types"
 )
 
@@ -52,20 +51,16 @@ func unregisterKuzzle(k *C.kuzzle) {
 }
 
 //export kuzzle_new_kuzzle
-func kuzzle_new_kuzzle(k *C.kuzzle, host, proto *C.char, options *C.options) {
-	var c protocol.Protocol
-
+func kuzzle_new_kuzzle(k *C.kuzzle, protocol *C.protocol, options *C.options) {
 	if listeners_list == nil {
 		listeners_list = make(map[uintptr]chan<- json.RawMessage)
 	}
 
 	opts := SetOptions(options)
 
-	if C.GoString(proto) == "websocket" {
-		c = websocket.NewWebSocket(C.GoString(host), opts)
-	}
+	p := NewWrapProtocol(protocol)
 
-	inst, err := kuzzle.NewKuzzle(c, opts)
+	inst, err := kuzzle.NewKuzzle(*p, opts)
 
 	if err != nil {
 		panic(err.Error())
@@ -160,7 +155,7 @@ func kuzzle_disconnect(k *C.kuzzle) {
 
 //export kuzzle_emit_event
 func kuzzle_emit_event(k *C.kuzzle, event C.int, body *C.char) {
-	(*kuzzle.Kuzzle)(k.instance).EmitEvent(int(event), C.GoString(body))
+	(*kuzzle.Kuzzle)(k.instance).EmitEvent(int(event), nil)
 }
 
 //export kuzzle_get_offline_queue
@@ -216,7 +211,6 @@ func kuzzle_add_listener(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data 
 	c := make(chan json.RawMessage)
 
 	listeners_list[uintptr(unsafe.Pointer(cb))] = c
-	(*kuzzle.Kuzzle)(k.instance).AddListener(int(e), c)
 	go func() {
 		for {
 			res, ok := <-c
@@ -228,6 +222,7 @@ func kuzzle_add_listener(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data 
 			C.kuzzle_trigger_event(e, cb, C.CString(string(r)), data)
 		}
 	}()
+	(*kuzzle.Kuzzle)(k.instance).AddListener(int(e), c)
 }
 
 //export kuzzle_once
@@ -235,7 +230,6 @@ func kuzzle_once(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data unsafe.P
 	c := make(chan json.RawMessage)
 
 	listeners_list[uintptr(unsafe.Pointer(cb))] = c
-	(*kuzzle.Kuzzle)(k.instance).Once(int(e), c)
 	go func() {
 		res := <-c
 
@@ -243,6 +237,7 @@ func kuzzle_once(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data unsafe.P
 
 		C.kuzzle_trigger_event(e, cb, C.CString(string(r)), data)
 	}()
+	(*kuzzle.Kuzzle)(k.instance).Once(int(e), c)
 }
 
 //export kuzzle_listener_count

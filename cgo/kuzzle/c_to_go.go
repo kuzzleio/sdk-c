@@ -18,10 +18,20 @@ package main
 	#cgo CFLAGS: -I../../include
 	#include <stdlib.h>
 	#include "kuzzlesdk.h"
+	#include "sdk_wrappers_internal.h"
+
+	static void bridge_trigger_kuzzle_notification_result(kuzzle_notification_listener f, notification_result* res, void* data) {
+    f(res, data);
+	}
+
+	static void bridge_trigger_kuzzle_response(kuzzle_response_listener f, kuzzle_response* res, void* data) {
+    f(res, data);
+	}
 */
 import "C"
 import (
 	"encoding/json"
+	"time"
 	"unsafe"
 
 	"github.com/kuzzleio/sdk-go/collection"
@@ -213,11 +223,13 @@ func cToGoKuzzleResponse(r *C.kuzzle_response) *types.KuzzleResponse {
 		Status:     int(r.status),
 	}
 
-	response.Error = types.NewError(C.GoString(r.error), int(r.status))
-	response.Error.Stack = C.GoString(r.stack)
+	if r.error != nil {
+		response.Error = types.NewError(C.GoString(r.error), int(r.status))
+		response.Error.Stack = C.GoString(r.stack)
+	}
 
-	response.Result, _ = json.Marshal(r.result)
-	response.Volatile, _ = json.Marshal(r.volatiles)
+	response.Result = json.RawMessage(C.GoString(r.result))
+	response.Volatile = json.RawMessage(C.GoString(r.volatiles))
 
 	return response
 }
@@ -246,3 +258,41 @@ func cToGoSearchResult(s *C.search_result) (*types.SearchResult, error) {
 func cToGoKuzzleNotificationChannel(c *C.kuzzle_notification_listener) chan<- types.KuzzleNotification {
 	return make(chan<- types.KuzzleNotification)
 }
+
+func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObject {
+	notifChan := make(chan *types.KuzzleNotification)
+	go func() {
+		for {
+			res, ok := <-notifChan
+			if ok == false {
+				break
+			}
+
+			C.bridge_trigger_kuzzle_notification_result(cqo.listener, goToCNotificationResult(res), data)
+		}
+	}()
+
+	resChan := make(chan *types.KuzzleResponse)
+	go func() {
+		for {
+			res, ok := <-resChan
+			if ok == false {
+				break
+			}
+
+			C.bridge_trigger_kuzzle_response(cqo.response_listener, goToCKuzzleResponse(res), data)
+		}
+	}()
+
+	goqo := &types.QueryObject{
+		Query:     []byte(C.GoString(cqo.query)),
+		Options:   SetQueryOptions(&cqo.options),
+		NotifChan: notifChan,
+		ResChan:   resChan,
+		Timestamp: time.Unix(int64(cqo.timestamp), 0),
+		RequestId: C.GoString(cqo.request_id),
+	}
+
+	return goqo
+}
+

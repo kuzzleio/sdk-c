@@ -32,7 +32,7 @@ func kuzzle_query(k *C.kuzzle, request *C.kuzzle_request, options *C.query_optio
 	req := cToGoKuzzleRequest(request)
 
 	resC := make(chan *types.KuzzleResponse)
-	(*kuzzle.Kuzzle)(k.instance).Query(req, opts, resC)
+	go (*kuzzle.Kuzzle)(k.instance).Query(req, opts, resC)
 
 	res := <-resC
 
