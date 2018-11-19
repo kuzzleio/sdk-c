@@ -176,7 +176,6 @@ func bridge_listener(event C.int, res *C.char, data unsafe.Pointer) {
 //export bridge_listener_once
 func bridge_listener_once(event C.int, res *C.char, data unsafe.Pointer) {
 	for c := range _list_once_listeners[int(event)] {
-		println("bridge_listener_once protocol")
 		c <- json.RawMessage(C.GoString(res))
 	}
 }
@@ -223,9 +222,6 @@ func (wp WrapProtocol) Connect() (bool, error) {
 
 func (wp WrapProtocol) Send(query []byte, options types.QueryOptions, responseChannel chan<- *types.KuzzleResponse, requestId string) error {
 	res := C.bridge_send(wp.P.send, C.CString(string(query[:])), goToCQueryOptions(options), C.CString(requestId), wp.P.instance)
-	if res.error != nil {
-		return errors.New(C.GoString(res.error))
-	}
 	if responseChannel != nil {
 		responseChannel <- cToGoKuzzleResponse(res)
 	}
