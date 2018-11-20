@@ -109,6 +109,7 @@ package main
 
 	extern void bridge_listener(int, char*, void*);
 	extern void bridge_listener_once(int, char*, void*);
+	extern void bridge_notification(char*, notification_result*, void*);
 
 	static void call_bridge(int event, char* res, void* data) {
 		bridge_listener(event, res, data);
@@ -116,6 +117,10 @@ package main
 
 	static void call_bridge_once(int event, char* res, void* data) {
 		bridge_listener_once(event, res, data);
+	}
+
+	static void call_notification_bridge(char* room_id, notification_result* result, void* data) {
+		bridge_notification(room_id, result, data);
 	}
 
 	static kuzzle_event_listener get_bridge_fptr() {
@@ -146,6 +151,7 @@ var proto_instances sync.Map
 
 var _list_listeners map[int]map[chan<- json.RawMessage]bool
 var _list_once_listeners map[int]map[chan<- json.RawMessage]bool
+var _list_notification_listeners map[string]chan<- types.KuzzleNotification
 
 // register new instance to the instances map
 func registerProtocol(instance interface{}, ptr unsafe.Pointer) {
@@ -242,6 +248,13 @@ func (wp WrapProtocol) State() int {
 
 func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
 	C.bridge_emit_event(wp.P.emit_event, C.int(event), nil, wp.P.instance)
+}
+
+//export bridge_notification
+func bridge_notification(roomId *C.char, res *C.notification_result, data unsafe.Pointer) {
+	for c := range _list_notification_listeners[C.GoString(roomId)] {
+		c <- json.RawMessage(C.GoString(res))
+	}
 }
 
 func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<- types.KuzzleNotification, chan<- interface{}) {

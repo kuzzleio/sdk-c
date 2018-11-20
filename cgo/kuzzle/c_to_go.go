@@ -296,3 +296,66 @@ func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObje
 	return goqo
 }
 
+// typedef struct {
+// 	const char *id;
+// 	meta *m;
+// 	const char *content;
+// 	int count;
+// } notification_content;
+
+// typedef struct notification_result {
+// 	const char *request_id;
+// 	notification_content *result;
+// 	const char *volatiles;
+// 	const char *index;
+// 	const char *collection;
+// 	const char *controller;
+// 	const char *action;
+// 	const char *protocol;
+// 	const char *scope;
+// 	const char *state;
+// 	const char *user;
+// 	const char *n_type;
+// 	const char *room_id;
+// 	unsigned long long timestamp;
+// 	int status;
+// 	const char *error;
+// 	const char *stack;
+// } notification_result;
+
+// ------------------------
+
+// KuzzleNotification struct {
+// 	RequestId  string              `json:"requestId"`
+// 	Result     *NotificationResult `json:"result"`
+// 	Volatile   json.RawMessage     `json:"volatile"`
+// 	Index      string              `json:"index"`
+// 	Collection string              `json:"collection"`
+// 	Controller string              `json:"controller"`
+// 	Action     string              `json:"action"`
+// 	Protocol   string              `json:"protocol"`
+// 	Scope      string              `json:"scope"`
+// 	State      string              `json:"state"`
+// 	User       string              `json:"user"`
+// 	Type       string              `json:"type"`
+// 	RoomId     string              `json:"room"`
+// 	Channel    string              `json:"channel"`
+// 	Timestamp  int                 `json:"timestamp"`
+// 	Status     int                 `json:"status"`
+// 	Error      KuzzleError         `json:"error"`
+// }
+
+// NotificationResult struct {
+// 	Id      string          `json:"_id"`
+// 	Meta    *Meta           `json:"_meta"`
+// 	Content json.RawMessage `json:"_source"`
+// 	Count   int             `json:"count"`
+// }
+
+func cToGoNotificationResult(cnr *C.notification_result, data unsafe.Pointer) *types.NotificationResult {
+	notifResult := types.NotificationResult{
+		
+	}
+
+	return &notifResult
+}
