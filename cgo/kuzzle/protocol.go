@@ -244,7 +244,7 @@ func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
 	C.bridge_emit_event(wp.P.emit_event, C.int(event), nil, wp.P.instance)
 }
 
-func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<- types.KuzzleNotification, chan<- interface{}) {
+func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<- types.NotificationResult, chan<- interface{}) {
 	//@todo
 }
 
