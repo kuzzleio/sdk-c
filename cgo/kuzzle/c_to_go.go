@@ -234,7 +234,7 @@ func cToGoKuzzleResponse(r *C.kuzzle_response) *types.KuzzleResponse {
 	return response
 }
 
-func cToGoSearchResult(s *C.search_result) *types.SearchResult {
+func cToGoSearchResult(s *C.search_result) (*types.SearchResult, error) {
 	options := types.NewQueryOptions()
 
 	options.SetSize(int(s.options.size))
@@ -249,18 +249,18 @@ func cToGoSearchResult(s *C.search_result) *types.SearchResult {
 
 	sr, err := types.NewSearchResult(kuzzle, scrollAction, request, options, response)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return sr
+	return sr, nil
 }
 
-func cToGoKuzzleNotificationChannel(c *C.kuzzle_notification_listener) chan<- types.KuzzleNotification {
-	return make(chan<- types.KuzzleNotification)
+func cToGoNotificationResultChannel(c *C.kuzzle_notification_listener) chan<- types.NotificationResult {
+	return make(chan<- types.NotificationResult)
 }
 
 func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObject {
-	notifChan := make(chan *types.KuzzleNotification)
+	notifChan := make(chan *types.NotificationResult)
 	go func() {
 		for {
 			res, ok := <-notifChan
@@ -296,65 +296,38 @@ func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObje
 	return goqo
 }
 
-// typedef struct {
-// 	const char *id;
-// 	meta *m;
-// 	const char *content;
-// 	int count;
-// } notification_content;
+func CToGoNotificationContent(cnc *C.notification_content) *types.NotificationContent {
+	notifContent := types.NotificationContent{
+		Id: C.GoString(cnc.id),
+		Meta: cToGoKuzzleMeta(cnc.m),
+		Content: json.RawMessage(C.GoString(cnc.content)),
+		Count: int(cnc.count),
+	}
 
-// typedef struct notification_result {
-// 	const char *request_id;
-// 	notification_content *result;
-// 	const char *volatiles;
-// 	const char *index;
-// 	const char *collection;
-// 	const char *controller;
-// 	const char *action;
-// 	const char *protocol;
-// 	const char *scope;
-// 	const char *state;
-// 	const char *user;
-// 	const char *n_type;
-// 	const char *room_id;
-// 	unsigned long long timestamp;
-// 	int status;
-// 	const char *error;
-// 	const char *stack;
-// } notification_result;
+	return &notifContent
+}
 
-// ------------------------
-
-// KuzzleNotification struct {
-// 	RequestId  string              `json:"requestId"`
-// 	Result     *NotificationResult `json:"result"`
-// 	Volatile   json.RawMessage     `json:"volatile"`
-// 	Index      string              `json:"index"`
-// 	Collection string              `json:"collection"`
-// 	Controller string              `json:"controller"`
-// 	Action     string              `json:"action"`
-// 	Protocol   string              `json:"protocol"`
-// 	Scope      string              `json:"scope"`
-// 	State      string              `json:"state"`
-// 	User       string              `json:"user"`
-// 	Type       string              `json:"type"`
-// 	RoomId     string              `json:"room"`
-// 	Channel    string              `json:"channel"`
-// 	Timestamp  int                 `json:"timestamp"`
-// 	Status     int                 `json:"status"`
-// 	Error      KuzzleError         `json:"error"`
-// }
-
-// NotificationResult struct {
-// 	Id      string          `json:"_id"`
-// 	Meta    *Meta           `json:"_meta"`
-// 	Content json.RawMessage `json:"_source"`
-// 	Count   int             `json:"count"`
-// }
-
-func cToGoNotificationResult(cnr *C.notification_result, data unsafe.Pointer) *types.NotificationResult {
+func cToGoNotificationResult(cnr *C.notification_result) *types.NotificationResult {
 	notifResult := types.NotificationResult{
-		
+		RequestId: C.GoString(cnr.request_id),
+		Result: CToGoNotificationContent(cnr.result),
+		Volatile: json.RawMessage(C.GoString(cnr.volatiles)),
+		Index: C.GoString(cnr.index),
+		Collection: C.GoString(cnr.collection),
+		Controller: C.GoString(cnr.controller),
+		Action: C.GoString(cnr.action),
+		Protocol: C.GoString(cnr.protocol),
+		Scope: C.GoString(cnr.scope),
+		State: C.GoString(cnr.state),
+		User: C.GoString(cnr.user),
+		Type: C.GoString(cnr.n_type),
+		RoomId: C.GoString(cnr.room_id),
+		Timestamp: int(cnr.timestamp),
+	}
+
+	if cnr.error != nil {
+		notifResult.Error = types.NewError(C.GoString(cnr.error), int(cnr.status))
+		notifResult.Error.Stack = C.GoString(cnr.stack)
 	}
 
 	return &notifResult

@@ -76,6 +76,8 @@ func kuzzle_set_default_options(copts *C.options) {
 	refresh := opts.Refresh()
 	if len(refresh) > 0 {
 		copts.refresh = C.CString(refresh)
+	} else {
+		copts.refresh = nil
 	}
 }
 

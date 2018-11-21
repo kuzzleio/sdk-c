@@ -151,7 +151,7 @@ var proto_instances sync.Map
 
 var _list_listeners map[int]map[chan<- json.RawMessage]bool
 var _list_once_listeners map[int]map[chan<- json.RawMessage]bool
-var _list_notification_listeners map[string]chan<- types.KuzzleNotification
+var _list_notification_listeners map[string]chan types.NotificationResult
 
 // register new instance to the instances map
 func registerProtocol(instance interface{}, ptr unsafe.Pointer) {
@@ -168,6 +168,7 @@ func NewWrapProtocol(p *C.protocol) *WrapProtocol {
 	registerProtocol(p, ptr_proto)
 	_list_listeners = make(map[int]map[chan<- json.RawMessage]bool)
 	_list_once_listeners = make(map[int]map[chan<- json.RawMessage]bool)
+	_list_notification_listeners = make(map[string]chan types.NotificationResult)
 
 	return &WrapProtocol{p}
 }
@@ -252,12 +253,10 @@ func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
 
 //export bridge_notification
 func bridge_notification(roomId *C.char, res *C.notification_result, data unsafe.Pointer) {
-	for c := range _list_notification_listeners[C.GoString(roomId)] {
-		c <- json.RawMessage(C.GoString(res))
-	}
+	_list_notification_listeners[C.GoString(roomId)] <- *cToGoNotificationResult(res)
 }
 
-func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<- types.KuzzleNotification, chan<- interface{}) {
+func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<- types.NotificationResult, chan<- interface{}) {
 	//@todo
 }
 

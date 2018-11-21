@@ -57,7 +57,11 @@ func kuzzle_new_document(d *C.document, k *C.kuzzle) {
 
 //export kuzzle_document_count
 func kuzzle_document_count(d *C.document, index *C.char, collection *C.char, body *C.char, options *C.query_options) *C.int_result {
-	res, err := (*document.Document)(d.instance).Count(C.GoString(index), C.GoString(collection), json.RawMessage(C.GoString(body)), SetQueryOptions(options))
+	var b json.RawMessage
+	if body != nil {
+		b = json.RawMessage(C.GoString(body))
+	}
+	res, err := (*document.Document)(d.instance).Count(C.GoString(index), C.GoString(collection), b, SetQueryOptions(options))
 	return goToCIntResult(res, err)
 }
 
