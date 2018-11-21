@@ -36,15 +36,18 @@ GOSRC = .$(PATHSEP)cgo$(PATHSEP)kuzzle$(PATHSEP)
 GOTARGET = $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB)
 GOTARGETSO = $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB)
 
+CORE_SRC = $(wildcard $(GOSRC)*.go)
 all: c
 
 pre_core:
 	cd $(SDKGOPATH) && go get .$(PATHSEP)...
+	touch pre_core
 
-core:
+core: $(CORE_SRC)
+	echo $(CORE_SRC)
 ifneq ($(OS),Windows_NT)
 ifeq ($(wildcard $(GOCC)),)
-	$(error "Unable to find go compiler")
+	$(error "Unable to find go compiler in $(GOCC)")
 endif
 endif
 ifeq ($(GOOS), android)
@@ -53,13 +56,18 @@ else
 	$(GOCC) build -o $(GOTARGET) $(GOFLAGS) $(GOSRC)
 endif
 	$(GOCC) build -o $(GOTARGETSO) $(GOFLAGSSHARED) $(GOSRC)
+
+	cd $(ROOTOUTDIR) && rm -f $(GOTARGET).$(VERSION) $(GOTARGETSO).$(VERSION)
+	cd $(ROOTOUTDIR) && mv $(GOTARGET) $(GOTARGET).$(VERSION) && mv $(GOTARGETSO) $(GOTARGETSO).$(VERSION)
+
 ifeq ($(OS),Windows_NT)
 	$(MV) $(subst /,\,$(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h) kuzzle.h
 else
 	$(MV) $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h $(ROOTOUTDIR)$(PATHSEP)kuzzle.h
 endif
+	touch core
 
-makedir:
+$(ROOTOUTDIR):
 ifeq ($(OS),Windows_NT)
 	@if not exist $(subst /,\,$(ROOTOUTDIR)) mkdir $(subst /,\,$(ROOTOUTDIR))
 else
@@ -67,10 +75,9 @@ else
 endif
 
 c: export GOPATH = $(ROOT_DIR)go
-c: makedir pre_core core
-	 cd $(ROOTOUTDIR) && mv $(GOTARGET) $(GOTARGET).$(VERSION) && mv $(GOTARGETSO) $(GOTARGETSO).$(VERSION)
-	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
-	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
+c: $(ROOTOUTDIR) pre_core core
+	 cd $(ROOTOUTDIR) && ln -srf $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
+	 cd $(ROOTOUTDIR) && ln -srf $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
 
 package: $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION)
 	mkdir $(ROOTOUTDIR)$(PATHSEP)lib
@@ -98,7 +105,7 @@ else
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)satori
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)stretchr
 endif
-.PHONY: all c core clean
+.PHONY: all c clean
 
 
 .DEFAULT_GOAL := all
