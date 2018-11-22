@@ -2,7 +2,7 @@ VERSION = 1.0.0
 
 ROOT_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-SDK_FOLDER_NAME=kuzzle-cpp-sdk
+SDK_FOLDER_NAME=kuzzle-c-sdk
 
 ifeq ($(OS),Windows_NT)
 	STATICLIB = .lib
