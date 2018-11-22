@@ -120,8 +120,8 @@ func kuzzle_collection_get_specifications(c *C.collection, index *C.char, col *C
 }
 
 //export kuzzle_collection_search_specifications
-func kuzzle_collection_search_specifications(c *C.collection, options *C.query_options) *C.search_result {
-	res, err := (*collection.Collection)(c.instance).SearchSpecifications(SetQueryOptions(options))
+func kuzzle_collection_search_specifications(c *C.collection, body *C.char, options *C.query_options) *C.search_result {
+	res, err := (*collection.Collection)(c.instance).SearchSpecifications(json.RawMessage(C.GoString(body)), SetQueryOptions(options))
 	return goToCSearchResult(c.k, res, err)
 }
 
