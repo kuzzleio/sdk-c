@@ -255,12 +255,12 @@ func cToGoSearchResult(s *C.search_result) (*types.SearchResult, error) {
 	return sr, nil
 }
 
-func cToGoKuzzleNotificationChannel(c *C.kuzzle_notification_listener) chan<- types.KuzzleNotification {
-	return make(chan<- types.KuzzleNotification)
+func cToGoNotificationResultChannel(c *C.kuzzle_notification_listener) chan<- types.NotificationResult {
+	return make(chan<- types.NotificationResult)
 }
 
 func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObject {
-	notifChan := make(chan *types.KuzzleNotification)
+	notifChan := make(chan *types.NotificationResult)
 	go func() {
 		for {
 			res, ok := <-notifChan
