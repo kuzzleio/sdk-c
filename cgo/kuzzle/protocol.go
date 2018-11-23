@@ -272,7 +272,7 @@ func (wp WrapProtocol) RegisterSub(channel, roomID string, filters json.RawMessa
 
 func (wp WrapProtocol) UnregisterSub(id string) {
 	C.bridge_unregister_sub(wp.P.unregister_sub, C.CString(id), wp.P.instance)
-	_list_notification_listeners[id] = nil
+	delete(_list_notification_listeners, id)
 }
 
 func (wp WrapProtocol) CancelSubs() {

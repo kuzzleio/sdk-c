@@ -179,6 +179,7 @@ func kuzzle_websocket_register_sub(ws *C.web_socket, channel, roomId, filters *C
 //export kuzzle_websocket_unregister_sub
 func kuzzle_websocket_unregister_sub(ws *C.web_socket, id *C.char) {
 	(*websocket.WebSocket)(ws.instance).UnregisterSub(C.GoString(id))
+	delete(_notification_listeners, C.GoString(id))
 }
 
 //export kuzzle_websocket_cancel_subs
