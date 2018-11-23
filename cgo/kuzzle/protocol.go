@@ -51,6 +51,10 @@ package main
 		f(event, res, data);
 	}
 
+	static void bridge_register_sub(void (*f)(const char*, const char*, const char*, bool, kuzzle_notification_listener*, void*), const char* channel, const char* room_id, const char* filters, bool subscribe_to_self, kuzzle_notification_listener* listener, void* data) {
+		f(channel, room_id, filters, subscribe_to_self, listener, data);
+	}
+
 	static void bridge_unregister_sub(void (*f)(char*, void*), char* id, void* data) {
 		f(id, data);
 	}
@@ -109,7 +113,7 @@ package main
 
 	extern void bridge_listener(int, char*, void*);
 	extern void bridge_listener_once(int, char*, void*);
-	extern void bridge_notification(char*, notification_result*, void*);
+	extern void bridge_notification(notification_result*, void*);
 
 	static void call_bridge(int event, char* res, void* data) {
 		bridge_listener(event, res, data);
@@ -119,8 +123,8 @@ package main
 		bridge_listener_once(event, res, data);
 	}
 
-	static void call_notification_bridge(char* room_id, notification_result* result, void* data) {
-		bridge_notification(room_id, result, data);
+	static void call_notification_bridge(notification_result* result, void* data) {
+		bridge_notification(result, data);
 	}
 
 	static kuzzle_event_listener get_bridge_fptr() {
@@ -129,6 +133,10 @@ package main
 
 	static kuzzle_event_listener get_bridge_once_fptr() {
 		return &call_bridge_once;
+	}
+
+	static kuzzle_notification_listener get_bridge_notification_listener_fptr() {
+		return &call_notification_bridge;
 	}
 */
 import "C"
@@ -151,7 +159,7 @@ var proto_instances sync.Map
 
 var _list_listeners map[int]map[chan<- json.RawMessage]bool
 var _list_once_listeners map[int]map[chan<- json.RawMessage]bool
-var _list_notification_listeners map[string]chan types.NotificationResult
+var _list_notification_listeners map[string]chan<- types.NotificationResult
 
 // register new instance to the instances map
 func registerProtocol(instance interface{}, ptr unsafe.Pointer) {
@@ -168,7 +176,7 @@ func NewWrapProtocol(p *C.protocol) *WrapProtocol {
 	registerProtocol(p, ptr_proto)
 	_list_listeners = make(map[int]map[chan<- json.RawMessage]bool)
 	_list_once_listeners = make(map[int]map[chan<- json.RawMessage]bool)
-	_list_notification_listeners = make(map[string]chan types.NotificationResult)
+	_list_notification_listeners = make(map[string]chan<- types.NotificationResult)
 
 	return &WrapProtocol{p}
 }
@@ -252,16 +260,19 @@ func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
 }
 
 //export bridge_notification
-func bridge_notification(roomId *C.char, res *C.notification_result, data unsafe.Pointer) {
-	_list_notification_listeners[C.GoString(roomId)] <- *cToGoNotificationResult(res)
+func bridge_notification(res *C.notification_result, data unsafe.Pointer) {
+	_list_notification_listeners[C.GoString(res.room_id)] <- *cToGoNotificationResult(res)
 }
 
-func (wp WrapProtocol) RegisterSub(string, string, json.RawMessage, bool, chan<- types.NotificationResult, chan<- interface{}) {
-	//@todo
+func (wp WrapProtocol) RegisterSub(channel, roomID string, filters json.RawMessage, subscribeToSelf bool, notifChan chan<- types.NotificationResult, onReconnectChannel chan<- interface{}) {
+	fptr := C.get_bridge_notification_listener_fptr()
+	_list_notification_listeners[channel] = notifChan
+	C.bridge_register_sub(wp.P.register_sub, C.CString(channel), C.CString(roomID), C.CString(string(filters)), C.bool(subscribeToSelf), &fptr, wp.P.instance)
 }
 
 func (wp WrapProtocol) UnregisterSub(id string) {
 	C.bridge_unregister_sub(wp.P.unregister_sub, C.CString(id), wp.P.instance)
+	_list_notification_listeners[id] = nil
 }
 
 func (wp WrapProtocol) CancelSubs() {
