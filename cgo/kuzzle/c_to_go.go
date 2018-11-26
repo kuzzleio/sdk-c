@@ -296,3 +296,42 @@ func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObje
 	return goqo
 }
 
+func CToGoNotificationContent(cnc *C.notification_content) *types.NotificationContent {
+	notifContent := types.NotificationContent{
+		Id: C.GoString(cnc.id),
+		Content: json.RawMessage(C.GoString(cnc.content)),
+		Count: int(cnc.count),
+	}
+
+	if cnc.m != nil {
+		notifContent.Meta = cToGoKuzzleMeta(cnc.m)
+	}
+
+	return &notifContent
+}
+
+func cToGoNotificationResult(cnr *C.notification_result) *types.NotificationResult {
+	notifResult := types.NotificationResult{
+		RequestId: C.GoString(cnr.request_id),
+		Result: CToGoNotificationContent(cnr.result),
+		Volatile: json.RawMessage(C.GoString(cnr.volatiles)),
+		Index: C.GoString(cnr.index),
+		Collection: C.GoString(cnr.collection),
+		Controller: C.GoString(cnr.controller),
+		Action: C.GoString(cnr.action),
+		Protocol: C.GoString(cnr.protocol),
+		Scope: C.GoString(cnr.scope),
+		State: C.GoString(cnr.state),
+		User: C.GoString(cnr.user),
+		Type: C.GoString(cnr.n_type),
+		RoomId: C.GoString(cnr.room_id),
+		Timestamp: int(cnr.timestamp),
+	}
+
+	if cnr.error != nil {
+		notifResult.Error = types.NewError(C.GoString(cnr.error), int(cnr.status))
+		notifResult.Error.Stack = C.GoString(cnr.stack)
+	}
+
+	return &notifResult
+}
