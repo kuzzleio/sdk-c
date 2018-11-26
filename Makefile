@@ -90,7 +90,7 @@ $(BUILD_DIR)/sdk: $(BUILD_DIR)/libs
 	cp $(BUILD_DIR)$(PATHSEP)kuzzle.h  $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/include/internal
 	cp -fr $(ROOT_DIR)$(PATHSEP)include $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)
 	cp -fr $(ROOT_DIR)$(PATHSEP)include $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)
-	cp $(BUILD_DIR)$(PATHSEP)*.a* $(BUILD_DIR)$(PATHSEP)*.so*  $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/lib
+	cp -a $(BUILD_DIR)$(PATHSEP)*.a* $(BUILD_DIR)$(PATHSEP)*.so*  $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/lib
 	@touch $@
 
 package: $(BUILD_DIR)/sdk
@@ -107,7 +107,7 @@ ifeq ($(OS),Windows_NT)
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)stretchr
 else
 	$(RRM) build
-	$(RRM) $(ROOT_DIR)$(PATHSEP)deploy
+	$(RRM) deploy
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)pkg
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)bin
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)gorilla
