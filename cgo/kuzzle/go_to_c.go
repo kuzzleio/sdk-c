@@ -782,13 +782,16 @@ func goToCUserRightsResult(rights []*types.UserRights, err error) *C.user_rights
 	}
 
 	if rights != nil {
-		result.user_rights_length = C.size_t(len(rights))
-		result.result = (**C.user_right)(C.calloc(C.size_t(len(rights)), C.sizeof_user_right))
-		carray := (*[1<<28 - 1]*C.user_right)(unsafe.Pointer(result.result))[:len(rights):len(rights)]
+		resultsSize := len(rights) + 1
+
+		result.result = (**C.user_right)(C.calloc(C.size_t(resultsSize), C.sizeof_user_right))
+		carray := (*[1<<28 - 1]*C.user_right)(unsafe.Pointer(result.result))[:resultsSize:resultsSize]
 
 		for i, right := range rights {
 			carray[i] = goToCUserRight(right)
 		}
+
+		carray[resultsSize-1] = nil
 	}
 
 	return result
