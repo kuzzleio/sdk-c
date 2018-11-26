@@ -18,8 +18,8 @@ package main
 	#cgo CFLAGS: -I../../include
 	#include <string.h>
 	#include <stdlib.h>
-	#include "kuzzlesdk.h"
-	#include "sdk_wrappers_internal.h"
+	#include "internal/kuzzle_structs.h"
+	#include "internal/sdk_wrappers_internal.h"
 */
 import "C"
 import (

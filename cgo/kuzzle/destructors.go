@@ -18,7 +18,7 @@ package main
   #cgo CFLAGS: -std=c99 -I../../include
 
   #include <stdlib.h>
-  #include "kuzzlesdk.h"
+  #include "internal/kuzzle_structs.h"
 
   static void free_char_array(char **arr, size_t length) {
     if (arr != NULL) {

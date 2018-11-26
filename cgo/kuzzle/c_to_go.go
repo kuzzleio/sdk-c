@@ -17,8 +17,8 @@ package main
 /*
 	#cgo CFLAGS: -I../../include
 	#include <stdlib.h>
-	#include "kuzzlesdk.h"
-	#include "sdk_wrappers_internal.h"
+	#include "internal/kuzzle_structs.h"
+	#include "internal/sdk_wrappers_internal.h"
 
 	static void bridge_trigger_kuzzle_notification_result(kuzzle_notification_listener f, notification_result* res, void* data) {
     f(res, data);

@@ -3,7 +3,7 @@ package main
 /*
 	#cgo CFLAGS: -I../../include
 	#include <stdlib.h>
-	#include "protocol.h"
+	#include "internal/protocol.h"
 
 	// Bridges
 
