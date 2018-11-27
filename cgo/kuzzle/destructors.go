@@ -18,7 +18,7 @@ package main
   #cgo CFLAGS: -std=c99 -I../../include
 
   #include <stdlib.h>
-  #include "internal/kuzzle_structs.h"
+  #include "kuzzlesdk.h"
 
   static void free_char_array(char **arr, size_t length) {
     if (arr != NULL) {
@@ -335,6 +335,15 @@ func kuzzle_free_role_result(st *C.role_result) {
 	}
 }
 
+//export kuzzle_free_subscribe_result
+func kuzzle_free_subscribe_result(st *C.subscribe_result) {
+	if st != nil {
+		C.free(unsafe.Pointer(st.room))
+		C.free(unsafe.Pointer(st.channel))
+		C.free(unsafe.Pointer(st))
+	}
+}
+
 // do not export => used to free the content of a structure
 // and not the structure itself
 func _free_user_right(st *C.user_right) {
@@ -344,15 +353,6 @@ func _free_user_right(st *C.user_right) {
 		C.free(unsafe.Pointer(st.index))
 		C.free(unsafe.Pointer(st.collection))
 		C.free(unsafe.Pointer(st.value))
-	}
-}
-
-//export kuzzle_free_subscribe_result
-func kuzzle_free_subscribe_result(st *C.subscribe_result) {
-	if st != nil {
-		C.free(unsafe.Pointer(st.room))
-		C.free(unsafe.Pointer(st.channel))
-		C.free(unsafe.Pointer(st))
 	}
 }
 
@@ -367,6 +367,7 @@ func kuzzle_free_user_rights_result(st *C.user_rights_result) {
 	if st != nil {
 		C.free(unsafe.Pointer(st.error))
 		C.free(unsafe.Pointer(st.stack))
+		C.free(unsafe.Pointer(st.result))
 		C.free(unsafe.Pointer(st))
 	}
 }
