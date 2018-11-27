@@ -1,6 +1,9 @@
 VERSION = 1.0.0
 
 ROOT_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+
+SDK_FOLDER_NAME=kuzzle-c-sdk
+
 ifeq ($(OS),Windows_NT)
 	STATICLIB = .lib
 	DYNLIB = .dll
@@ -24,28 +27,34 @@ else
 	MV = mv -f
 	ROOT_DIR_CLEAN = $(ROOT_DIR)
 	LIB_PREFIX = lib
+	ARCH=$(shell uname -p)
 endif
 
 SDKGOPATH = go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)kuzzleio$(PATHSEP)sdk-go
 CGOPATH = cgo$(PATHSEP)kuzzle
 PATHSEP = $(strip $(SEP))
-ROOTOUTDIR = $(ROOT_DIR)build
+BUILD_DIR = $(ROOT_DIR)build
 GOFLAGS ?= -buildmode=c-archive
 GOFLAGSSHARED = -buildmode=c-shared
 GOSRC = .$(PATHSEP)cgo$(PATHSEP)kuzzle$(PATHSEP)
-GOTARGET = $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB)
-GOTARGETSO = $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB)
+GOTARGET = $(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB)
+GOTARGETSO = $(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB)
 
-all: c
+export GOPATH = $(ROOT_DIR)go
 
-pre_core:
+CORE_SRC = $(wildcard $(GOSRC)*.go)
+all:  $(BUILD_DIR)/sdk
+
+$(BUILD_DIR)/pre_core:
 	cd $(SDKGOPATH) && go get .$(PATHSEP)...
+	@touch $@
 
-core:
+$(BUILD_DIR)/core: $(CORE_SRC) Makefile
 ifneq ($(OS),Windows_NT)
 ifeq ($(wildcard $(GOCC)),)
-	$(error "Unable to find go compiler")
+	$(error "Unable to find go compiler in $(GOCC)")
 endif
+	cd $(BUILD_DIR) && rm -f $(GOTARGET).* $(GOTARGETSO).*
 endif
 ifeq ($(GOOS), android)
 	$(GOCC) build -o $(GOTARGET) $(GOFLAGSSHARED) $(GOSRC)
@@ -53,32 +62,39 @@ else
 	$(GOCC) build -o $(GOTARGET) $(GOFLAGS) $(GOSRC)
 endif
 	$(GOCC) build -o $(GOTARGETSO) $(GOFLAGSSHARED) $(GOSRC)
+
+	cd $(BUILD_DIR) && mv $(GOTARGET) $(GOTARGET).$(VERSION) && mv $(GOTARGETSO) $(GOTARGETSO).$(VERSION)
+
 ifeq ($(OS),Windows_NT)
-	$(MV) $(subst /,\,$(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h) kuzzle.h
+	$(MV) $(subst /,\,$(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h) kuzzle.h
 else
-	$(MV) $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h $(ROOTOUTDIR)$(PATHSEP)kuzzle.h
+	$(MV) $(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h $(BUILD_DIR)$(PATHSEP)kuzzle.h
+endif
+	 @touch $@
+
+$(BUILD_DIR):
+ifeq ($(OS),Windows_NT)
+	@if not exist $(subst /,\,$(BUILD_DIR)) mkdir $(subst /,\,$(BUILD_DIR))
+else
+	mkdir -p $@
 endif
 
-makedir:
-ifeq ($(OS),Windows_NT)
-	@if not exist $(subst /,\,$(ROOTOUTDIR)) mkdir $(subst /,\,$(ROOTOUTDIR))
-else
-	mkdir -p $(ROOTOUTDIR)
-endif
+$(BUILD_DIR)/libs: $(BUILD_DIR) $(BUILD_DIR)/pre_core $(BUILD_DIR)/core
+	cd $(BUILD_DIR) && ln -srf $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
+	cd $(BUILD_DIR) && ln -srf $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
+	@touch $@
 
-c: export GOPATH = $(ROOT_DIR)go
-c: makedir pre_core core
-	 cd $(ROOTOUTDIR) && mv $(GOTARGET) $(GOTARGET).$(VERSION) && mv $(GOTARGETSO) $(GOTARGETSO).$(VERSION)
-	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
-	 cd $(ROOTOUTDIR) && ln -sr $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
+$(BUILD_DIR)/sdk: $(BUILD_DIR)/libs
+	mkdir -p $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/lib
+	mkdir -p $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/include/internal
+	cp $(BUILD_DIR)$(PATHSEP)kuzzle.h  $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/include/internal
+	cp -fr $(ROOT_DIR)$(PATHSEP)include $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)
+	cp -fr $(ROOT_DIR)$(PATHSEP)include $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)
+	cp -a $(BUILD_DIR)$(PATHSEP)*.a* $(BUILD_DIR)$(PATHSEP)*.so*  $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/lib
+	@touch $@
 
-package: $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(ROOTOUTDIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION)
-	mkdir $(ROOTOUTDIR)$(PATHSEP)lib
-	mkdir $(ROOTOUTDIR)$(PATHSEP)include
-	cp -fr $(ROOT_DIR)$(PATHSEP)include$(PATHSEP)*.h $(ROOTOUTDIR)$(PATHSEP)include
-	cp $(ROOTOUTDIR)$(PATHSEP)*.so  $(ROOTOUTDIR)$(PATHSEP)lib
-	cp $(ROOTOUTDIR)$(PATHSEP)*.a  $(ROOTOUTDIR)$(PATHSEP)lib
-	mkdir deploy && cd $(ROOTOUTDIR) && tar cfz ..$(PATHSEP)deploy$(PATHSEP)kuzzlesdk-c-$(VERSION)-$(ARCH).tar.gz lib include
+package: $(BUILD_DIR)/sdk
+	mkdir -p deploy && cd $(BUILD_DIR) && tar cfz ..$(PATHSEP)deploy$(PATHSEP)kuzzlesdk-c-$(VERSION)-$(ARCH).tar.gz $(SDK_FOLDER_NAME)
 
 clean:
 ifeq ($(OS),Windows_NT)
@@ -91,14 +107,14 @@ ifeq ($(OS),Windows_NT)
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)stretchr
 else
 	$(RRM) build
-	$(RRM) $(ROOT_DIR)$(PATHSEP)deploy
+	$(RRM) deploy
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)pkg
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)bin
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)gorilla
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)satori
 	$(RRM) $(ROOT_DIR)$(PATHSEP)go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)stretchr
 endif
-.PHONY: all c core clean
+.PHONY: all clean 
 
 
 .DEFAULT_GOAL := all

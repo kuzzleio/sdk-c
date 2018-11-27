@@ -18,8 +18,8 @@ package main
 	#cgo CFLAGS: -I../../include
 	#include <string.h>
 	#include <stdlib.h>
-	#include "kuzzlesdk.h"
-	#include "sdk_wrappers_internal.h"
+	#include "internal/kuzzle_structs.h"
+	#include "internal/sdk_wrappers_internal.h"
 */
 import "C"
 import (
@@ -71,7 +71,7 @@ func goToCShards(gShards *types.Shards) *C.shards {
 }
 
 // Allocates memory
-func goToCNotificationContent(gNotifContent *types.NotificationResult) *C.notification_content {
+func goToCNotificationContent(gNotifContent *types.NotificationContent) *C.notification_content {
 	result := (*C.notification_content)(C.calloc(1, C.sizeof_notification_content))
 	result.id = C.CString(gNotifContent.Id)
 	result.m = goToCMeta(gNotifContent.Meta)
@@ -83,7 +83,7 @@ func goToCNotificationContent(gNotifContent *types.NotificationResult) *C.notifi
 }
 
 // Allocates memory
-func goToCNotificationResult(gNotif *types.KuzzleNotification) *C.notification_result {
+func goToCNotificationResult(gNotif *types.NotificationResult) *C.notification_result {
 	result := (*C.notification_result)(C.calloc(1, C.sizeof_notification_result))
 
 	if gNotif.Error.Error() != "" {

@@ -17,8 +17,8 @@ package main
 /*
 	#cgo CFLAGS: -I../../include
 	#include <stdlib.h>
-	#include "kuzzlesdk.h"
-	#include "sdk_wrappers_internal.h"
+	#include "internal/kuzzle_structs.h"
+	#include "internal/sdk_wrappers_internal.h"
 
 	static void bridge_trigger_kuzzle_notification_result(kuzzle_notification_listener f, notification_result* res, void* data) {
     f(res, data);
@@ -255,12 +255,12 @@ func cToGoSearchResult(s *C.search_result) (*types.SearchResult, error) {
 	return sr, nil
 }
 
-func cToGoKuzzleNotificationChannel(c *C.kuzzle_notification_listener) chan<- types.KuzzleNotification {
-	return make(chan<- types.KuzzleNotification)
+func cToGoNotificationResultChannel(c *C.kuzzle_notification_listener) chan<- types.NotificationResult {
+	return make(chan<- types.NotificationResult)
 }
 
 func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObject {
-	notifChan := make(chan *types.KuzzleNotification)
+	notifChan := make(chan *types.NotificationResult)
 	go func() {
 		for {
 			res, ok := <-notifChan
@@ -296,3 +296,42 @@ func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObje
 	return goqo
 }
 
+func CToGoNotificationContent(cnc *C.notification_content) *types.NotificationContent {
+	notifContent := types.NotificationContent{
+		Id: C.GoString(cnc.id),
+		Content: json.RawMessage(C.GoString(cnc.content)),
+		Count: int(cnc.count),
+	}
+
+	if cnc.m != nil {
+		notifContent.Meta = cToGoKuzzleMeta(cnc.m)
+	}
+
+	return &notifContent
+}
+
+func cToGoNotificationResult(cnr *C.notification_result) *types.NotificationResult {
+	notifResult := types.NotificationResult{
+		RequestId: C.GoString(cnr.request_id),
+		Result: CToGoNotificationContent(cnr.result),
+		Volatile: json.RawMessage(C.GoString(cnr.volatiles)),
+		Index: C.GoString(cnr.index),
+		Collection: C.GoString(cnr.collection),
+		Controller: C.GoString(cnr.controller),
+		Action: C.GoString(cnr.action),
+		Protocol: C.GoString(cnr.protocol),
+		Scope: C.GoString(cnr.scope),
+		State: C.GoString(cnr.state),
+		User: C.GoString(cnr.user),
+		Type: C.GoString(cnr.n_type),
+		RoomId: C.GoString(cnr.room_id),
+		Timestamp: int(cnr.timestamp),
+	}
+
+	if cnr.error != nil {
+		notifResult.Error = types.NewError(C.GoString(cnr.error), int(cnr.status))
+		notifResult.Error.Stack = C.GoString(cnr.stack)
+	}
+
+	return &notifResult
+}

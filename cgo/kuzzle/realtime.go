@@ -16,8 +16,8 @@ package main
 
 /*
 	#cgo CFLAGS: -I../../include
-	#include "kuzzlesdk.h"
-    #include "sdk_wrappers_internal.h"
+	#include "internal/kuzzle_structs.h"
+    #include "internal/sdk_wrappers_internal.h"
 */
 import "C"
 
@@ -78,7 +78,7 @@ func kuzzle_realtime_unsubscribe(rt *C.realtime, roomId *C.char, options *C.quer
 
 //export kuzzle_realtime_subscribe
 func kuzzle_realtime_subscribe(rt *C.realtime, index, collection, body *C.char, callback C.kuzzle_notification_listener, data unsafe.Pointer, options *C.room_options) *C.subscribe_result {
-	c := make(chan types.KuzzleNotification)
+	c := make(chan types.NotificationResult)
 	subRes, err := (*realtime.Realtime)(rt.instance).Subscribe(C.GoString(index), C.GoString(collection), json.RawMessage(C.GoString(body)), c, SetRoomOptions(options))
 
 	if err != nil {

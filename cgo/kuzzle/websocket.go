@@ -17,12 +17,16 @@ package main
 /*
 	#cgo CFLAGS: -I../../include
 	#include <stdlib.h>
-	#include "kuzzlesdk.h"
-	#include "protocol.h"
-	#include "sdk_wrappers_internal.h"
+	#include "internal/kuzzle_structs.h"
+	#include "internal/protocol.h"
+	#include "internal/sdk_wrappers_internal.h"
 
 	static void bridge_trigger_event_listener(kuzzle_event_listener listener, int event, char* res, void* data) {
 		listener(event, res, data);
+	}
+
+	static void bridge_trigger_notification_listener(kuzzle_notification_listener listener, notification_result* result, void* data) {
+		listener(result, data);
 	}
 */
 import "C"
@@ -41,6 +45,7 @@ var webSocketInstances sync.Map
 // listeners
 var _event_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage
 var _event_once_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage
+var _notification_listeners map[string]chan<- types.NotificationResult
 
 // register new instance to the instances map
 func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
@@ -53,6 +58,7 @@ func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.
 
 	_event_listeners = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
 	_event_once_listeners = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
+	_notification_listeners = make(map[string]chan<- types.NotificationResult)
 
 	ws.cpp_instance = cppInstance
 	ptr := unsafe.Pointer(inst)
@@ -152,9 +158,28 @@ func kuzzle_websocket_close(ws *C.web_socket) *C.char {
 	return nil
 }
 
+//export kuzzle_websocket_register_sub
+func kuzzle_websocket_register_sub(ws *C.web_socket, channel, roomId, filters *C.char, subscribe_to_self C.bool, listener C.kuzzle_notification_listener) {
+	c := make(chan types.NotificationResult)
+
+	_notification_listeners[C.GoString(channel)] = c
+	go func() {
+		for {
+			res, ok := <-c
+			if ok == false {
+				break
+			}
+
+			C.bridge_trigger_notification_listener(listener, goToCNotificationResult(&res), ws.cpp_instance)
+		}
+	}()
+	(*websocket.WebSocket)(ws.instance).RegisterSub(C.GoString(channel), C.GoString(roomId), json.RawMessage(C.GoString(filters)), bool(subscribe_to_self), c, nil)
+}
+
 //export kuzzle_websocket_unregister_sub
 func kuzzle_websocket_unregister_sub(ws *C.web_socket, id *C.char) {
 	(*websocket.WebSocket)(ws.instance).UnregisterSub(C.GoString(id))
+	delete(_notification_listeners, C.GoString(id))
 }
 
 //export kuzzle_websocket_cancel_subs

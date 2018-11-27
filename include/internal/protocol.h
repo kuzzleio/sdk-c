@@ -15,7 +15,7 @@
 #ifndef KUZZLE_PROTOCOL_H
 #define KUZZLE_PROTOCOL_H
 
-#include "kuzzlesdk.h"
+#include "kuzzle_structs.h"
 #include "sdk_wrappers_internal.h"
 
 typedef struct {
@@ -31,7 +31,7 @@ typedef struct {
   const char* (*close)(void*);
   int (*get_state)(void*);
   void (*emit_event)(int, void*, void*);
-  void (*register_sub)(const char*, const char*, const char*, int, kuzzle_notification_listener*, void*);
+  void (*register_sub)(const char*, const char*, const char*, bool, kuzzle_notification_listener*, void*);
   void (*unregister_sub)(const char*, void*);
   void (*cancel_subs)(void*);
   void (*start_queuing)(void*);
