@@ -15,7 +15,7 @@
 #ifndef KUZZLE_PROTOCOL_H
 #define KUZZLE_PROTOCOL_H
 
-#include "kuzzlesdk.h"
+#include "kuzzle_structs.h"
 #include "sdk_wrappers_internal.h"
 
 typedef struct {

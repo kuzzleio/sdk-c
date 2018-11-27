@@ -18,9 +18,9 @@ package main
 	#cgo CFLAGS: -I../../include
 	#include <stdlib.h>
 	#include <string.h>
-	#include "kuzzlesdk.h"
-	#include "protocol.h"
-	#include "sdk_wrappers_internal.h"
+	#include "internal/kuzzle_structs.h"
+	#include "internal/protocol.h"
+	#include "internal/sdk_wrappers_internal.h"
 */
 import "C"
 import (
