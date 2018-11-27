@@ -17,9 +17,9 @@ package main
 /*
 	#cgo CFLAGS: -I../../include
 	#include <stdlib.h>
-	#include "kuzzlesdk.h"
-	#include "protocol.h"
-	#include "sdk_wrappers_internal.h"
+	#include "internal/kuzzle_structs.h"
+	#include "internal/protocol.h"
+	#include "internal/sdk_wrappers_internal.h"
 
 	static void bridge_trigger_event_listener(kuzzle_event_listener listener, int event, char* res, void* data) {
 		listener(event, res, data);
