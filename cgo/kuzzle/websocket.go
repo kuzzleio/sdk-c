@@ -127,7 +127,7 @@ func kuzzle_websocket_connect(ws *C.web_socket) *C.char {
 	if err != nil {
 		return C.CString(err.Error())
 	}
-	return C.CString("")
+	return nil
 }
 
 //export kuzzle_websocket_send
