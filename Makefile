@@ -27,7 +27,7 @@ else
 	MV = mv -f
 	ROOT_DIR_CLEAN = $(ROOT_DIR)
 	LIB_PREFIX = lib
-	ARCH=$(shell uname -p)
+	ARCH ?= $(shell uname -p)
 endif
 
 SDKGOPATH = go$(PATHSEP)src$(PATHSEP)github.com$(PATHSEP)kuzzleio$(PATHSEP)sdk-go
