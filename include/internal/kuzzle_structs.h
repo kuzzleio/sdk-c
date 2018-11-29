@@ -399,7 +399,6 @@ typedef struct {
 
 typedef struct user_rights_result {
   user_right **result;
-  size_t user_rights_length;
   int status;
   const char *error;
   const char *stack;
