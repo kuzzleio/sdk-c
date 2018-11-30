@@ -157,9 +157,9 @@ type WrapProtocol struct {
 
 var proto_instances sync.Map
 
-var _list_listeners map[int]map[chan<- json.RawMessage]bool
-var _list_once_listeners map[int]map[chan<- json.RawMessage]bool
-var _list_notification_listeners map[string]chan<- types.NotificationResult
+var _list_listeners map[int]map[chan<- json.RawMessage]bool = make(map[int]map[chan<- json.RawMessage]bool)
+var _list_once_listeners map[int]map[chan<- json.RawMessage]bool = make(map[int]map[chan<- json.RawMessage]bool)
+var _list_notification_listeners map[string]chan<- types.NotificationResult = make(map[string]chan<- types.NotificationResult)
 
 // register new instance to the instances map
 func registerProtocol(instance interface{}, ptr unsafe.Pointer) {
@@ -174,9 +174,6 @@ func unregisterProtocol(p *C.protocol) {
 func NewWrapProtocol(p *C.protocol) *WrapProtocol {
 	ptr_proto := unsafe.Pointer(p.instance)
 	registerProtocol(p, ptr_proto)
-	_list_listeners = make(map[int]map[chan<- json.RawMessage]bool)
-	_list_once_listeners = make(map[int]map[chan<- json.RawMessage]bool)
-	_list_notification_listeners = make(map[string]chan<- types.NotificationResult)
 
 	return &WrapProtocol{p}
 }

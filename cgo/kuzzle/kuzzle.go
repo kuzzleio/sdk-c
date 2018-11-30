@@ -37,7 +37,7 @@ import (
 var instances sync.Map
 
 // map which stores channel and function's pointers adresses for listeners
-var listeners_list map[uintptr]chan<- json.RawMessage
+var listeners_list map[uintptr]chan<- json.RawMessage = make(map[uintptr]chan<- json.RawMessage)
 
 // register new instance to the instances map
 func registerKuzzle(instance interface{}, ptr unsafe.Pointer) {
@@ -52,10 +52,6 @@ func unregisterKuzzle(k *C.kuzzle) {
 
 //export kuzzle_new_kuzzle
 func kuzzle_new_kuzzle(k *C.kuzzle, protocol *C.protocol, options *C.options) {
-	if listeners_list == nil {
-		listeners_list = make(map[uintptr]chan<- json.RawMessage)
-	}
-
 	opts := SetOptions(options)
 
 	p := NewWrapProtocol(protocol)
