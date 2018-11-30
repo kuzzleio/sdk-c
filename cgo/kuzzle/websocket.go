@@ -32,20 +32,19 @@ package main
 import "C"
 import (
 	"encoding/json"
-	"sync"
-	"unsafe"
-
 	"github.com/kuzzleio/sdk-go/protocol/websocket"
 	"github.com/kuzzleio/sdk-go/types"
+	"sync"
+	"unsafe"
 )
 
 // map which stores instances to keep references in case the gc passes
 var webSocketInstances sync.Map
 
 // listeners
-var _event_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage
-var _event_once_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage
-var _notification_listeners map[string]chan<- types.NotificationResult
+var _event_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
+var _event_once_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
+var _notification_listeners map[string]chan<- types.NotificationResult = make(map[string]chan<- types.NotificationResult)
 
 // register new instance to the instances map
 func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
@@ -55,10 +54,6 @@ func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
 //export kuzzle_websocket_new_web_socket
 func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.options, cppInstance unsafe.Pointer) {
 	inst := websocket.NewWebSocket(C.GoString(host), SetOptions(options))
-
-	_event_listeners = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
-	_event_once_listeners = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
-	_notification_listeners = make(map[string]chan<- types.NotificationResult)
 
 	ws.cpp_instance = cppInstance
 	ptr := unsafe.Pointer(inst)
