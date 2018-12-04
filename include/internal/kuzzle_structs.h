@@ -139,7 +139,7 @@ typedef struct s_query_options {
 typedef void (callback)(char* notification);
 
 // raw Kuzzle response
-typedef struct {
+typedef struct s_kuzzle_response{
     const char *request_id;
     const char *result;
     const char *volatiles;
@@ -149,6 +149,11 @@ typedef struct {
     const char *action;
     const char *room_id;
     const char *channel;
+
+    # ifdef __cplusplus
+      ~s_kuzzle_response();
+    # endif
+
     int status;
     const char *error;
     const char *stack;
@@ -326,12 +331,16 @@ typedef struct {
 } role;
 
 // kuzzle user
-typedef struct {
+typedef struct s_kuzzle_user {
     const char *id;
     const char *content;
     const char * const *profile_ids;
     size_t profile_ids_length;
     kuzzle *k;
+
+    # ifdef __cplusplus
+      ~s_kuzzle_user();
+    # endif
 } kuzzle_user;
 
 // user content passed to user constructor
@@ -389,12 +398,16 @@ typedef struct roles_result {
     const char *stack;
 } roles_result;
 
-typedef struct {
+typedef struct s_user_right {
     const char *controller;
     const char *action;
     const char *index;
     const char *collection;
     const char *value;
+
+    # ifdef __cplusplus
+      ~s_user_right();
+    # endif
 } user_right;
 
 typedef struct user_rights_result {
@@ -470,13 +483,17 @@ typedef struct ms_sorted_set {
 } ms_sorted_set;
 
 //check_token
-typedef struct token_validity {
+typedef struct s_token_validity {
     bool valid;
     const char *state;
     unsigned long long expires_at;
     int status;
     const char *error;
     const char *stack;
+
+    # ifdef __cplusplus
+      ~s_token_validity();
+    # endif
 } token_validity;
 
 /* === Generic response structures === */
@@ -617,7 +634,7 @@ typedef struct specification_result {
     const char *stack;
 } specification_result;
 
-typedef struct search_result {
+typedef struct s_search_result {
     const char *aggregations;
     const char *hits;
     unsigned total;
@@ -715,14 +732,19 @@ typedef struct collection_entry_result {
     const char *stack;
 } collection_entry_result;
 
-typedef struct validation_response {
+typedef struct s_validation_response {
   bool valid;
   const char * const *details;
   size_t details_length;
   const char *description;
+
   int status;
   const char *error;
   const char *stack;
+
+  # ifdef __cplusplus
+    ~s_validation_response();
+  # endif
 } validation_response;
 
 # ifdef __cplusplus

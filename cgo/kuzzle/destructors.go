@@ -228,8 +228,8 @@ func _free_user(st *C.kuzzle_user) {
 	}
 }
 
-//export kuzzle_free_user
-func kuzzle_free_user(st *C.kuzzle_user) {
+//export kuzzle_free_kuzzle_user
+func kuzzle_free_kuzzle_user(st *C.kuzzle_user) {
 	_free_user(st)
 	C.free(unsafe.Pointer(st))
 }
@@ -451,17 +451,17 @@ func kuzzle_free_token_validity(st *C.token_validity) {
 func kuzzle_free_kuzzle_response(st *C.kuzzle_response) {
 	if st != nil {
 		C.free(unsafe.Pointer(st.request_id))
+		C.free(unsafe.Pointer(st.result))
+		C.free(unsafe.Pointer(st.volatiles))
 		C.free(unsafe.Pointer(st.index))
 		C.free(unsafe.Pointer(st.collection))
 		C.free(unsafe.Pointer(st.controller))
 		C.free(unsafe.Pointer(st.action))
 		C.free(unsafe.Pointer(st.room_id))
 		C.free(unsafe.Pointer(st.channel))
+
 		C.free(unsafe.Pointer(st.error))
 		C.free(unsafe.Pointer(st.stack))
-
-		C.free(unsafe.Pointer(st.result))
-		C.free(unsafe.Pointer(st.volatiles))
 
 		C.free(unsafe.Pointer(st))
 	}
@@ -626,10 +626,10 @@ func kuzzle_free_specification_result(st *C.specification_result) {
 //export kuzzle_free_search_result
 func kuzzle_free_search_result(sr *C.search_result) {
 	if sr != nil {
-		C.free(unsafe.Pointer(sr.instance))
 		C.free(unsafe.Pointer(sr.aggregations))
 		C.free(unsafe.Pointer(sr.hits))
 		C.free(unsafe.Pointer(sr.scroll_id))
+		C.free(unsafe.Pointer(sr.instance))
 		C.free(unsafe.Pointer(sr.k))
 		kuzzle_free_kuzzle_request(sr.request)
 		kuzzle_free_kuzzle_response(sr.response)
@@ -788,8 +788,8 @@ func kuzzle_free_search_users_result(sr *C.search_users_result) {
 //export kuzzle_free_validation_response
 func kuzzle_free_validation_response(st *C.validation_response) {
 	if st != nil {
-		C.free(unsafe.Pointer(st.description))
 		C.free_char_array(st.details, st.details_length)
+		C.free(unsafe.Pointer(st.description))
 
 		C.free(unsafe.Pointer(st.error))
 		C.free(unsafe.Pointer(st.stack))
