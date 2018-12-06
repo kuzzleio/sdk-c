@@ -39,13 +39,13 @@ enum Event {
 };
 
 enum State {
-    CONNECTING
-    DISCONNECTED
-    CONNECTED
-    INITIALIZING
-    READY
-    LOGGUED_OUT
-    ERROR
+    CONNECTING,
+    DISCONNECTED,
+    CONNECTED,
+    INITIALIZING,
+    READY,
+    LOGGUED_OUT,
+    ERROR,
     OFFLINE
 };
 
