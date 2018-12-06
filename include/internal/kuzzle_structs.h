@@ -38,6 +38,17 @@ enum Event {
     ERROR
 };
 
+enum State {
+    CONNECTING
+    DISCONNECTED
+    CONNECTED
+    INITIALIZING
+    READY
+    LOGGUED_OUT
+    ERROR
+    OFFLINE
+};
+
 enum is_action_allowed {
     ALLOWED,
     CONDITIONNAL,
