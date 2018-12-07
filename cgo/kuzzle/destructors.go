@@ -504,6 +504,15 @@ func kuzzle_free_int_result(st *C.int_result) {
 	}
 }
 
+//export kuzzle_free_date_result
+func kuzzle_free_date_result(st *C.date_result) {
+	if st != nil {
+		C.free(unsafe.Pointer(st.error))
+		C.free(unsafe.Pointer(st.stack))
+		C.free(unsafe.Pointer(st))
+	}
+}
+
 //export kuzzle_free_double_result
 func kuzzle_free_double_result(st *C.double_result) {
 	if st != nil {
