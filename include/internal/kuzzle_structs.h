@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _KUZZLESDK_H_
-#define _KUZZLESDK_H_
+#ifndef _KUZZLE_STRUCTS_H_
+#define _KUZZLE_STRUCTS_H_
 
 #include <time.h>
 #include <errno.h>
@@ -21,27 +21,37 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-enum Mode {AUTO, MANUAL};
 //options passed to the Kuzzle() fct
 
-enum Event {
-    CONNECTED,
-    DISCARDED,
-    DISCONNECTED,
-    LOGIN_ATTEMPT,
-    NETWORK_ERROR,
-    OFFLINE_QUEUE_POP,
-    OFFLINE_QUEUE_PUSH,
-    QUERY_ERROR,
-    RECONNECTED,
-    JWT_EXPIRED,
-    ERROR
+enum KuzzleEvent {
+    KUZZLE_EVENT_CONNECTED,
+    KUZZLE_EVENT_DISCARDED,
+    KUZZLE_EVENT_DISCONNECTED,
+    KUZZLE_EVENT_LOGIN_ATTEMPT,
+    KUZZLE_EVENT_NETWORK_ERROR,
+    KUZZLE_EVENT_OFFLINE_QUEUE_POP,
+    KUZZLE_EVENT_OFFLINE_QUEUE_PUSH,
+    KUZZLE_EVENT_QUERY_ERROR,
+    KUZZLE_EVENT_RECONNECTED,
+    KUZZLE_EVENT_JWT_EXPIRED,
+    KUZZLE_EVENT_ERROR
 };
 
-enum is_action_allowed {
-    ALLOWED,
-    CONDITIONNAL,
-    DENIED
+enum KuzzleState {
+    KUZZLE_STATE_CONNECTING,
+    KUZZLE_STATE_DISCONNECTED,
+    KUZZLE_STATE_CONNECTED,
+    KUZZLE_STATE_INITIALIZING,
+    KUZZLE_STATE_READY,
+    KUZZLE_STATE_LOGGUED_OUT,
+    KUZZLE_STATE_ERROR,
+    KUZZLE_STATE_OFFLINE
+};
+
+enum KuzzleAction {
+    KUZZLE_ACTION_ALLOWED,
+    KUZZLE_ACTION_CONDITIONNAL,
+    KUZZLE_ACTION_DENIED
 };
 
 
@@ -281,7 +291,6 @@ typedef struct {
 typedef struct s_options {
     unsigned queue_ttl;
     unsigned long queue_max_size;
-    enum Mode offline_mode;
     bool auto_queue;
     bool auto_reconnect;
     bool auto_replay;
