@@ -49,10 +49,10 @@ enum KuzzleState {
     KUZZLE_STATE_OFFLINE
 };
 
-enum kuzzle_is_action_allowed {
-    KUZZLE_IS_ACTION_ALLOWED,
-    KUZZLE_IS_ACTION_CONDITIONNAL,
-    KUZZLE_IS_ACTION_DENIED
+enum KuzzleAction {
+    KUZZLE_ACTION_ALLOWED,
+    KUZZLE_ACTION_CONDITIONNAL,
+    KUZZLE_ACTION_DENIED
 };
 
 
