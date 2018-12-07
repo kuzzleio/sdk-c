@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-enum KuzzleConnectionMode {AUTO, MANUAL};
 //options passed to the Kuzzle() fct
 
 enum KuzzleEvent {
@@ -292,7 +291,6 @@ typedef struct {
 typedef struct s_options {
     unsigned queue_ttl;
     unsigned long queue_max_size;
-    enum KuzzleConnectionMode offline_mode;
     bool auto_queue;
     bool auto_reconnect;
     bool auto_replay;
