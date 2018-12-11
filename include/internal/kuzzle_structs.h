@@ -407,7 +407,8 @@ typedef struct {
 } user_right;
 
 typedef struct user_rights_result {
-  user_right **result;
+  user_right **rights;
+  size_t rights_length;
   int status;
   const char *error;
   const char *stack;
