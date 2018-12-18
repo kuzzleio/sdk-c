@@ -57,6 +57,11 @@ enum KuzzleAction {
 
 # ifdef __cplusplus
 namespace kuzzleio {
+
+  typedef KuzzleEvent Event;
+  typedef KuzzleState State;
+  typedef KuzzleAction Action;
+
 # endif
 
 //meta of a document
