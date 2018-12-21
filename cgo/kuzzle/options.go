@@ -67,12 +67,6 @@ func kuzzle_set_default_options(copts *C.options) {
 	copts.reconnection_delay = C.ulong(opts.ReconnectionDelay())
 	copts.replay_interval = C.ulong(opts.ReplayInterval())
 
-	if opts.OfflineMode() == 1 {
-		copts.offline_mode = C.MANUAL
-	} else {
-		copts.offline_mode = C.AUTO
-	}
-
 	refresh := opts.Refresh()
 	if len(refresh) > 0 {
 		copts.refresh = C.CString(refresh)
@@ -115,7 +109,6 @@ func SetOptions(options *C.options) (opts types.Options) {
 
 	opts.SetQueueTTL(time.Duration(uint16(options.queue_ttl)))
 	opts.SetQueueMaxSize(int(options.queue_max_size))
-	opts.SetOfflineMode(int(options.offline_mode))
 
 	opts.SetAutoQueue(bool(options.auto_queue))
 	opts.SetAutoReconnect(bool(options.auto_reconnect))
