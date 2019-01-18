@@ -294,6 +294,7 @@ typedef struct {
 } subscribe_result;
 
 typedef struct s_options {
+    unsigned int port;
     unsigned queue_ttl;
     unsigned long queue_max_size;
     bool auto_queue;

@@ -59,6 +59,7 @@ func kuzzle_set_default_room_options(copts *C.room_options) {
 func kuzzle_set_default_options(copts *C.options) {
 	opts := types.NewOptions()
 
+	copts.port = C.uint(opts.Port())
 	copts.queue_ttl = C.uint(opts.QueueTTL())
 	copts.queue_max_size = C.ulong(opts.QueueMaxSize())
 	copts.auto_queue = C.bool(opts.AutoQueue())
@@ -111,6 +112,7 @@ func SetOptions(options *C.options) (opts types.Options) {
 
 	opts = types.NewOptions()
 
+	opts.SetPort(int(options.port))
 	opts.SetQueueTTL(time.Duration(uint16(options.queue_ttl)))
 	opts.SetQueueMaxSize(int(options.queue_max_size))
 
