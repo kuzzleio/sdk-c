@@ -52,9 +52,7 @@ func registerWebSocket(instance interface{}, ptr unsafe.Pointer) {
 }
 
 //export kuzzle_websocket_new_web_socket
-func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char,
-	options *C.options, cppInstance unsafe.Pointer) {
-
+func kuzzle_websocket_new_web_socket(ws *C.web_socket, host *C.char, options *C.options, cppInstance unsafe.Pointer) {
 	inst := websocket.NewWebSocket(C.GoString(host), SetOptions(options))
 
 	ws.cpp_instance = cppInstance
