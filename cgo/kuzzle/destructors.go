@@ -129,6 +129,12 @@ func kuzzle_free_room_options(st *C.room_options) {
 func kuzzle_free_options(st *C.options) {
 	if st != nil {
 		C.free(unsafe.Pointer(st.refresh))
+
+		if st.header_size > 0 {
+			C.free_char_array(st.header_names, st.header_size)
+			C.free_char_array(st.header_values, st.header_size)
+		}
+
 		C.free(unsafe.Pointer(st))
 	}
 }

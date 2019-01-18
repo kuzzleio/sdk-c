@@ -21,9 +21,10 @@ package main
 */
 import "C"
 import (
-	"time"
-
 	"github.com/kuzzleio/sdk-go/types"
+	"net/http"
+	"time"
+	"unsafe"
 )
 
 //export kuzzle_set_default_query_options
@@ -118,6 +119,21 @@ func SetOptions(options *C.options) (opts types.Options) {
 	opts.SetReplayInterval(time.Duration(int(options.replay_interval)))
 	if options.refresh != nil {
 		opts.SetRefresh(C.GoString(options.refresh))
+	}
+
+	if options.header_size > 0 {
+		httpHeaders := &http.Header{}
+
+		hnames := (*[1<<28 - 1]*C.char)(unsafe.Pointer(options.header_names))[:options.header_size:options.header_size]
+		hvals := (*[1<<28 - 1]*C.char)(unsafe.Pointer(options.header_values))[:options.header_size:options.header_size]
+
+		for i := 0; i < int(options.header_size); i++ {
+			httpHeaders.Add(
+				C.GoString(hnames[i]),
+				C.GoString(hvals[i]))
+		}
+
+		opts.SetHeaders(httpHeaders)
 	}
 
 	return

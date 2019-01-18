@@ -304,6 +304,11 @@ typedef struct s_options {
     unsigned long replay_interval;
     const char *refresh;
 
+    // HTTP headers
+    const char * const * header_names;
+    const char * const * header_values;
+    size_t header_size;
+
     // C++ constructor to have default values
     # ifdef __cplusplus
       s_options();
