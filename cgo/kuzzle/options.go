@@ -67,6 +67,9 @@ func kuzzle_set_default_options(copts *C.options) {
 	copts.auto_resubscribe = C.bool(opts.AutoResubscribe())
 	copts.reconnection_delay = C.ulong(opts.ReconnectionDelay())
 	copts.replay_interval = C.ulong(opts.ReplayInterval())
+	copts.header_size = C.size_t(0)
+	copts.header_names = nil
+	copts.header_values = nil
 
 	refresh := opts.Refresh()
 	if len(refresh) > 0 {
