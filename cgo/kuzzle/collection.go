@@ -22,12 +22,10 @@ package main
 import "C"
 import (
 	"encoding/json"
-	"sync"
-	"unsafe"
-
 	"github.com/kuzzleio/sdk-go/collection"
 	"github.com/kuzzleio/sdk-go/kuzzle"
-	"github.com/kuzzleio/sdk-go/types"
+	"sync"
+	"unsafe"
 )
 
 // map which stores instances to keep references in case the gc passes
@@ -127,7 +125,9 @@ func kuzzle_collection_search_specifications(c *C.collection, body *C.char, opti
 
 //export kuzzle_collection_search_specifications_next
 func kuzzle_collection_search_specifications_next(sr *C.search_result) *C.search_result {
-	res, err := (*types.SearchResult)(sr.instance).Next()
+	goSearchResult, _ := cToGoSearchResult(sr)
+
+	res, err := goSearchResult.Next()
 	return goToCSearchResult(sr.k, res, err)
 }
 

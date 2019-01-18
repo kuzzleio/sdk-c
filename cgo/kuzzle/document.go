@@ -22,12 +22,11 @@ package main
 import "C"
 import (
 	"encoding/json"
-	"sync"
-	"unsafe"
-
+	"fmt"
 	"github.com/kuzzleio/sdk-go/document"
 	"github.com/kuzzleio/sdk-go/kuzzle"
-	"github.com/kuzzleio/sdk-go/types"
+	"sync"
+	"unsafe"
 )
 
 // map which stores instances to keep references in case the gc passes
@@ -45,13 +44,12 @@ func unregisterDocument(d *C.document) {
 }
 
 //export kuzzle_new_document
-func kuzzle_new_document(d *C.document, k *C.kuzzle) {
-	kuz := (*kuzzle.Kuzzle)(k.instance)
+func kuzzle_new_document(d *C.document) {
+	kuz := (*kuzzle.Kuzzle)(d.k.instance)
 	doc := document.NewDocument(kuz)
 
 	ptr := unsafe.Pointer(doc)
 	d.instance = ptr
-	d.k = k
 	registerDocument(doc, ptr)
 }
 
@@ -132,7 +130,12 @@ func kuzzle_document_search(d *C.document, index *C.char, collection *C.char, bo
 
 //export kuzzle_document_search_next
 func kuzzle_document_search_next(sr *C.search_result) *C.search_result {
-	res, err := (*types.SearchResult)(sr.instance).Next()
+	goSearchResult, _ := cToGoSearchResult(sr)
+
+	res, err := goSearchResult.Next()
+	if res == nil {
+		fmt.Println("res is null :-(")
+	}
 	return goToCSearchResult(sr.k, res, err)
 }
 

@@ -171,7 +171,10 @@ func kuzzle_websocket_close(ws *C.web_socket) *C.char {
 }
 
 //export kuzzle_websocket_register_sub
-func kuzzle_websocket_register_sub(ws *C.web_socket, channel, roomId, filters *C.char, subscribe_to_self C.bool, listener C.kuzzle_notification_listener) {
+func kuzzle_websocket_register_sub(ws *C.web_socket, channel, roomId,
+	filters *C.char, subscribe_to_self C.bool,
+	listener C.kuzzle_notification_listener) {
+
 	c := make(chan types.NotificationResult)
 
 	_notification_listeners[C.GoString(channel)] = c
@@ -182,7 +185,10 @@ func kuzzle_websocket_register_sub(ws *C.web_socket, channel, roomId, filters *C
 				break
 			}
 
-			C.bridge_trigger_notification_listener(listener, goToCNotificationResult(&res), ws.cpp_instance)
+			C.bridge_trigger_notification_listener(
+				listener,
+				goToCNotificationResult(&res),
+				ws.cpp_instance)
 		}
 	}()
 	(*websocket.WebSocket)(ws.instance).RegisterSub(C.GoString(channel), C.GoString(roomId), json.RawMessage(C.GoString(filters)), bool(subscribe_to_self), c, nil)
