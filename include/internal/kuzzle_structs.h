@@ -306,8 +306,8 @@ typedef struct s_options {
     const char *refresh;
 
     // HTTP headers
-    const char * const * header_names;
-    const char * const * header_values;
+    char ** header_names;
+    char ** header_values;
     size_t header_size;
 
     // C++ constructor to have default values
