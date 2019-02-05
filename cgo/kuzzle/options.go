@@ -68,7 +68,7 @@ func kuzzle_set_default_options(copts *C.options) {
 	copts.auto_resubscribe = C.bool(opts.AutoResubscribe())
 	copts.reconnection_delay = C.ulong(opts.ReconnectionDelay())
 	copts.replay_interval = C.ulong(opts.ReplayInterval())
-	copts.header_size = C.size_t(0)
+	copts.header_length = C.size_t(0)
 	copts.header_names = nil
 	copts.header_values = nil
 
@@ -126,13 +126,13 @@ func SetOptions(options *C.options) (opts types.Options) {
 		opts.SetRefresh(C.GoString(options.refresh))
 	}
 
-	if options.header_size > 0 {
+	if options.header_length > 0 {
 		httpHeaders := &http.Header{}
 
-		hnames := (*[1<<28 - 1]*C.char)(unsafe.Pointer(options.header_names))[:options.header_size:options.header_size]
-		hvals := (*[1<<28 - 1]*C.char)(unsafe.Pointer(options.header_values))[:options.header_size:options.header_size]
+		hnames := (*[1<<28 - 1]*C.char)(unsafe.Pointer(options.header_names))[:options.header_length:options.header_length]
+		hvals := (*[1<<28 - 1]*C.char)(unsafe.Pointer(options.header_values))[:options.header_length:options.header_length]
 
-		for i := 0; i < int(options.header_size); i++ {
+		for i := 0; i < int(options.header_length); i++ {
 			httpHeaders.Add(
 				C.GoString(hnames[i]),
 				C.GoString(hvals[i]))

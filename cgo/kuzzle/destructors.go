@@ -130,9 +130,9 @@ func kuzzle_free_options(st *C.options) {
 	if st != nil {
 		C.free(unsafe.Pointer(st.refresh))
 
-		if st.header_size > 0 {
-			C.free_char_array(st.header_names, st.header_size)
-			C.free_char_array(st.header_values, st.header_size)
+		if st.header_length > 0 {
+			C.free_char_array(st.header_names, st.header_length)
+			C.free_char_array(st.header_values, st.header_length)
 		}
 
 		C.free(unsafe.Pointer(st))
