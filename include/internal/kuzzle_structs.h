@@ -303,17 +303,11 @@ typedef struct s_options {
     bool auto_resubscribe;
     unsigned long reconnection_delay;
     unsigned long replay_interval;
-    const char *refresh;
 
     // HTTP headers
     char ** header_names;
     char ** header_values;
     size_t header_length;
-
-    // C++ constructor to have default values
-    # ifdef __cplusplus
-      s_options();
-    # endif
 } options;
 
 /* === Security === */

@@ -71,13 +71,6 @@ func kuzzle_set_default_options(copts *C.options) {
 	copts.header_length = C.size_t(0)
 	copts.header_names = nil
 	copts.header_values = nil
-
-	refresh := opts.Refresh()
-	if len(refresh) > 0 {
-		copts.refresh = C.CString(refresh)
-	} else {
-		copts.refresh = nil
-	}
 }
 
 func SetQueryOptions(options *C.query_options) (opts types.QueryOptions) {
@@ -122,9 +115,6 @@ func SetOptions(options *C.options) (opts types.Options) {
 	opts.SetAutoResubscribe(bool(options.auto_resubscribe))
 	opts.SetReconnectionDelay(time.Duration(int(options.reconnection_delay)))
 	opts.SetReplayInterval(time.Duration(int(options.replay_interval)))
-	if options.refresh != nil {
-		opts.SetRefresh(C.GoString(options.refresh))
-	}
 
 	if options.header_length > 0 {
 		httpHeaders := &http.Header{}
