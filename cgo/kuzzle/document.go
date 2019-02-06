@@ -22,7 +22,6 @@ package main
 import "C"
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/kuzzleio/sdk-go/document"
 	"github.com/kuzzleio/sdk-go/kuzzle"
 	"sync"
