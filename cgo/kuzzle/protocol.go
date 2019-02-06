@@ -21,7 +21,6 @@ package main
 
 	static void call_notification_bridge(notification_result* result,
 																			 void* data) {
-		printf("calling bridge_notification...\n");
 		bridge_notification(result, data);
 	}
 
@@ -146,7 +145,6 @@ package main
 	}
 
 	static kuzzle_notification_listener get_bridge_notification_listener_fptr() {
-		printf("go call bridge pointer: %p\n", &call_notification_bridge);
 		return &call_notification_bridge;
 	}
 */
@@ -278,6 +276,7 @@ func (wp WrapProtocol) RegisterSub(channel, roomID string,
 	subscribeToSelf bool,
 	notifChan chan<- types.NotificationResult,
 	onReconnectChannel chan<- interface{}) {
+
 	_list_notification_listeners[channel] = notifChan
 
 	C.bridge_register_sub(wp.P.register_sub, C.CString(channel),

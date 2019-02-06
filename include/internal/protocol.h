@@ -32,7 +32,7 @@ typedef struct {
   int (*get_state)(void*);
   void (*emit_event)(int, void*, void*);
   void (*register_sub)(const char*, const char*, const char*, bool,
-                       kuzzle_notification_listener*, void*);
+                       kuzzle_notification_listener, void*);
   void (*unregister_sub)(const char*, void*);
   void (*cancel_subs)(void*);
   void (*start_queuing)(void*);

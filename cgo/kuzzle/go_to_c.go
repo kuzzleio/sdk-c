@@ -108,8 +108,7 @@ func goToCNotificationResult(
 	result.room_id = C.CString(gNotif.RoomId)
 	result.timestamp = C.ulonglong(gNotif.Timestamp)
 	result.status = C.int(gNotif.Status)
-	fmt.Println("=== converted notification to C struct")
-	fmt.Printf("===> %s\n", gNotif.Result.Content)
+
 	return result
 }
 
@@ -555,7 +554,7 @@ func goToCSearchResult(k *C.kuzzle, sr *types.SearchResult, err error) *C.search
 	result.response = goToCKuzzleResponse(sr.Response())
 	result.options = goToCQueryOptions(sr.Options())
 	result.scroll_action = C.CString(sr.ScrollAction())
-	fmt.Printf("result.fetched = %d\n", result.fetched)
+
 	return result
 }
 
