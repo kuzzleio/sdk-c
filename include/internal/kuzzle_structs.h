@@ -304,6 +304,7 @@ typedef struct s_options {
     unsigned long reconnection_delay;
     unsigned long replay_interval;
     const char *refresh;
+    bool ssl_connection;
 
     // HTTP headers
     char ** header_names;
