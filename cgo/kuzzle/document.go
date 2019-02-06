@@ -131,11 +131,7 @@ func kuzzle_document_search(d *C.document, index *C.char, collection *C.char, bo
 //export kuzzle_document_search_next
 func kuzzle_document_search_next(sr *C.search_result) *C.search_result {
 	goSearchResult, _ := cToGoSearchResult(sr)
-
 	res, err := goSearchResult.Next()
-	if res == nil {
-		fmt.Println("res is null :-(")
-	}
 	return goToCSearchResult(sr.k, res, err)
 }
 
