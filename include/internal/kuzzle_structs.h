@@ -294,6 +294,7 @@ typedef struct {
 } subscribe_result;
 
 typedef struct s_options {
+    unsigned int port;
     unsigned queue_ttl;
     unsigned long queue_max_size;
     bool auto_queue;
@@ -302,12 +303,11 @@ typedef struct s_options {
     bool auto_resubscribe;
     unsigned long reconnection_delay;
     unsigned long replay_interval;
-    const char *refresh;
 
-    // C++ constructor to have default values
-    # ifdef __cplusplus
-      s_options();
-    # endif
+    // HTTP headers
+    char ** header_names;
+    char ** header_values;
+    size_t header_length;
 } options;
 
 /* === Security === */

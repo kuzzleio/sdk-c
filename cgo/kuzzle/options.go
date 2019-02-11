@@ -21,9 +21,10 @@ package main
 */
 import "C"
 import (
-	"time"
-
 	"github.com/kuzzleio/sdk-go/types"
+	"net/http"
+	"time"
+	"unsafe"
 )
 
 //export kuzzle_set_default_query_options
@@ -58,6 +59,7 @@ func kuzzle_set_default_room_options(copts *C.room_options) {
 func kuzzle_set_default_options(copts *C.options) {
 	opts := types.NewOptions()
 
+	copts.port = C.uint(opts.Port())
 	copts.queue_ttl = C.uint(opts.QueueTTL())
 	copts.queue_max_size = C.ulong(opts.QueueMaxSize())
 	copts.auto_queue = C.bool(opts.AutoQueue())
@@ -66,13 +68,9 @@ func kuzzle_set_default_options(copts *C.options) {
 	copts.auto_resubscribe = C.bool(opts.AutoResubscribe())
 	copts.reconnection_delay = C.ulong(opts.ReconnectionDelay())
 	copts.replay_interval = C.ulong(opts.ReplayInterval())
-
-	refresh := opts.Refresh()
-	if len(refresh) > 0 {
-		copts.refresh = C.CString(refresh)
-	} else {
-		copts.refresh = nil
-	}
+	copts.header_length = C.size_t(0)
+	copts.header_names = nil
+	copts.header_values = nil
 }
 
 func SetQueryOptions(options *C.query_options) (opts types.QueryOptions) {
@@ -107,6 +105,7 @@ func SetOptions(options *C.options) (opts types.Options) {
 
 	opts = types.NewOptions()
 
+	opts.SetPort(int(options.port))
 	opts.SetQueueTTL(time.Duration(uint16(options.queue_ttl)))
 	opts.SetQueueMaxSize(int(options.queue_max_size))
 
@@ -116,8 +115,20 @@ func SetOptions(options *C.options) (opts types.Options) {
 	opts.SetAutoResubscribe(bool(options.auto_resubscribe))
 	opts.SetReconnectionDelay(time.Duration(int(options.reconnection_delay)))
 	opts.SetReplayInterval(time.Duration(int(options.replay_interval)))
-	if options.refresh != nil {
-		opts.SetRefresh(C.GoString(options.refresh))
+
+	if options.header_length > 0 {
+		httpHeaders := &http.Header{}
+
+		hnames := (*[1<<28 - 1]*C.char)(unsafe.Pointer(options.header_names))[:options.header_length:options.header_length]
+		hvals := (*[1<<28 - 1]*C.char)(unsafe.Pointer(options.header_values))[:options.header_length:options.header_length]
+
+		for i := 0; i < int(options.header_length); i++ {
+			httpHeaders.Add(
+				C.GoString(hnames[i]),
+				C.GoString(hvals[i]))
+		}
+
+		opts.SetHeaders(httpHeaders)
 	}
 
 	return
