@@ -262,7 +262,15 @@ func (wp WrapProtocol) State() int {
 }
 
 func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
-	C.bridge_emit_event(wp.P.emit_event, C.int(event), nil, wp.P.instance)
+	str, err := json.Marshal(data)
+
+	if err != nil {
+		str = []byte("")
+	}
+
+	p := unsafe.Pointer(C.CString(string(str)))
+	defer C.free(p)
+	C.bridge_emit_event(wp.P.emit_event, C.int(event), p, wp.P.instance)
 }
 
 //export bridge_notification
