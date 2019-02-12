@@ -37,7 +37,8 @@ import (
 var instances sync.Map
 
 // map which stores channel and function's pointers adresses for listeners
-var listeners_list map[uintptr]chan<- json.RawMessage = make(map[uintptr]chan<- json.RawMessage)
+var _listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
+var _once_listeners map[int]map[C.kuzzle_event_listener]chan json.RawMessage = make(map[int]map[C.kuzzle_event_listener]chan json.RawMessage)
 
 // register new instance to the instances map
 func registerKuzzle(instance interface{}, ptr unsafe.Pointer) {
@@ -203,37 +204,57 @@ func kuzzle_stop_queuing(k *C.kuzzle) {
 
 //export kuzzle_add_listener
 // TODO loop and close on Unsubscribe
-func kuzzle_add_listener(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data unsafe.Pointer) {
-	c := make(chan json.RawMessage)
+func kuzzle_add_listener(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener,
+	data unsafe.Pointer) {
+	event := int(e)
 
-	listeners_list[uintptr(unsafe.Pointer(cb))] = c
-	go func() {
-		for {
-			res, ok := <-c
-			if ok == false {
-				break
+	if _listeners[event] == nil {
+		_listeners[event] = make(
+			map[C.kuzzle_event_listener]chan json.RawMessage)
+	}
+
+	// skip if the same listener is already registered
+	if _, ok := _listeners[event][cb]; !ok {
+		c := make(chan json.RawMessage)
+		_listeners[event][cb] = c
+		go func() {
+			for {
+				res, ok := <-c
+				if ok == false {
+					break
+				}
+				r, _ := json.Marshal(res)
+
+				C.kuzzle_trigger_event(e, cb, C.CString(string(r)), data)
 			}
-			r, _ := json.Marshal(res)
-
-			C.kuzzle_trigger_event(e, cb, C.CString(string(r)), data)
-		}
-	}()
-	(*kuzzle.Kuzzle)(k.instance).AddListener(int(e), c)
+		}()
+		(*kuzzle.Kuzzle)(k.instance).AddListener(event, c)
+	}
 }
 
 //export kuzzle_once
 func kuzzle_once(k *C.kuzzle, e C.int, cb C.kuzzle_event_listener, data unsafe.Pointer) {
-	c := make(chan json.RawMessage)
+	event := int(e)
 
-	listeners_list[uintptr(unsafe.Pointer(cb))] = c
-	go func() {
-		res := <-c
+	if _once_listeners[event] == nil {
+		_once_listeners[event] = make(
+			map[C.kuzzle_event_listener]chan json.RawMessage)
+	}
 
-		r, _ := json.Marshal(res)
+	if _, ok := _once_listeners[event][cb]; !ok {
+		c := make(chan json.RawMessage)
 
-		C.kuzzle_trigger_event(e, cb, C.CString(string(r)), data)
-	}()
-	(*kuzzle.Kuzzle)(k.instance).Once(int(e), c)
+		_once_listeners[event][cb] = c
+		go func() {
+			res := <-c
+
+			r, _ := json.Marshal(res)
+
+			C.kuzzle_trigger_event(e, cb, C.CString(string(r)), data)
+			delete(_once_listeners[event], cb)
+		}()
+		(*kuzzle.Kuzzle)(k.instance).Once(event, c)
+	}
 }
 
 //export kuzzle_listener_count
@@ -242,13 +263,15 @@ func kuzzle_listener_count(k *C.kuzzle, event C.int) int {
 }
 
 //export kuzzle_remove_listener
-func kuzzle_remove_listener(k *C.kuzzle, event C.int, cb unsafe.Pointer) {
-	(*kuzzle.Kuzzle)(k.instance).RemoveListener(int(event), listeners_list[uintptr(cb)])
+func kuzzle_remove_listener(k *C.kuzzle, event C.int, listener C.kuzzle_event_listener) {
+	(*kuzzle.Kuzzle)(k.instance).RemoveListener(int(event), _listeners[int(event)][listener])
+	delete(_listeners[int(event)], listener)
 }
 
 //export kuzzle_remove_all_listeners
 func kuzzle_remove_all_listeners(k *C.kuzzle, event C.int) {
 	(*kuzzle.Kuzzle)(k.instance).RemoveAllListeners(int(event))
+	delete(_listeners, int(event))
 }
 
 //export kuzzle_get_auto_queue

@@ -7,6 +7,23 @@ package main
 
 	// Bridges
 
+	extern void bridge_listener(int, char*, void*);
+	extern void bridge_listener_once(int, char*, void*);
+	extern void bridge_notification(notification_result*, void*);
+
+	static void call_bridge(int event, char* res, void* data) {
+		bridge_listener(event, res, data);
+	}
+
+	static void call_bridge_once(int event, char* res, void* data) {
+		bridge_listener_once(event, res, data);
+	}
+
+	static void call_notification_bridge(notification_result* result,
+																			 void* data) {
+		bridge_notification(result, data);
+	}
+
 	static void bridge_protocol_add_listener(void (*f)(int, kuzzle_event_listener*, void*), int event, kuzzle_event_listener* listener, void* data) {
 		f(event, listener, data);
 	}
@@ -51,8 +68,16 @@ package main
 		f(event, res, data);
 	}
 
-	static void bridge_register_sub(void (*f)(const char*, const char*, const char*, bool, kuzzle_notification_listener*, void*), const char* channel, const char* room_id, const char* filters, bool subscribe_to_self, kuzzle_notification_listener* listener, void* data) {
-		f(channel, room_id, filters, subscribe_to_self, listener, data);
+	static void bridge_register_sub(
+			void (*f)(const char*, const char*, const char*, bool,
+							  kuzzle_notification_listener, void*),
+		  const char* channel,
+		  const char* room_id,
+		  const char* filters,
+		  bool subscribe_to_self,
+		  void* data) {
+		f(channel, room_id, filters, subscribe_to_self, call_notification_bridge,
+			data);
 	}
 
 	static void bridge_unregister_sub(void (*f)(char*, void*), char* id, void* data) {
@@ -109,22 +134,6 @@ package main
 
 	static bool bridge_is_ssl_connection(bool (*f)(void*), void* data) {
 		return f(data);
-	}
-
-	extern void bridge_listener(int, char*, void*);
-	extern void bridge_listener_once(int, char*, void*);
-	extern void bridge_notification(notification_result*, void*);
-
-	static void call_bridge(int event, char* res, void* data) {
-		bridge_listener(event, res, data);
-	}
-
-	static void call_bridge_once(int event, char* res, void* data) {
-		bridge_listener_once(event, res, data);
-	}
-
-	static void call_notification_bridge(notification_result* result, void* data) {
-		bridge_notification(result, data);
 	}
 
 	static kuzzle_event_listener get_bridge_fptr() {
@@ -253,18 +262,34 @@ func (wp WrapProtocol) State() int {
 }
 
 func (wp WrapProtocol) EmitEvent(event int, data interface{}) {
-	C.bridge_emit_event(wp.P.emit_event, C.int(event), nil, wp.P.instance)
+	str, err := json.Marshal(data)
+
+	if err != nil {
+		str = []byte("")
+	}
+
+	p := unsafe.Pointer(C.CString(string(str)))
+	defer C.free(p)
+	C.bridge_emit_event(wp.P.emit_event, C.int(event), p, wp.P.instance)
 }
 
 //export bridge_notification
 func bridge_notification(res *C.notification_result, data unsafe.Pointer) {
-	_list_notification_listeners[C.GoString(res.room_id)] <- *cToGoNotificationResult(res)
+	goNotification := cToGoNotificationResult(res)
+	_list_notification_listeners[C.GoString(res.room_id)] <- *goNotification
 }
 
-func (wp WrapProtocol) RegisterSub(channel, roomID string, filters json.RawMessage, subscribeToSelf bool, notifChan chan<- types.NotificationResult, onReconnectChannel chan<- interface{}) {
-	fptr := C.get_bridge_notification_listener_fptr()
+func (wp WrapProtocol) RegisterSub(channel, roomID string,
+	filters json.RawMessage,
+	subscribeToSelf bool,
+	notifChan chan<- types.NotificationResult,
+	onReconnectChannel chan<- interface{}) {
+
 	_list_notification_listeners[channel] = notifChan
-	C.bridge_register_sub(wp.P.register_sub, C.CString(channel), C.CString(roomID), C.CString(string(filters)), C.bool(subscribeToSelf), &fptr, wp.P.instance)
+
+	C.bridge_register_sub(wp.P.register_sub, C.CString(channel),
+		C.CString(roomID), C.CString(string(filters)), C.bool(subscribeToSelf),
+		wp.P.instance)
 }
 
 func (wp WrapProtocol) UnregisterSub(id string) {
