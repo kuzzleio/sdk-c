@@ -72,13 +72,6 @@ func kuzzle_set_default_options(copts *C.options) {
 	copts.header_names = nil
 	copts.header_values = nil
 	copts.ssl_connection = false
-
-	refresh := opts.Refresh()
-	if len(refresh) > 0 {
-		copts.refresh = C.CString(refresh)
-	} else {
-		copts.refresh = nil
-	}
 }
 
 func SetQueryOptions(options *C.query_options) (opts types.QueryOptions) {
