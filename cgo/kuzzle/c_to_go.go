@@ -140,7 +140,7 @@ func cToGoUser(u *C.kuzzle_user) *security.User {
 	return user
 }
 
-func cToGoUserRigh(r *C.user_right) *types.UserRights {
+func cToGoUserRight(r *C.user_right) *types.UserRights {
 	right := &types.UserRights{
 		Controller: C.GoString(r.controller),
 		Action:     C.GoString(r.action),
@@ -242,12 +242,17 @@ func cToGoSearchResult(s *C.search_result) (*types.SearchResult, error) {
 	options.SetScroll(C.GoString(s.options.scroll))
 	options.SetScrollId(C.GoString(s.options.scroll_id))
 
-	kuzzle := (*kuzzle.Kuzzle)(s.k.instance)
 	scrollAction := C.GoString(s.scroll_action)
 	request := cToGoKuzzleRequest(s.request)
 	response := cToGoKuzzleResponse(s.response)
 
-	sr, err := types.NewSearchResult(kuzzle, scrollAction, request, options, response)
+	sr, err := types.NewSearchResult(
+		(*kuzzle.Kuzzle)(s.k.instance),
+		scrollAction,
+		request,
+		options,
+		response)
+
 	if err != nil {
 		return nil, err
 	}
@@ -298,9 +303,9 @@ func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObje
 
 func CToGoNotificationContent(cnc *C.notification_content) *types.NotificationContent {
 	notifContent := types.NotificationContent{
-		Id: C.GoString(cnc.id),
+		Id:      C.GoString(cnc.id),
 		Content: json.RawMessage(C.GoString(cnc.content)),
-		Count: int(cnc.count),
+		Count:   int(cnc.count),
 	}
 
 	if cnc.m != nil {
@@ -312,20 +317,20 @@ func CToGoNotificationContent(cnc *C.notification_content) *types.NotificationCo
 
 func cToGoNotificationResult(cnr *C.notification_result) *types.NotificationResult {
 	notifResult := types.NotificationResult{
-		RequestId: C.GoString(cnr.request_id),
-		Result: CToGoNotificationContent(cnr.result),
-		Volatile: json.RawMessage(C.GoString(cnr.volatiles)),
-		Index: C.GoString(cnr.index),
+		RequestId:  C.GoString(cnr.request_id),
+		Result:     CToGoNotificationContent(cnr.result),
+		Volatile:   json.RawMessage(C.GoString(cnr.volatiles)),
+		Index:      C.GoString(cnr.index),
 		Collection: C.GoString(cnr.collection),
 		Controller: C.GoString(cnr.controller),
-		Action: C.GoString(cnr.action),
-		Protocol: C.GoString(cnr.protocol),
-		Scope: C.GoString(cnr.scope),
-		State: C.GoString(cnr.state),
-		User: C.GoString(cnr.user),
-		Type: C.GoString(cnr.n_type),
-		RoomId: C.GoString(cnr.room_id),
-		Timestamp: int(cnr.timestamp),
+		Action:     C.GoString(cnr.action),
+		Protocol:   C.GoString(cnr.protocol),
+		Scope:      C.GoString(cnr.scope),
+		State:      C.GoString(cnr.state),
+		User:       C.GoString(cnr.user),
+		Type:       C.GoString(cnr.n_type),
+		RoomId:     C.GoString(cnr.room_id),
+		Timestamp:  int(cnr.timestamp),
 	}
 
 	if cnr.error != nil {

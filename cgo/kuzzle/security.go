@@ -475,7 +475,7 @@ func kuzzle_security_is_action_allowed(crights **C.user_right, crlength C.uint, 
 
 	carray := (*[1<<28 - 1]*C.user_right)(unsafe.Pointer(crights))[:int(crlength):int(crlength)]
 	for i := 0; i < int(crlength); i++ {
-		rights[i] = cToGoUserRigh(carray[i])
+		rights[i] = cToGoUserRight(carray[i])
 	}
 
 	res := security.IsActionAllowed(rights, C.GoString(controller), C.GoString(action), C.GoString(index), C.GoString(collection))

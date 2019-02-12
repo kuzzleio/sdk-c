@@ -83,7 +83,9 @@ func goToCNotificationContent(gNotifContent *types.NotificationContent) *C.notif
 }
 
 // Allocates memory
-func goToCNotificationResult(gNotif *types.NotificationResult) *C.notification_result {
+func goToCNotificationResult(
+	gNotif *types.NotificationResult) *C.notification_result {
+
 	result := (*C.notification_result)(C.calloc(1, C.sizeof_notification_result))
 
 	if gNotif.Error.Error() != "" {
@@ -276,7 +278,9 @@ func goToCStringResult(goRes *string, err error) *C.string_result {
 	return result
 }
 
-func goToCSubscribeResult(goRes *types.SubscribeResult, err error) *C.subscribe_result {
+func goToCSubscribeResult(goRes *types.SubscribeResult,
+	err error) *C.subscribe_result {
+
 	result := (*C.subscribe_result)(C.calloc(1, C.sizeof_subscribe_result))
 
 	if err != nil {
@@ -410,7 +414,16 @@ func goToCProfile(k *C.kuzzle, profile *security.Profile, dest *C.profile) *C.pr
 }
 
 func goToCProfileSearchResult(k *C.kuzzle, sr *security.ProfileSearchResult, err error) *C.search_profiles_result {
-	result := (*C.search_profiles_result)(C.calloc(1, C.sizeof_search_profiles_result))
+	// this situation arises when a next() is performed on the last
+	// search result page
+	if sr == nil && err == nil {
+		return nil
+	}
+
+	result := (*C.search_profiles_result)(C.calloc(
+		1,
+		C.sizeof_search_profiles_result))
+	result.k = k
 
 	if err != nil {
 		Set_search_profiles_result_error(result, err)
@@ -432,7 +445,7 @@ func goToCProfileSearchResult(k *C.kuzzle, sr *security.ProfileSearchResult, err
 	result.scroll_id = C.CString(sr.ScrollId)
 
 	result.instance = unsafe.Pointer(sr)
-	result.k = k
+
 	result.request = goToCKuzzleRequest(sr.Request())
 	result.response = goToCKuzzleResponse(sr.Response())
 	result.options = goToCQueryOptions(sr.Options())
@@ -440,8 +453,16 @@ func goToCProfileSearchResult(k *C.kuzzle, sr *security.ProfileSearchResult, err
 	return result
 }
 
-func goToCRoleSearchResult(k *C.kuzzle, sr *security.RoleSearchResult, err error) *C.search_roles_result {
+func goToCRoleSearchResult(k *C.kuzzle, sr *security.RoleSearchResult,
+	err error) *C.search_roles_result {
+	// this situation arises when a next() is performed on the last
+	// search result page
+	if sr == nil && err == nil {
+		return nil
+	}
+
 	result := (*C.search_roles_result)(C.calloc(1, C.sizeof_search_roles_result))
+	result.k = k
 
 	if err != nil {
 		Set_search_roles_result_error(result, err)
@@ -463,7 +484,7 @@ func goToCRoleSearchResult(k *C.kuzzle, sr *security.RoleSearchResult, err error
 	result.scroll_id = C.CString(sr.ScrollId)
 
 	result.instance = unsafe.Pointer(sr)
-	result.k = k
+
 	result.request = goToCKuzzleRequest(sr.Request())
 	result.response = goToCKuzzleResponse(sr.Response())
 	result.options = goToCQueryOptions(sr.Options())
@@ -509,7 +530,15 @@ func goToCQueryOptions(options types.QueryOptions) *C.query_options {
 
 // Allocates memory
 func goToCSearchResult(k *C.kuzzle, sr *types.SearchResult, err error) *C.search_result {
+
+	// this situation arises when a next() is performed on the last
+	// search result page
+	if sr == nil && err == nil {
+		return nil
+	}
+
 	result := (*C.search_result)(C.calloc(1, C.sizeof_search_result))
+	result.k = k
 
 	if err != nil {
 		Set_search_result_error(result, err)
@@ -521,8 +550,6 @@ func goToCSearchResult(k *C.kuzzle, sr *types.SearchResult, err error) *C.search
 	result.total = C.uint(sr.Total)
 	result.fetched = C.uint(sr.Fetched)
 	result.scroll_id = C.CString(sr.ScrollId)
-	result.instance = unsafe.Pointer(sr)
-	result.k = k
 	result.request = goToCKuzzleRequest(sr.Request())
 	result.response = goToCKuzzleResponse(sr.Response())
 	result.options = goToCQueryOptions(sr.Options())
@@ -593,6 +620,12 @@ func goToCSpecificationResult(goRes *types.Specification, err error) *C.specific
 
 // Allocates memory
 func goToCSpecificationSearchResult(goRes *types.SpecificationSearchResult, err error) *C.specification_search_result {
+	// this situation arises when a next() is performed on the last
+	// search result page
+	if goRes == nil && err == nil {
+		return nil
+	}
+
 	result := (*C.specification_search_result)(C.calloc(1, C.sizeof_specification_search_result))
 
 	if err != nil {
@@ -796,7 +829,14 @@ func goToCUserRightsResult(rights []*types.UserRights, err error) *C.user_rights
 }
 
 func goToCUserSearchResult(k *C.kuzzle, sr *security.UserSearchResult, err error) *C.search_users_result {
+	// this situation arises when a next() is performed on the last
+	// search result page
+	if sr == nil && err == nil {
+		return nil
+	}
+
 	result := (*C.search_users_result)(C.calloc(1, C.sizeof_search_users_result))
+	result.k = k
 
 	if err != nil {
 		Set_search_users_result_error(result, err)
@@ -806,19 +846,22 @@ func goToCUserSearchResult(k *C.kuzzle, sr *security.UserSearchResult, err error
 	result.aggregations = C.CString(string(sr.Aggregations))
 	result.hits_length = C.size_t(len(sr.Hits))
 	if len(sr.Hits) > 0 {
-		result.hits = (*C.kuzzle_user)(C.calloc(result.hits_length, C.sizeof_kuzzle_user))
+		result.hits = (*C.kuzzle_user)(C.calloc(
+			result.hits_length,
+			C.sizeof_kuzzle_user))
 		carr := (*[1<<26 - 1]C.kuzzle_user)(unsafe.Pointer(result.hits))[:len(sr.Hits)]
 
 		for i, user := range sr.Hits {
 			goToCUser(k, user, &carr[i])
 		}
 	}
+
 	result.total = C.uint(sr.Total)
 	result.fetched = C.uint(sr.Fetched)
 	result.scroll_id = C.CString(sr.ScrollId)
 
 	result.instance = unsafe.Pointer(sr)
-	result.k = k
+
 	result.request = goToCKuzzleRequest(sr.Request())
 	result.response = goToCKuzzleResponse(sr.Response())
 	result.options = goToCQueryOptions(sr.Options())

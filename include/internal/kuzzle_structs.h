@@ -638,7 +638,6 @@ typedef struct search_result {
     unsigned total;
     unsigned fetched;
     const char *scroll_id;
-    void *instance;
     kuzzle *k;
     kuzzle_request *request;
     kuzzle_response *response;
