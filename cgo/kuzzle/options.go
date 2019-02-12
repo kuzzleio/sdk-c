@@ -71,6 +71,7 @@ func kuzzle_set_default_options(copts *C.options) {
 	copts.header_length = C.size_t(0)
 	copts.header_names = nil
 	copts.header_values = nil
+	copts.ssl_connection = false
 }
 
 func SetQueryOptions(options *C.query_options) (opts types.QueryOptions) {
@@ -106,6 +107,7 @@ func SetOptions(options *C.options) (opts types.Options) {
 	opts = types.NewOptions()
 
 	opts.SetPort(int(options.port))
+	opts.SetSslConnection(bool(options.ssl_connection))
 	opts.SetQueueTTL(time.Duration(uint16(options.queue_ttl)))
 	opts.SetQueueMaxSize(int(options.queue_max_size))
 

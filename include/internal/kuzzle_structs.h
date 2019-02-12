@@ -303,6 +303,7 @@ typedef struct s_options {
     bool auto_resubscribe;
     unsigned long reconnection_delay;
     unsigned long replay_interval;
+    bool ssl_connection;
 
     // HTTP headers
     char ** header_names;
