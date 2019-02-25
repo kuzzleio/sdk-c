@@ -13,8 +13,6 @@ import (
 	"sync"
 	"time"
 	"unsafe"
-
-	"github.com/kuzzleio/sdk-go/protocol"
 	"github.com/kuzzleio/sdk-go/types"
 )
 
@@ -164,26 +162,6 @@ func (wp WrapProtocol) RequestHistory() map[string]time.Time {
 	return nil
 }
 
-func (wp WrapProtocol) StartQueuing() {
-	C.bridge_start_queuing(wp.P.start_queuing, wp.P.instance)
-}
-
-func (wp WrapProtocol) StopQueuing() {
-	C.bridge_stop_queuing(wp.P.stop_queuing, wp.P.instance)
-}
-
-func (wp WrapProtocol) PlayQueue() {
-	C.bridge_play_queue(wp.P.play_queue, wp.P.instance)
-}
-
-func (wp WrapProtocol) ClearQueue() {
-	C.bridge_clear_queue(wp.P.clear_queue, wp.P.instance)
-}
-
-func (wp WrapProtocol) AutoQueue() bool {
-	return bool(C.bridge_is_auto_queue(wp.P.is_auto_queue, wp.P.instance))
-}
-
 func (wp WrapProtocol) AutoReconnect() bool {
 	return bool(C.bridge_is_auto_reconnect(wp.P.is_auto_reconnect, wp.P.instance))
 }
@@ -192,57 +170,8 @@ func (wp WrapProtocol) AutoResubscribe() bool {
 	return bool(C.bridge_is_auto_resubscribe(wp.P.is_auto_resubscribe, wp.P.instance))
 }
 
-// Deprecated
-func (wp WrapProtocol) AutoReplay() bool {
-	//@todo will be moved in Kuzzle object
-	return false
-}
-
-func (wp WrapProtocol) Host() string {
-	return C.GoString(C.bridge_get_host(wp.P.get_host, wp.P.instance))
-}
-
-// Deprecated
-func (wp WrapProtocol) OfflineQueue() []*types.QueryObject {
-	//@todo will be moved in Kuzzle object
-	return nil
-}
-
-// Deprecated
-func (wp WrapProtocol) OfflineQueueLoader() protocol.OfflineQueueLoader {
-	//@todo will be moved in Kuzzle object
-	var offline protocol.OfflineQueueLoader
-	return offline
-}
-
 func (wp WrapProtocol) Port() int {
 	return int(C.bridge_get_port(wp.P.get_port, wp.P.instance))
-}
-
-// Deprecated
-func (wp WrapProtocol) QueueFilter() protocol.QueueFilter {
-	//@todo will be moved in Kuzzle object
-	return func(data []byte) bool {
-		return false
-	}
-}
-
-// Deprecated
-func (wp WrapProtocol) QueueMaxSize() int {
-	//@todo will be moved in Kuzzle object
-	return -1
-}
-
-// Deprecated
-func (wp WrapProtocol) QueueTTL() time.Duration {
-	//@todo will be moved in Kuzzle object
-	return time.Duration(0)
-}
-
-// Deprecated
-func (wp WrapProtocol) ReplayInterval() time.Duration {
-	//@todo will be moved in Kuzzle object
-	return time.Duration(0)
 }
 
 func (wp WrapProtocol) ReconnectionDelay() time.Duration {
@@ -253,37 +182,10 @@ func (wp WrapProtocol) SslConnection() bool {
 	return bool(C.bridge_is_ssl_connection(wp.P.is_ssl_connection, wp.P.instance))
 }
 
-// Deprecated
-func (wp WrapProtocol) SetAutoQueue(value bool) {
-	//@todo will be moved in Kuzzle object
+func (wp WrapProtocol) IsReady() bool {
+	return bool(C.bridge_is_ready(wp.P.is_ready, wp.P.instance))
 }
 
-// Deprecated
-func (wp WrapProtocol) SetAutoReplay(value bool) {
-	//@todo will be moved in Kuzzle object
-}
-
-// Deprecated
-func (wp WrapProtocol) SetOfflineQueueLoader(value protocol.OfflineQueueLoader) {
-	//@todo will be moved in Kuzzle object
-}
-
-// Deprecated
-func (wp WrapProtocol) SetQueueFilter(value protocol.QueueFilter) {
-	//@todo will be moved in Kuzzle object
-}
-
-// Deprecated
-func (wp WrapProtocol) SetQueueMaxSize(value int) {
-	//@todo will be moved in Kuzzle object
-}
-
-// Deprecated
-func (wp WrapProtocol) SetQueueTTL(value time.Duration) {
-	//@todo will be moved in Kuzzle object
-}
-
-// Deprecated
-func (wp WrapProtocol) SetReplayInterval(value time.Duration) {
-	//@todo will be moved in Kuzzle object
+func (wp WrapProtocol) Host() string {
+	return C.GoString(C.bridge_get_host(wp.P.get_host, wp.P.instance))
 }

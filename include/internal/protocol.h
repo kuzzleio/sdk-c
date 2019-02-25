@@ -35,19 +35,14 @@ typedef struct {
                        kuzzle_notification_listener, void*);
   void (*unregister_sub)(const char*, void*);
   void (*cancel_subs)(void*);
-  void (*start_queuing)(void*);
-  void (*stop_queuing)(void*);
-  void (*play_queue)(void*);
-  void (*clear_queue)(void*);
 
-  bool (*is_auto_queue)(void*);
   bool (*is_auto_reconnect)(void*);
   bool (*is_auto_resubscribe)(void*);
   const char* (*get_host)(void*);
   unsigned int (*get_port)(void*);
   unsigned long long (*get_reconnection_delay)(void*);
   bool (*is_ssl_connection)(void*);
-
+  bool (*is_ready)(void*);
 } protocol;
 
 #endif

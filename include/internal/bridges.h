@@ -55,4 +55,6 @@ kuzzle_event_listener get_bridge_fptr();
 kuzzle_event_listener get_bridge_once_fptr();
 kuzzle_notification_listener get_bridge_notification_listener_fptr();
 
+bool bridge_is_ready(bool (*f)(void*), void* data);
+
 #endif
