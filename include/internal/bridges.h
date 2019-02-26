@@ -4,18 +4,18 @@
 void call_bridge(int event, char* res, void* data);
 void call_bridge_once(int event, char* res, void* data);
 void call_notification_bridge(notification_result* result, void* data);
-void bridge_protocol_add_listener(void (*f)(int, kuzzle_event_listener*, void*),
-                                  int event, kuzzle_event_listener* listener,
+void bridge_protocol_add_listener(void (*f)(int, kuzzle_event_listener, void*),
+                                  int event, kuzzle_event_listener listener,
                                   void* data);
-void bridge_protocol_once(void (*f)(int, kuzzle_event_listener*, void*),
-                          int event, kuzzle_event_listener* listener,
+void bridge_protocol_once(void (*f)(int, kuzzle_event_listener, void*),
+                          int event, kuzzle_event_listener listener,
                           void* data);
-void bridge_remove_listener(void (*f)(int, kuzzle_event_listener*, void*),
-                            int event, kuzzle_event_listener* listener,
+void bridge_remove_listener(void (*f)(int, kuzzle_event_listener, void*),
+                            int event, kuzzle_event_listener listener,
                             void* data);
 void bridge_remove_all_listeners(void (*f)(int, void*), int event, void* data);
-void bridge_once(void (*f)(int, kuzzle_event_listener*, void*), int event,
-                 kuzzle_event_listener* listener, void* data);
+void bridge_once(void (*f)(int, kuzzle_event_listener, void*), int event,
+                 kuzzle_event_listener listener, void* data);
 int bridge_listener_count(int (*f)(int, void*), int event, void* data);
 char* bridge_connect(char* (*f)(void*), void* data);
 kuzzle_response* bridge_send(
