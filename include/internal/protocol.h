@@ -21,10 +21,10 @@
 typedef struct {
   void* instance;
 
-  void (*add_listener)(int, kuzzle_event_listener*, void*);
-  void (*remove_listener)(int, kuzzle_event_listener*, void*);
+  void (*add_listener)(int, kuzzle_event_listener, void*);
+  void (*remove_listener)(int, kuzzle_event_listener, void*);
   void (*remove_all_listeners)(int, void*);
-  void (*once)(int, kuzzle_event_listener*, void*);
+  void (*once)(int, kuzzle_event_listener, void*);
   int (*listener_count)(int, void*);
   char* (*connect)(void*);
   kuzzle_response* (*send)(const char*, query_options*, char*, void*);

@@ -58,17 +58,25 @@ func bridge_listener_once(event C.int, res *C.char, data unsafe.Pointer) {
 }
 
 func (wp WrapProtocol) AddListener(event int, channel chan<- json.RawMessage) {
-	fptr := C.get_bridge_fptr()
 	if _list_listeners[event] == nil {
 		_list_listeners[event] = make(map[chan<- json.RawMessage]bool)
 	}
 	_list_listeners[event][channel] = true
-	C.bridge_protocol_add_listener(wp.P.add_listener, C.int(event), &fptr, wp.P.instance)
+
+	C.bridge_protocol_add_listener(
+		wp.P.add_listener,
+		C.int(event),
+		C.get_bridge_fptr(),
+		wp.P.instance)
 }
 
 func (wp WrapProtocol) RemoveListener(event int, channel chan<- json.RawMessage) {
-	fptr := C.get_bridge_fptr()
-	C.bridge_remove_listener(wp.P.remove_listener, C.int(event), &fptr, wp.P.instance)
+	C.bridge_remove_listener(
+		wp.P.remove_listener,
+		C.int(event),
+		C.get_bridge_fptr(),
+		wp.P.instance)
+
 	delete(_list_listeners[event], channel)
 }
 
@@ -77,12 +85,16 @@ func (wp WrapProtocol) RemoveAllListeners(event int) {
 }
 
 func (wp WrapProtocol) Once(event int, channel chan<- json.RawMessage) {
-	fptr := C.get_bridge_once_fptr()
 	if _list_once_listeners[event] == nil {
 		_list_once_listeners[event] = make(map[chan<- json.RawMessage]bool)
 	}
 	_list_once_listeners[event][channel] = true
-	C.bridge_protocol_once(wp.P.once, C.int(event), &fptr, wp.P.instance)
+
+	C.bridge_protocol_once(
+		wp.P.once,
+		C.int(event),
+		C.get_bridge_once_fptr(),
+		wp.P.instance)
 }
 
 func (wp WrapProtocol) ListenerCount(event int) int {

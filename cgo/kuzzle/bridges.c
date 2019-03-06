@@ -14,20 +14,20 @@ void call_notification_bridge(notification_result* result, void* data) {
   bridge_notification(result, data);
 }
 
-void bridge_protocol_add_listener(void (*f)(int, kuzzle_event_listener*, void*),
-                                  int event, kuzzle_event_listener* listener,
+void bridge_protocol_add_listener(void (*f)(int, kuzzle_event_listener, void*),
+                                  int event, kuzzle_event_listener listener,
                                   void* data) {
   f(event, listener, data);
 }
 
-void bridge_protocol_once(void (*f)(int, kuzzle_event_listener*, void*),
-                          int event, kuzzle_event_listener* listener,
+void bridge_protocol_once(void (*f)(int, kuzzle_event_listener, void*),
+                          int event, kuzzle_event_listener listener,
                           void* data) {
   f(event, listener, data);
 }
 
-void bridge_remove_listener(void (*f)(int, kuzzle_event_listener*, void*),
-                            int event, kuzzle_event_listener* listener,
+void bridge_remove_listener(void (*f)(int, kuzzle_event_listener, void*),
+                            int event, kuzzle_event_listener listener,
                             void* data) {
   f(event, listener, data);
 }
@@ -36,8 +36,8 @@ void bridge_remove_all_listeners(void (*f)(int, void*), int event, void* data) {
   f(event, data);
 }
 
-void bridge_once(void (*f)(int, kuzzle_event_listener*, void*), int event,
-                 kuzzle_event_listener* listener, void* data) {
+void bridge_once(void (*f)(int, kuzzle_event_listener, void*), int event,
+                 kuzzle_event_listener listener, void* data) {
   f(event, listener, data);
 }
 
