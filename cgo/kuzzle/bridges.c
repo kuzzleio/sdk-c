@@ -151,3 +151,7 @@ kuzzle_event_listener get_bridge_once_fptr() {
 kuzzle_notification_listener get_bridge_notification_listener_fptr() {
   return &call_notification_bridge;
 }
+
+bool bridge_is_ready(bool (*f)(void*), void* data) {
+  return f(data);
+}

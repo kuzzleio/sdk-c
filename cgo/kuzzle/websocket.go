@@ -205,40 +205,10 @@ func kuzzle_websocket_cancel_subs(ws *C.web_socket) {
 	(*websocket.WebSocket)(ws.instance).CancelSubs()
 }
 
-//export kuzzle_websocket_start_queuing
-func kuzzle_websocket_start_queuing(ws *C.web_socket) {
-	(*websocket.WebSocket)(ws.instance).StartQueuing()
-}
-
-//export kuzzle_websocket_stop_queuing
-func kuzzle_websocket_stop_queuing(ws *C.web_socket) {
-	(*websocket.WebSocket)(ws.instance).StopQueuing()
-}
-
-//export kuzzle_websocket_play_queue
-func kuzzle_websocket_play_queue(ws *C.web_socket) {
-	(*websocket.WebSocket)(ws.instance).PlayQueue()
-}
-
-//export kuzzle_websocket_clear_queue
-func kuzzle_websocket_clear_queue(ws *C.web_socket) {
-	(*websocket.WebSocket)(ws.instance).ClearQueue()
-}
-
 //export kuzzle_websocket_remove_all_listeners
 func kuzzle_websocket_remove_all_listeners(ws *C.web_socket, event C.int) {
 	(*websocket.WebSocket)(ws.instance).RemoveAllListeners(int(event))
 	delete(_event_listeners, int(event))
-}
-
-//export kuzzle_websocket_is_auto_reconnect
-func kuzzle_websocket_is_auto_reconnect(ws *C.web_socket) C.bool {
-	return C.bool((*websocket.WebSocket)(ws.instance).AutoReconnect())
-}
-
-//export kuzzle_websocket_is_auto_resubscribe
-func kuzzle_websocket_is_auto_resubscribe(ws *C.web_socket) C.bool {
-	return C.bool((*websocket.WebSocket)(ws.instance).AutoResubscribe())
 }
 
 //export kuzzle_websocket_get_host
@@ -249,11 +219,6 @@ func kuzzle_websocket_get_host(ws *C.web_socket) *C.char {
 //export kuzzle_websocket_get_port
 func kuzzle_websocket_get_port(ws *C.web_socket) C.int {
 	return C.int((*websocket.WebSocket)(ws.instance).Port())
-}
-
-//export kuzzle_websocket_get_reconnection_delay
-func kuzzle_websocket_get_reconnection_delay(ws *C.web_socket) C.int {
-	return C.int((*websocket.WebSocket)(ws.instance).ReconnectionDelay())
 }
 
 //export kuzzle_websocket_is_ssl_connection

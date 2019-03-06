@@ -304,11 +304,6 @@ func kuzzle_set_auto_replay(k *C.kuzzle, value C.bool) {
 	(*kuzzle.Kuzzle)(k.instance).SetAutoReplay(bool(value))
 }
 
-//export kuzzle_get_host
-func kuzzle_get_host(k *C.kuzzle) *C.char {
-	return C.CString((*kuzzle.Kuzzle)(k.instance).Host())
-}
-
 //export kuzzle_get_offline_queue_loader
 func kuzzle_get_offline_queue_loader(k *C.kuzzle) C.kuzzle_offline_queue_loader {
 	return k.loader
@@ -317,11 +312,6 @@ func kuzzle_get_offline_queue_loader(k *C.kuzzle) C.kuzzle_offline_queue_loader 
 //export kuzzle_set_offline_queue_loader
 func kuzzle_set_offline_queue_loader(k *C.kuzzle, loader C.kuzzle_offline_queue_loader) {
 	k.loader = loader
-}
-
-//export kuzzle_get_port
-func kuzzle_get_port(k *C.kuzzle) C.int {
-	return C.int((*kuzzle.Kuzzle)(k.instance).Port())
 }
 
 //export kuzzle_get_queue_filter
