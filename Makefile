@@ -93,9 +93,6 @@ $(BUILD_DIR)/sdk: $(BUILD_DIR)/libs
 	cp -a $(BUILD_DIR)$(PATHSEP)*.a* $(BUILD_DIR)$(PATHSEP)*.so*  $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/lib
 	@touch $@
 
-package: $(BUILD_DIR)/sdk
-	mkdir -p deploy && cd $(BUILD_DIR) && tar cfz ..$(PATHSEP)deploy$(PATHSEP)kuzzlesdk-c-$(VERSION)-$(ARCH).tar.gz $(SDK_FOLDER_NAME)
-
 clean:
 ifeq ($(OS),Windows_NT)
 	if exist build $(RRM) build
