@@ -8,11 +8,11 @@ ifeq ($(OS),Windows_NT)
 	STATICLIB = .lib
 	DYNLIB = .dll
 	GOROOT ?= C:/Go
-	GOCC ?= $(GOROOT)bin\go
-	SEP = \\
+	GOCC ?= go
+	SEP = /
 	RM = del /Q /F /S
 	RRM = rmdir /S /Q
-	MV = rename
+	MV = mv
 	CMDSEP = &
 	ROOT_DIR_CLEAN = $(subst /,\,$(ROOT_DIR))
 	LIB_PREFIX =
@@ -40,6 +40,12 @@ GOSRC = .$(PATHSEP)cgo$(PATHSEP)kuzzle$(PATHSEP)
 GOTARGET = $(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(STATICLIB)
 GOTARGETSO = $(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk$(DYNLIB)
 
+ifeq ($(shell uname) ,Darwin)
+	RELATIVELINKOPTS = -sf
+else
+	RELATIVELINKOPTS = -srf
+endif
+
 export GOPATH = $(ROOT_DIR)go
 
 CORE_SRC = $(wildcard $(GOSRC)*.go)
@@ -62,26 +68,21 @@ else
 	$(GOCC) build -o $(GOTARGET) $(GOFLAGS) $(GOSRC)
 endif
 	$(GOCC) build -o $(GOTARGETSO) $(GOFLAGSSHARED) $(GOSRC)
-
 	cd $(BUILD_DIR) && mv $(GOTARGET) $(GOTARGET).$(VERSION) && mv $(GOTARGETSO) $(GOTARGETSO).$(VERSION)
 
 ifeq ($(OS),Windows_NT)
-	$(MV) $(subst /,\,$(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h) kuzzle.h
+	$(MV) $(subst /,\,$(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h) $(subst /,\,$(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzle.h)
 else
 	$(MV) $(BUILD_DIR)$(PATHSEP)$(LIB_PREFIX)kuzzlesdk.h $(BUILD_DIR)$(PATHSEP)kuzzle.h
 endif
-	 @touch $@
+	@touch $@
 
 $(BUILD_DIR):
-ifeq ($(OS),Windows_NT)
-	@if not exist $(subst /,\,$(BUILD_DIR)) mkdir $(subst /,\,$(BUILD_DIR))
-else
 	mkdir -p $@
-endif
 
 $(BUILD_DIR)/libs: $(BUILD_DIR) $(BUILD_DIR)/pre_core $(BUILD_DIR)/core
-	cd $(BUILD_DIR) && ln -srf $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
-	cd $(BUILD_DIR) && ln -srf $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
+	cd $(BUILD_DIR) && ln $(RELATIVELINKOPTS) $(LIB_PREFIX)kuzzlesdk$(STATICLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(STATICLIB)
+	cd $(BUILD_DIR) && ln $(RELATIVELINKOPTS) $(LIB_PREFIX)kuzzlesdk$(DYNLIB).$(VERSION) $(LIB_PREFIX)kuzzlesdk$(DYNLIB)
 	@touch $@
 
 $(BUILD_DIR)/sdk: $(BUILD_DIR)/libs
@@ -90,7 +91,7 @@ $(BUILD_DIR)/sdk: $(BUILD_DIR)/libs
 	cp $(BUILD_DIR)$(PATHSEP)kuzzle.h  $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/include/internal
 	cp -fr $(ROOT_DIR)$(PATHSEP)include $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)
 	cp -fr $(ROOT_DIR)$(PATHSEP)include $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)
-	cp -a $(BUILD_DIR)$(PATHSEP)*.a* $(BUILD_DIR)$(PATHSEP)*.so*  $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/lib
+	cp -a $(BUILD_DIR)$(PATHSEP)*$(STATICLIB)* $(BUILD_DIR)$(PATHSEP)*$(DYNLIB)*  $(BUILD_DIR)$(PATHSEP)$(SDK_FOLDER_NAME)/lib
 	@touch $@
 
 clean:

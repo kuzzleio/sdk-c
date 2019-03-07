@@ -4,7 +4,7 @@ jobs:
 # Linux amd64
 # -----------------------------------------------
 
-  - name: Linux amd64 - Go 1.12.x
+  - name: Linux amd64 - Go 1.12.x - GCC
     os: linux
     dist: xenial
     sudo: true
@@ -20,11 +20,64 @@ jobs:
     - export CGO_ENABLED=1
     - make all
 
+  - name: Linux amd64 - Go 1.11.x - GCC
+    if: type = cron OR branch = master
+    os: linux
+    dist: xenial
+    sudo: true
+    language: go
+    go: 1.11.x
+    cache:
+      directories:
+      - "$HOME/.cache/go-build"
+      - "$HOME/gopath/pkg"
+    script:
+    - export GOOS=linux
+    - export GOARCH=amd64
+    - export CGO_ENABLED=1
+    - make all
+
+  - name: Linux amd64 - Go 1.12.x - Clang
+    if: type = cron OR branch = master
+    os: linux
+    dist: xenial
+    sudo: true
+    language: go
+    go: 1.12.x
+    cache:
+      directories:
+      - "$HOME/.cache/go-build"
+      - "$HOME/gopath/pkg"
+    script:
+    - export GOOS=linux
+    - export GOARCH=amd64
+    - export CGO_ENABLED=1
+    - export CC=clang
+    - make all
+
+  - name: Linux amd64 - Go 1.11.x - Clang
+    if: type = cron OR branch = master
+    os: linux
+    dist: xenial
+    sudo: true
+    language: go
+    go: 1.11.x
+    cache:
+      directories:
+      - "$HOME/.cache/go-build"
+      - "$HOME/gopath/pkg"
+    script:
+    - export GOOS=linux
+    - export GOARCH=amd64
+    - export CGO_ENABLED=1
+      export CC=clang
+    - make all
+
 # -----------------------------------------------
 # Linux i386
 # -----------------------------------------------
 
-  - name: Linux i386 - Go 1.12.x
+  - name: Linux i386 - Go 1.12.x - GCC
     os: linux
     dist: xenial
     sudo: true
@@ -44,12 +97,77 @@ jobs:
     - export GOARCH=386
     - export CGO_ENABLED=1
     - make all
-      #
+
+  - name: Linux i386 - Go 1.11.x - GCC
+    if: type = cron OR branch = master
+    os: linux
+    dist: xenial
+    sudo: true
+    language: go
+    go: 1.11.x
+    cache:
+      directories:
+      - "$HOME/.cache/go-build"
+      - "$HOME/gopath/pkg"
+    addons:
+      apt:
+        packages:
+          - gcc-multilib
+          - gccgo-multilib
+    script:
+    - export GOOS=linux
+    - export GOARCH=386
+    - export CGO_ENABLED=1
+    - make all
+
+  - name: Linux i386 - Go 1.12.x - Clang
+    if: type = cron OR branch = master
+    os: linux
+    dist: xenial
+    sudo: true
+    language: go
+    go: 1.12.x
+    cache:
+      directories:
+      - "$HOME/.cache/go-build"
+      - "$HOME/gopath/pkg"
+    addons:
+      apt:
+        packages:
+          - gccgo-multilib
+    script:
+    - export GOOS=linux
+    - export GOARCH=386
+    - export CGO_ENABLED=1
+    - export CC=clang
+    - make all
+
+  - name: Linux i386 - Go 1.11.x - Clang
+    if: type = cron OR branch = master
+    os: linux
+    dist: xenial
+    sudo: true
+    language: go
+    go: 1.11.x
+    cache:
+      directories:
+      - "$HOME/.cache/go-build"
+      - "$HOME/gopath/pkg"
+    addons:
+      apt:
+        packages:
+          - gccgo-multilib
+    script:
+    - export GOOS=linux
+    - export GOARCH=386
+    - export CGO_ENABLED=1
+    - export CC=clang
+    - make all
 # -----------------------------------------------
 # Linux armhf
 # -----------------------------------------------
 
-  - name: Linux armhf - Go 1.12.x
+  - name: Linux armhf - Go 1.12.x - GCC
     os: linux
     dist: xenial
     sudo: true
@@ -73,11 +191,36 @@ jobs:
     - export CC=arm-linux-gnueabihf-gccgo
     - make all
 
+  - name: Linux armhf - Go 1.11.x - GCC
+    if: type = cron OR branch = master
+    os: linux
+    dist: xenial
+    sudo: true
+    language: go
+    go: 1.11.x
+    cache:
+      directories:
+      - "$HOME/.cache/go-build"
+      - "$HOME/gopath/pkg"
+    addons:
+      apt:
+        packages:
+          - gcc-arm-linux-gnueabihf
+          - gccgo-arm-linux-gnueabihf
+    script:
+    - export GOOS=linux
+    - export GOARCH=arm
+    - export GOARM=7
+    - export CGO_ENABLED=1
+    - export GCCGO=arm-linux-gnueabihf-gcc
+    - export CC=arm-linux-gnueabihf-gccgo
+    - make all
+
 # -----------------------------------------------
 # Linux arm64
 # -----------------------------------------------
 
-  - name: Linux arm64 - Go 1.12.x
+  - name: Linux arm64 - Go 1.12.x - GCC
     os: linux
     dist: xenial
     sudo: true
@@ -100,3 +243,99 @@ jobs:
     - export CC=aarch64-linux-gnu-gcc
     - make all
 
+  - name: Linux arm64 - Go 1.11.x - GCC
+    if: type = cron OR branch = master
+    os: linux
+    dist: xenial
+    sudo: true
+    language: go
+    go: 1.11.x
+    cache:
+      directories:
+      - "$HOME/.cache/go-build"
+      - "$HOME/gopath/pkg"
+    addons:
+      apt:
+        packages:
+          - gcc-aarch64-linux-gnu
+          - gccgo-aarch64-linux-gnu
+    script:
+    - export GOOS=linux
+    - export GOARCH=arm64
+    - export CGO_ENABLED=1
+    - export GCCGO=aarch64-linux-gnu-gccgo
+    - export CC=aarch64-linux-gnu-gcc
+    - make all
+
+# -----------------------------------------------
+# MacOS amd64
+# -----------------------------------------------
+
+  - name: MacOS amd64 - Go 1.12.x
+    if: type = cron OR branch = master
+    os: osx
+    language: go
+    go: 1.12.x
+    cache:
+      directories:
+      - "$HOME/Library/Caches/go-build"
+      - "$HOME/gopath/pkg"
+    script:
+    - export GOOS=darwin
+    - export GOARCH=amd64
+    - export CGO_ENABLED=1
+    - make all
+
+  - name: MacOS amd64 - Go 1.11.x
+    if: type = cron OR branch = master
+    os: osx
+    language: go
+    go: 1.11.x
+    cache:
+      directories:
+      - "$HOME/Library/Caches/go-build"
+      - "$HOME/gopath/pkg"
+    script:
+    - export GOOS=darwin
+    - export GOARCH=amd64
+    - export CGO_ENABLED=1
+    - make all
+
+# -----------------------------------------------
+# Windows amd64
+# -----------------------------------------------
+
+  - name: Windows amd64 - Go 1.12.x
+    if: type = cron OR branch = master
+    os: windows
+    language: go
+    go: 1.12.x
+    install: 
+    - choco install make 
+    script:
+    - export GOOS=windows
+    - export GOARCH=amd64
+    - export CGO_ENABLED=1
+    - make all
+
+  - name: Windows amd64 - Go 1.11.x
+    if: type = cron OR branch = master
+    os: windows
+    language: go
+    go: 1.11.x
+    install: 
+    - choco install make 
+    script:
+    - export GOOS=windows
+    - export GOARCH=amd64
+    - export CGO_ENABLED=1
+    - make all
+
+notifications:
+  slack:
+    rooms:
+    - secure: "aZb73WkyrnhmmvvNMFdcS659E/Dn+k25gPssWQW/5IAr0P7/Zf7QmQTdm5a8NaFMSoHJr4vW6o6z5vnA6MdpmwlBy+n4BksjpEmCGC5enn14Pd+9C6JFS04i7U0Yb6rgSmDoDCgjj0tU3z7ezc6pKp80NYdiaP7uIQoQ6p/jNf8eNX2480Vo0R16IglHWcKMjRp6WyhIlGf73G8FE8KFjdBlvh6WIMY2DkB4JLTaWEkvQIjzPlrr7l4JUAQbTB3oJmpORjNaWP3BzIPm1JxZXf6qHpzjl8W5OPiNS5Xs09vVcxNo3rWs1/6LP5mBoZVi9V8vuD7w09Go/HW2qQHT1HSuNn7xFtty2PIw6sNCt3zqVg48SAIDjP3sNff/UWrAxio9m6kDcJCnPL9BmEJOr2rzjpOCFpppV80/GwJITLKorHwbGurt85DuJ7qBVlWvXS1/tJU1Dpf0CJA83nmlTyYLiRkPIINj05oWFbrqIW2RCf9xHpkkWV3Rhwl36rRd6h9EnNtLtPLJGr9sNBWBbk2k+wNPTljacRVsaIJLgMTnELIIfrSR32KHG3hd2tVlFC2UqzrV91fqbiGxlNGUyC/Bw0qKg6WdeU9wJrZ+JKujVX6ebFPZJp51oYujon+x/ZNcX1yc9PH4DChVbx20/E0XwfvI/BXCO/pZY+Y3o5o="
+    on_success: never
+    on_failure: always
+    on_error: always
+    on_pull_requests: false
