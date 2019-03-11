@@ -16,19 +16,9 @@ package main
 
 /*
   #cgo CFLAGS: -std=c99 -I../../include
-
-  #include <stdlib.h>
+  #include "internal/cstd.h"
   #include "internal/kuzzle_structs.h"
-
-  static void free_char_array(char **arr, size_t length) {
-    if (arr != NULL) {
-      for(int i = 0; i < length; i++) {
-        free(arr[i]);
-      }
-
-      free(arr);
-    }
-  }
+  #include "internal/sdk_wrappers_internal.h"
 */
 import "C"
 

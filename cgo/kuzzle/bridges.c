@@ -155,3 +155,25 @@ kuzzle_notification_listener get_bridge_notification_listener_fptr() {
 bool bridge_is_ready(bool (*f)(void*), void* data) {
   return f(data);
 }
+
+void bridge_trigger_event_listener(kuzzle_event_listener listener, int event,
+                                   char* res, void* data) {
+  listener(event, res, data);
+}
+
+void bridge_trigger_notification_listener(kuzzle_notification_listener listener,
+                                          notification_result* result,
+                                          void* data) {
+  listener(result, data);
+}
+
+void bridge_trigger_kuzzle_notification_result(kuzzle_notification_listener f,
+                                               notification_result* res,
+                                               void* data) {
+  f(res, data);
+}
+
+void bridge_trigger_kuzzle_response(kuzzle_response_listener f,
+                                    kuzzle_response* res, void* data) {
+  f(res, data);
+}

@@ -16,16 +16,9 @@ package main
 
 /*
   #cgo CFLAGS: -I../../include
-
-  #include <stdlib.h>
-  #include <string.h>
+  #include "internal/cstd.h"
   #include "internal/kuzzle_structs.h"
   #include "internal/sdk_wrappers_internal.h"
-
-  static void assign_geopos(double (*ptr)[2], int idx, double lon, double lat) {
-    ptr[idx][0] = lon;
-    ptr[idx][1] = lat;
-  }
 */
 import "C"
 import (

@@ -15,9 +15,11 @@
 #ifndef __SDK_WRAPPERS_INTERNAL
 #define __SDK_WRAPPERS_INTERNAL
 
-# ifdef __cplusplus
-using namespace kuzzleio;
-# endif
+#include "internal/kuzzle_structs.h"
+
+#ifdef __cplusplus
+namespace kuzzleio {
+#endif
 
 typedef char *char_ptr;
 typedef policy *policy_ptr;
@@ -27,24 +29,19 @@ typedef query_object *query_object_ptr;
 // used by memory_storage.geopos
 typedef double geopos_arr[2];
 
-static void set_errno(int err) {
-  errno = err;
-}
+void set_errno(int err);
+void kuzzle_notify(kuzzle_notification_listener f, notification_result* res,
+                   void* data);
+void kuzzle_trigger_event(int event, kuzzle_event_listener f, char* res,
+                          void* data);
+void room_on_subscribe(kuzzle_subscribe_listener f, room_result* res,
+                       void* data);
+bool kuzzle_filter_query(kuzzle_queue_filter f, const char *rq);
+void free_char_array(char **arr, size_t length);
+void assign_geopos(double (*ptr)[2], int idx, double lon, double lat);
 
-static void kuzzle_notify(kuzzle_notification_listener f, notification_result* res, void* data) {
-    f(res, data);
+#ifdef __cplusplus // end of namespace kuzzleio
 }
-
-static void kuzzle_trigger_event(int event, kuzzle_event_listener f, char* res, void* data) {
-    f(event, res, data);
-}
-
-static void room_on_subscribe(kuzzle_subscribe_listener f, room_result* res, void* data) {
-    f(res, data);
-}
-
-static bool kuzzle_filter_query(kuzzle_queue_filter f, const char *rq) {
-  return f(rq);
-}
+#endif
 
 #endif

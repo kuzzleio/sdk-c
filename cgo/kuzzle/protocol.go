@@ -2,7 +2,6 @@ package main
 
 /*
 	#cgo CFLAGS: -I../../include
-	#include <stdlib.h>
 	#include "internal/protocol.h"
 	#include "internal/bridges.h"
 */
@@ -10,10 +9,10 @@ import "C"
 import (
 	"encoding/json"
 	"errors"
+	"github.com/kuzzleio/sdk-go/types"
 	"sync"
 	"time"
 	"unsafe"
-	"github.com/kuzzleio/sdk-go/types"
 )
 
 type WrapProtocol struct {
