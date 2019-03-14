@@ -15,9 +15,8 @@
 package main
 
 /*
-#cgo CFLAGS: -I../../include
-
-#include "internal/kuzzle_structs.h"
+	#cgo CFLAGS: -I../../include
+	#include "internal/kuzzle_structs.h"
 */
 import "C"
 

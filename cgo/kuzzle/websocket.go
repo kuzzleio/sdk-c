@@ -16,18 +16,10 @@ package main
 
 /*
 	#cgo CFLAGS: -I../../include
-	#include <stdlib.h>
 	#include "internal/kuzzle_structs.h"
 	#include "internal/protocol.h"
 	#include "internal/sdk_wrappers_internal.h"
-
-	static void bridge_trigger_event_listener(kuzzle_event_listener listener, int event, char* res, void* data) {
-		listener(event, res, data);
-	}
-
-	static void bridge_trigger_notification_listener(kuzzle_notification_listener listener, notification_result* result, void* data) {
-		listener(result, data);
-	}
+	#include "internal/bridges.h"
 */
 import "C"
 import (

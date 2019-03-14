@@ -18,6 +18,10 @@
 #include "kuzzle_structs.h"
 #include "sdk_wrappers_internal.h"
 
+#ifdef __cplusplus
+namespace kuzzleio {
+#endif
+
 typedef struct {
   void* instance;
 
@@ -44,5 +48,9 @@ typedef struct {
   bool (*is_ssl_connection)(void*);
   bool (*is_ready)(void*);
 } protocol;
+
+#ifdef __cplusplus // end of namespace kuzzleio
+}
+#endif
 
 #endif

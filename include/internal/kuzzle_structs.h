@@ -15,13 +15,11 @@
 #ifndef _KUZZLE_STRUCTS_H_
 #define _KUZZLE_STRUCTS_H_
 
-#include <time.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "internal/cstd.h"
 
-//options passed to the Kuzzle() fct
+#ifdef __cplusplus
+namespace kuzzleio {
+#endif
 
 enum KuzzleEvent {
     KUZZLE_EVENT_CONNECTED,
@@ -55,14 +53,11 @@ enum KuzzleAction {
 };
 
 
-# ifdef __cplusplus
-namespace kuzzleio {
-
-  typedef KuzzleEvent Event;
-  typedef KuzzleState State;
-  typedef KuzzleAction Action;
-
-# endif
+#ifdef __cplusplus
+typedef KuzzleEvent Event;
+typedef KuzzleState State;
+typedef KuzzleAction Action;
+#endif
 
 //meta of a document
 typedef struct {
@@ -740,8 +735,8 @@ typedef struct validation_response {
   const char *stack;
 } validation_response;
 
-# ifdef __cplusplus
+#ifdef __cplusplus // end of namespace kuzzleio
 }
-# endif
+#endif
 
 #endif
