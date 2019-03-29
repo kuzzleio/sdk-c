@@ -70,6 +70,10 @@ func goToCShards(gShards *types.Shards) *C.shards {
 
 // Allocates memory
 func goToCNotificationContent(gNotifContent *types.NotificationContent) *C.notification_content {
+	if gNotifContent == nil {
+		return nil
+	}
+
 	result := (*C.notification_content)(C.calloc(1, C.sizeof_notification_content))
 	result.id = C.CString(gNotifContent.Id)
 	result.m = goToCMeta(gNotifContent.Meta)
