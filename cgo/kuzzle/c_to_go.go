@@ -294,6 +294,10 @@ func cToGoQueryObject(cqo *C.query_object, data unsafe.Pointer) *types.QueryObje
 }
 
 func CToGoNotificationContent(cnc *C.notification_content) *types.NotificationContent {
+	if cnc == nil {
+		return &types.NotificationContent{}
+	}
+
 	notifContent := types.NotificationContent{
 		Id:      C.GoString(cnc.id),
 		Content: json.RawMessage(C.GoString(cnc.content)),
